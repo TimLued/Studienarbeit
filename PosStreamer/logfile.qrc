@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>drone1.txt</file>
+        <file>drone2.txt</file>
+        <file>drone3.txt</file>
+        <file>drone4.txt</file>
+        <file>drone5.txt</file>
+        <file>drone6.txt</file>
+        <file>drone7.txt</file>
+    </qresource>
+</RCC>

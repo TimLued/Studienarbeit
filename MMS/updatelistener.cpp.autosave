@@ -1,0 +1,8 @@
+#include "updatelistener.h"
+#include <QtCore>
+
+UpdateListener::UpdateListener():
+    timer(new QTimer(this))
+{
+    connect(timer, SIGNAL(timeout()), this, SLOT(requestPos()));
+}

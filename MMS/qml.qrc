@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>algos.js</file>
+        <file>img/scale.png</file>
+        <file>img/scale_end.png</file>
+        <file>more/route.nmea</file>
+        <file>Drone.qml</file>
+        <file>more/route2.nmea</file>
+    </qresource>
+</RCC>
