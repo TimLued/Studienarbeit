@@ -14,8 +14,7 @@ Window {
     height: 500
 
     property variant drones: []
-    property variant lines: []
-    property variant colors: ["Red","Blue","Green","Purple","Yellow"]
+    property variant colors: ["red","blue","green","purple","yellow","cyan","coral","chartreuse","darkorange","darkred","fuchsia"]
     property variant usedColors: []
 
     property int txtSize: 14
@@ -184,17 +183,12 @@ Window {
                 for (var i = 0; i < drones.length; i++) {
                     if (drones[i].droneID === droneInfo){
 
-                        //update loc and speed in panel
-
-                        dronePanel.posChanged(i, pos.latitude, pos.longitude, drones[i].speed)
-
                         if (drones[i].pathPoly){
                             if (line.pathLength() >= 300) line.removeCoordinate(0)
                             line.addCoordinate(pos)
                             line.line.color = drones[i].droneColor
                         }
-                        //INFO last pos update -> millisecs ago
-                        //GET Mission {new entry} --> Number Code
+
                         found = true
                         break
                     }
@@ -235,6 +229,13 @@ Window {
                 for (var l = 0; l< pl;l++) removeCoordinate(0)
             }
         }
+        function addLine(pos,col){
+            if (line.pathLength() >= 300) line.removeCoordinate(0)
+            line.addCoordinate(pos)
+            line.line.color = col
+        }
+
+
 
         //Drone PANEL
         Item{
@@ -424,14 +425,13 @@ Window {
                 droneModel.append({"droneID": droneID, "lat": "-", "lon": "-", "speed": 0, "droneColor": droneColor})
             }
 
-            function posChanged(index, newLat, newLon, speed){
-                droneModel.setProperty(index,"lat",Algos.roundNumber(newLat,4).toString())
-                droneModel.setProperty(index,"lon",Algos.roundNumber(newLon,4).toString())
-                droneModel.setProperty(index,"speed",Math.round(speed))
+        }
 
-            }
-
-
+        //update loc and speed in panel
+        function posChanged(index, newLat, newLon, speed){
+            droneModel.setProperty(index,"lat",Algos.roundNumber(newLat,4).toString())
+            droneModel.setProperty(index,"lon",Algos.roundNumber(newLon,4).toString())
+            droneModel.setProperty(index,"speed",Math.round(speed))
         }
 
         //Action PANEL

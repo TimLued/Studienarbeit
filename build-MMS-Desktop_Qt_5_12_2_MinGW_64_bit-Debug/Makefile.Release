@@ -113,8 +113,6 @@ release/qrc_qml.cpp: ../MMS/qml.qrc \
 		../MMS/algos.js \
 		../MMS/Drone.qml \
 		../MMS/main.qml \
-		../MMS/more/route2.nmea \
-		../MMS/more/route.nmea \
 		../MMS/img/scale_end.png \
 		../MMS/img/scale.png
 	C:\Qt\5.12.2\mingw73_64\bin\rcc.exe -name qml ..\MMS\qml.qrc -o release\qrc_qml.cpp

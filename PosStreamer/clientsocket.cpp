@@ -7,6 +7,7 @@
 #include <possource.h>
 
 #include <iostream>
+#include <QtCore>
 
 ClientSocket::ClientSocket(QObject *parent):
     QObject (parent)
@@ -54,14 +55,20 @@ void ClientSocket::nextPos()
     out << line;
 
     QLocalSocket *clientConnection = server->nextPendingConnection();
+    connect(clientConnection, QOverload<QLocalSocket::LocalSocketError>::of(&QLocalSocket::error),this, &ClientSocket::serverError);
     connect(clientConnection, &QLocalSocket::disconnected, clientConnection, &QLocalSocket:: deleteLater);
-        clientConnection->write(block);
-        clientConnection->flush();
-        clientConnection->disconnectFromServer();
+    clientConnection->write(block);
+    clientConnection->flush();
+    clientConnection->disconnectFromServer();
 
 
     } catch (const std::exception& ex) {
          std::cerr << "Error: " << ex.what() << std::endl;
     }
 
+}
+
+void ClientSocket::serverError()
+{
+    std::cout << server->errorString().toUtf8().constData() << std::endl;
 }

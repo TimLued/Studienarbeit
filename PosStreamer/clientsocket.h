@@ -14,6 +14,7 @@ private:
     QTextStream *stream;
     QLocalServer *server;
     QList<QString> buffer;
+    void serverError();
 
 private slots:
     void nextPos();

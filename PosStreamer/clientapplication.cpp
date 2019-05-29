@@ -17,7 +17,8 @@
 static QList<QString> files = {":/drone1.txt",":/drone2.txt",":/drone3.txt",":/drone4.txt",":/drone5.txt",":/drone6.txt",":/drone7.txt"};
 
 ClientApplication::ClientApplication(QWidget *parent)
-    : QDialog(parent)
+    : QDialog(parent),
+      timer(new QTimer(this))
 {
     //Local Server
     mySocket = new ClientSocket;
@@ -44,11 +45,15 @@ ClientApplication::ClientApplication(QWidget *parent)
     droneLW->setSelectionMode(QAbstractItemView::SingleSelection);
     connect(droneLW, SIGNAL(itemChanged(QListWidgetItem*)), this,SLOT  (itemChanged()));
     startBtn = new QPushButton("Start",this);
+    startBtn->setCheckable(true);
     resetBtn = new QPushButton("Reset",this);
+    startAllBtn= new QPushButton("ALL",this);
     connect(startBtn,SIGNAL(clicked()),this,SLOT(startStopUpdates()));
     connect(resetBtn,SIGNAL(clicked()),mySocket,SLOT(resetBuffer()));
+    connect(startAllBtn,SIGNAL(clicked()),this,SLOT(startAll()));
     buttonBox->addButton(startBtn, QDialogButtonBox::ActionRole);
     buttonBox->addButton(resetBtn, QDialogButtonBox::RejectRole);
+    buttonBox->addButton(startAllBtn, QDialogButtonBox::RejectRole);
     //fromRow, fromColumn, rowSpan, columnSpan
     mainLayout->addWidget(bufferLbl,0,0);
     mainLayout->addWidget(statusLbl,1,0);
@@ -69,7 +74,7 @@ ClientApplication::ClientApplication(QWidget *parent)
         source->setupSource(files[i],i);
         sources.append(source);
         t = new QThread;
-        connect(this, SIGNAL(startStop()),source,SLOT(startStop()));
+        connect(this, SIGNAL(startStop(bool)),source,SLOT(startStop(bool)));
         connect(source, SIGNAL(posUpdated(QString)),mySocket,SLOT(loadToBuffer(QString))); //Buffer of ClientSocket
         connect(this, SIGNAL(setRunning(bool,int)),source,SLOT(setRunning(bool,int)));
         source->moveToThread(t);
@@ -79,7 +84,7 @@ ClientApplication::ClientApplication(QWidget *parent)
         //ListView
         droneItem = new QListWidgetItem;
         droneItem->setData( Qt::DisplayRole, files[i] );
-        droneItem->setData( Qt::CheckStateRole, Qt::Checked );
+        droneItem->setData( Qt::CheckStateRole, Qt::Unchecked );
         droneLW->addItem(droneItem);
     }
 
@@ -94,18 +99,44 @@ void ClientApplication::itemChanged()
     }
 }
 
-static bool enabled = false;
 void ClientApplication::startStopUpdates()
 {
-    emit startStop();
-    //Switch Button text
-    if (!enabled)
+
+    if (startBtn->isChecked())
     {
+        emit startStop(1);
         startBtn->setText("Stop");
     }else{
+        emit startStop(0);
         startBtn->setText("Start");
     }
-    enabled = !enabled;
+}
+
+void ClientApplication::startAll()
+{
+    connect(timer,SIGNAL(timeout()),this,SLOT(startAllStep()));
+    for (int i = 0; i<droneLW->count();++i){
+        droneLW->item(i)->setCheckState(Qt::CheckState::Unchecked);
+    }
+    timer->start(2000);
+}
+
+void ClientApplication::startAllStep()
+{
+
+
+    for (int i = 0; i<droneLW->count();++i){
+        if (droneLW->item(i)->checkState() == Qt::CheckState::Unchecked){
+            startBtn->setChecked(0);
+            startStopUpdates();
+            droneLW->item(i)->setCheckState(Qt::CheckState::Checked);
+            startBtn->setChecked(1);
+            startStopUpdates();
+
+            if (i==droneLW->count()-1) timer->stop();
+            break;
+        }
+    }
 }
 
 //SIGNALS

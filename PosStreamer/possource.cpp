@@ -8,7 +8,7 @@ PosSource::PosSource(QObject *parent):
     logFile(new QFile(this)),
     timer(new QTimer(this))
 {
-    running = true;
+    running = false;
     timer->setInterval(20); //interval == gps frequency
     connect(timer, SIGNAL(timeout()),this,SLOT(readNextPos()));
 }
@@ -30,11 +30,11 @@ void PosSource::readNextPos(){
 
 }
 
-void PosSource::startStop(){
-    if (timer->isActive()){
-        timer->stop();
-    }else{
+void PosSource::startStop(bool start){
+    if (start){
         if (running) timer->start();
+    }else{
+        timer->stop();
     }
 }
 

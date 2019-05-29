@@ -85,6 +85,13 @@ MapQuickItem {
 
     onCoordinateChanged: {
         if (follow) map.center = coordinate
+        map.posChanged(index,coordinate.latitude,coordinate.longitude,speed)
+
+        if (pathPoly) map.addLine(coordinate,droneColor)
+
+        //ADD
+        //INFO last pos update -> millisecs ago
+        //GET Mission {new entry} --> Number Code
     }
 
     TransSmoother{

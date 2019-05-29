@@ -26,15 +26,20 @@ private:
     QLabel *statusLbl;
     QPushButton *startBtn;
     QPushButton *resetBtn;
+    QPushButton *startAllBtn;
     QListWidget *droneLW;
 
     PosSource* source;
     QThread* t;
     ClientSocket* mySocket;
 
+    QTimer *timer;
+
 private slots:
     void startStopUpdates();
     void itemChanged();
+    void startAll();
+    void startAllStep();
 
 public slots:
     void updateList(QString);
@@ -43,7 +48,7 @@ public slots:
     void updateStatus();
 
 signals:
-    void startStop();
+    void startStop(bool start);
     void startServer();
     void setRunning(bool,int);
 };
