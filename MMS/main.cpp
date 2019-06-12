@@ -5,28 +5,46 @@
 #include <QQmlContext>
 
 #include <transsmoother.h>
+#include <nodemodel.h>
+
+#include <dronelistmodel.h>
+
+
+#include <iostream>
+#include <QGeoPath>
+
+void update(){
+
+}
 
 int main(int argc, char *argv[])
 {
-
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
-    QQmlApplicationEngine engine;
 
     Controller c;
-    engine.rootContext()->setContextProperty("Listener",&c);
+
+
+    DroneListModel droneModel;
+
+
+    QQmlApplicationEngine  engine;
+    droneModel.register_objects("dronemodel","nodemodel",engine.rootContext());
+
+    //EDIT!!
     qmlRegisterType<TransSmoother>("TransSmoother", 1, 0, "TransSmoother");
 
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    if (engine.rootObjects().isEmpty())
+        return -1;
 
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-                     &app, [url](QObject *obj, const QUrl &objUrl) {
-        if (!obj && url == objUrl)
-            QCoreApplication::exit(-1);
-    }, Qt::QueuedConnection);
+    QObject::connect(&c, &Controller::posUpdated, [&droneModel, &c]() {
+        droneModel.updateDrone(c.currentId,c.currentPos);
+    });
 
-    engine.load(url);
+
+    c.start();
 
     return app.exec();
 }

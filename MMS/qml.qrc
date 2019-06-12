@@ -5,5 +5,8 @@
         <file>img/scale.png</file>
         <file>img/scale_end.png</file>
         <file>Drone.qml</file>
+        <file>PolyLine.qml</file>
+        <file>DronePanel.qml</file>
+        <file>ActionPanel.qml</file>
     </qresource>
 </RCC>

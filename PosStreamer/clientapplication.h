@@ -10,18 +10,18 @@
 #include <QListWidget>
 
 #include <possource.h>
-#include <clientsocket.h>
+
+class QLocalServer;
 
 class ClientApplication : public QDialog
 {
     Q_OBJECT
 public:
-    explicit ClientApplication(QWidget *parent = nullptr);
+    ClientApplication(QWidget *parent= nullptr);
 
 private:
     QList<PosSource*> sources;
 
-    QTextEdit *txtEdit;
     QLabel *bufferLbl;
     QLabel *statusLbl;
     QPushButton *startBtn;
@@ -31,8 +31,10 @@ private:
 
     PosSource* source;
     QThread* t;
-    ClientSocket* mySocket;
-
+    //ClientSocket* mySocket;
+    QLocalServer *server;
+    void serverError();
+    QList<QString> buffer;
     QTimer *timer;
 
 private slots:
@@ -41,15 +43,13 @@ private slots:
     void startAll();
     void startAllStep();
 
-public slots:
-    void updateList(QString);
-    void clearList();
-    void updateBuffer(int);
-    void updateStatus();
+    void loadToBuffer(QString);
+    void resetBuffer();
+    void nextPos();
+
 
 signals:
     void startStop(bool start);
-    void startServer();
     void setRunning(bool,int);
 };
 

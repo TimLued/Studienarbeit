@@ -8,11 +8,14 @@
 #include <QListWidgetItem>
 
 #include <possource.h>
-#include <clientsocket.h>
 
 #include <QThread>
 
 #include <iostream>
+
+#include <QtNetwork>
+#include <qlocalserver.h>
+#include <qlocalsocket.h>
 
 static QList<QString> files = {":/drone1.txt",":/drone2.txt",":/drone3.txt",":/drone4.txt",":/drone5.txt",":/drone6.txt",":/drone7.txt"};
 
@@ -21,21 +24,15 @@ ClientApplication::ClientApplication(QWidget *parent)
       timer(new QTimer(this))
 {
     //Local Server
-    mySocket = new ClientSocket;
-    t = new QThread;
-    connect(mySocket, SIGNAL(updateList(QString)),this,SLOT(updateList(QString)));
-    connect(mySocket, SIGNAL(clearList()),this,SLOT(clearList()));
-    connect(mySocket, SIGNAL(updateBuffer(int)),this,SLOT(updateBuffer(int)));
-    connect(mySocket, SIGNAL(updateStatus()),this,SLOT(updateStatus()));  
-    connect(this, SIGNAL(startServer()),mySocket,SLOT(startServer()));
+    server = new QLocalServer(this);
+    connect(server, &QLocalServer::newConnection, this, &ClientApplication::nextPos);
 
     //Layout
-    this->setFixedSize(600,450);
+    //this->setFixedSize(600,450);
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint);
     QGridLayout *mainLayout = new QGridLayout(this);
     QDialogButtonBox *buttonBox = new QDialogButtonBox;
 
-    txtEdit = new QTextEdit(this);
     bufferLbl = new QLabel(this);
     bufferLbl->setText("Buffer: 0");
     statusLbl = new QLabel(this);
@@ -49,7 +46,7 @@ ClientApplication::ClientApplication(QWidget *parent)
     resetBtn = new QPushButton("Reset",this);
     startAllBtn= new QPushButton("ALL",this);
     connect(startBtn,SIGNAL(clicked()),this,SLOT(startStopUpdates()));
-    connect(resetBtn,SIGNAL(clicked()),mySocket,SLOT(resetBuffer()));
+    connect(resetBtn,SIGNAL(clicked()),this,SLOT(resetBuffer()));
     connect(startAllBtn,SIGNAL(clicked()),this,SLOT(startAll()));
     buttonBox->addButton(startBtn, QDialogButtonBox::ActionRole);
     buttonBox->addButton(resetBtn, QDialogButtonBox::RejectRole);
@@ -57,14 +54,10 @@ ClientApplication::ClientApplication(QWidget *parent)
     //fromRow, fromColumn, rowSpan, columnSpan
     mainLayout->addWidget(bufferLbl,0,0);
     mainLayout->addWidget(statusLbl,1,0);
-    mainLayout->addWidget(txtEdit,2,0,1,2);
-    mainLayout->addWidget(buttonBox,3,0,1,4);
-    mainLayout->addWidget(droneLW,2,3,1,1);
-    mainLayout->setColumnStretch(1,5);
-    mainLayout->setColumnStretch(3,2);
+    mainLayout->addWidget(buttonBox,3,0,1,1);
+    mainLayout->addWidget(droneLW,2,0);
 
-    mySocket->moveToThread(t);
-    t->start();
+    //t->start();
 
     //load txt
     QListWidgetItem* droneItem;
@@ -75,8 +68,8 @@ ClientApplication::ClientApplication(QWidget *parent)
         sources.append(source);
         t = new QThread;
         connect(this, SIGNAL(startStop(bool)),source,SLOT(startStop(bool)));
-        connect(source, SIGNAL(posUpdated(QString)),mySocket,SLOT(loadToBuffer(QString))); //Buffer of ClientSocket
         connect(this, SIGNAL(setRunning(bool,int)),source,SLOT(setRunning(bool,int)));
+        connect(source, SIGNAL(posUpdated(QString)),this,SLOT(loadToBuffer(QString))); //Buffer of ClientSocket
         source->moveToThread(t);
 
         t->start();
@@ -88,9 +81,20 @@ ClientApplication::ClientApplication(QWidget *parent)
         droneLW->addItem(droneItem);
     }
 
-    emit startServer();
+    server->listen("dronespos");
 
 }
+
+void ClientApplication::loadToBuffer(QString info){ //solves segmentastion fault???
+    buffer.append(info);
+    bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
+}
+
+void ClientApplication::resetBuffer(){
+     buffer.clear();
+     bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
+}
+
 
 void ClientApplication::itemChanged()
 {
@@ -101,7 +105,6 @@ void ClientApplication::itemChanged()
 
 void ClientApplication::startStopUpdates()
 {
-
     if (startBtn->isChecked())
     {
         emit startStop(1);
@@ -139,20 +142,44 @@ void ClientApplication::startAllStep()
     }
 }
 
-//SIGNALS
-void ClientApplication::updateList(QString text){
-     txtEdit->append(text);
+void ClientApplication::nextPos()
+{
+    try {
+
+        statusLbl->setText("connected");
+        statusLbl->setStyleSheet("QLabel {color : green; }");
+
+        QString line;
+        if (!buffer.isEmpty()){
+            line = buffer.last();
+            buffer.removeLast();
+            bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
+            //emit updateList(line.trimmed());
+        }else{
+            line="-";
+        }
+
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out << quint32(line.size());
+        out << line;
+
+        QLocalSocket *clientConnection = server->nextPendingConnection();
+        connect(clientConnection, QOverload<QLocalSocket::LocalSocketError>::of(&QLocalSocket::error),this, &ClientApplication::serverError);
+        connect(clientConnection, &QLocalSocket::disconnected, clientConnection, &QLocalSocket:: deleteLater);
+        clientConnection->write(block);
+        clientConnection->flush();
+        clientConnection->disconnectFromServer();
+
+
+    } catch (const std::exception& ex) {
+        std::cerr << "Error: " << ex.what() << std::endl;
+    }
+
 }
 
-void ClientApplication::clearList(){
-    txtEdit->clear();
+void ClientApplication::serverError()
+{
+    std::cout << server->errorString().toUtf8().constData() << std::endl;
 }
 
-void ClientApplication::updateBuffer(int nr){
-    bufferLbl->setText("Buffer: " + QString::number(nr));
-}
-
-void ClientApplication::updateStatus(){
-    statusLbl->setText("connected");
-    statusLbl->setStyleSheet("QLabel {color : green; }");
-}

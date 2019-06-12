@@ -2,7 +2,8 @@ QT  += \
     quick \
     network \
     positioning \
-    concurrent
+    concurrent \
+    core
 
 
 
@@ -11,6 +12,7 @@ CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
+        dronelistmodel.cpp \
         main.cpp \
         posupdater.cpp \
         transsmoother.cpp
@@ -24,5 +26,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     controller.h \
+    drone.h \
+    dronelistmodel.h \
+    nodemodel.h \
     posupdater.h \
     transsmoother.h

@@ -5,16 +5,14 @@ import QtPositioning 5.12
 import QtLocation 5.12
 import "algos.js" as Algos
 
-Window {
+ApplicationWindow  {
     id: win
     visible: true
-    //visibility: "Maximized"
     title: "MMS GUI"
     width: 800
     height: 500
 
-    property variant drones: []
-    property variant colors: ["red","blue","green","purple","yellow","cyan","coral","chartreuse","darkorange","darkred","fuchsia"]
+
     property variant usedColors: []
 
     property int txtSize: 14
@@ -33,12 +31,16 @@ Window {
 
         //MAP SCALE
         property variant scaleLengths: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000]
-        function calculateScale()
+
+        function calculateScale(objWidth)
         {
-            var coord1, coord2, dist, text, f
-            f = 0
+            var coord1, coord2, dist, f
+            var info = []
+
+            f = 0 //factor
             coord1 = map.toCoordinate(Qt.point(0,scale.y))
-            coord2 = map.toCoordinate(Qt.point(0+scaleImage.sourceSize.width,scale.y))
+            coord2 = map.toCoordinate(Qt.point(objWidth,scale.y))
+
             dist = Math.round(coord1.distanceTo(coord2))
 
             if (dist === 0) {
@@ -57,25 +59,26 @@ Window {
                 }
             }
 
-            text = Algos.formatDistance(dist)
-            scaleImage.width = (scaleImage.sourceSize.width * f) - 2 * scaleImageLeft.sourceSize.width
-            scaleText.text = text
+            info.push(Algos.formatDistance(dist))
+            info.push(f)
+            return info
         }
 
-        onCenterChanged:{
-            scaleTimer.restart()
+        function setZoomScale(){
+
+            scaleText.text = info[0]
+            scaleImage.width = (scaleImage.sourceSize.width * info[1]) - 2 * scaleImageLeft.sourceSize.width
         }
+
+        function setCircleScale(){
+            var info = calculateScale(scaleImage.sourceSize.width)
+            //RADIUS
+        }
+
 
         onZoomLevelChanged:{
-            scaleTimer.restart()
-        }
-
-        onWidthChanged:{
-            scaleTimer.restart()
-        }
-
-        onHeightChanged:{
-            scaleTimer.restart()
+            map.setZoomScale()
+            zoomLbl.text = "Zoom: " + Math.round(map.zoomLevel)
         }
 
         Item {
@@ -113,7 +116,7 @@ Window {
                 text: "0 m"
             }
             Component.onCompleted: {
-                map.calculateScale();
+                map.setZoomScale();
             }
         }
 
@@ -137,20 +140,9 @@ Window {
             Label {
                 id: coorLbl
                 color: "#004EAE"
-                text: ""
+                text: "" //updates on mouse moved on map
                 anchors.top:zoomLbl.bottom
                 anchors.left: parent.left
-            }
-        }
-
-        Timer {
-            id: scaleTimer
-            interval: 100
-            running: false
-            repeat: false
-            onTriggered: {
-                map.calculateScale()
-                zoomLbl.text = "Zoom: " + Math.round(map.zoomLevel)
             }
         }
 
@@ -164,277 +156,43 @@ Window {
                 coorLbl.text = Algos.roundNumber(cor.latitude,3) + ", " +  Algos.roundNumber(cor.longitude,3)
             }
 
-            onClicked: {
-                for (var i = 0; i<drones.length;i++){
-                    drones[i].marked = false
-                    drones[i].droneSize = 14
+        }
+
+        PolyLine {id: staticPath}
+        PolyLine{id: dynamicPath}
+
+        function updateStaticPath(idInfo,colorInfo,posInfo){
+            staticPath.setPath(idInfo,colorInfo,posInfo)
+            dynamicPath.line.color = colorInfo
+        }
+
+        function removeTrail(){
+            staticPath.clearPath()
+            dynamicPath.clearPath()
+        }
+
+
+        MapItemView{
+            model: dronemodel
+            delegate: Drone{
+                coordinate: posInfo
+                droneColor: colorInfo
+                onCoordinateChanged: {
+                    if (followInfo) dynamicPath.updatePath(posInfo)
                 }
             }
         }
 
-        //register Drones
-        Connections{
-            target: Listener
-
-            property bool found: false
-            onPosUpdated: {
-                //drone already exists?
-                found = false
-                for (var i = 0; i < drones.length; i++) {
-                    if (drones[i].droneID === droneInfo){
-
-                        if (drones[i].pathPoly){
-                            if (line.pathLength() >= 300) line.removeCoordinate(0)
-                            line.addCoordinate(pos)
-                            line.line.color = drones[i].droneColor
-                        }
-
-                        found = true
-                        break
-                    }
-                }
-
-                if (!found){//NEW drone
-                    var drone = Qt.createQmlObject("Drone {}", map)
-
-                    if (usedColors.length == colors.length) usedColors = []
-                    for (var k = 0; k<colors.length;k++){
-                        if (usedColors.indexOf(colors[k]) == -1){
-                            drone.droneColor = colors[k]
-                            usedColors.push(colors[k])
-                            //update Panel
-                            dronePanel.addItem(droneInfo,colors[k])
-                            break
-                        }
-                    }
-
-                    drone.droneID = droneInfo
-                    drone.index = drones.length
-                    drone.coordinate = pos
-
-                    drones.push(drone)
-                    map.addMapItem(drone)
-                }
-
-            }
-        }
-
-        MapPolyline{
-            id: line
-            line.width: 2
-            opacity: 0.6
-            smooth: true
-            function clearPath(){
-                var pl = pathLength()
-                for (var l = 0; l< pl;l++) removeCoordinate(0)
-            }
-        }
-        function addLine(pos,col){
-            if (line.pathLength() >= 300) line.removeCoordinate(0)
-            line.addCoordinate(pos)
-            line.line.color = col
-        }
-
-
-
-        //Drone PANEL
-        Item{
-            id: dronePanel
-            width: 150
-            height: parent.height
-
-
-            Rectangle{
-                width: parent.width
-                height: parent.height
-                opacity: 0.7
-                color: "Grey"
-            }
-
-            ListModel{id: droneModel}
-
-            Component{
-                id: listDelegate
-                Item{
-                    id: listItem
-                    width: parent.width
-                    height: small
-
-                    Rectangle{
-                        anchors.fill: parent
-                        opacity: 0.3
-                        color: droneColor
-
-                        MouseArea {
-                            hoverEnabled: true
-                            anchors.fill: parent
-
-                            onClicked: {
-                                if(listItem.height === small){listItem.height = enlarged
-                                }else{listItem.height = small}
-                            }
-
-                            onEntered: {
-                                list.currentIndex = index
-                            }
-                            onExited: {
-                                list.currentIndex = -1
-                            }
-
-                        }
-                    }
-
-                    Column{
-                        layer.enabled: true
-                        spacing: 5
-                        anchors.fill: parent
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
-                        anchors.topMargin: 5
-                        anchors.bottomMargin: 5
-
-                        Text{text: droneID; font.pixelSize: txtSize; font.underline: drones[index].marked; font.bold: drones[index].marked; wrapMode: Text.WordWrap; width: parent.width}
-                        Text{text: "Lat: " + lat; font.pixelSize: txtSize; wrapMode: Text.WordWrap; width: parent.width}
-                        Text{text: "Lon: " + lon; font.pixelSize: txtSize; wrapMode: Text.WordWrap; width: parent.width}
-                        Text{text: "Speed: " + speed + " m/s"; font.pixelSize: txtSize; wrapMode: Text.WordWrap; width: parent.width}
-                        Text{text: "Mission: Transition"; font.pixelSize: txtSize; wrapMode: Text.WordWrap; width: parent.width}
-
-                        Row{
-                            spacing: 5
-                            Button{
-                                //\u2295
-                                //\u2A01
-                                //\u2B99
-                                text: "Follow"
-                                height: 20
-                                width: 50
-                                font.pixelSize: 11
-                                highlighted: drones[index].follow
-                                enabled: if(listItem.height === enlarged){true}else{false}
-
-                                onClicked:{
-                                    if (drones[index].follow){
-                                        drones[index].follow = false
-                                    }else{
-                                        for (var m = 0; m<drones.length;m++){
-                                            drones[m].follow = false
-                                        }
-                                        drones[index].follow = true
-                                        map.center =drones[index].coordinate
-                                    }
-                                }
-                            }
-                            Button{
-                                // U+20E0
-                                //U+26C4
-                                text: "Visible"
-                                height: 20
-                                width: 50
-                                font.pixelSize: 11
-                                highlighted: drones[index].visible
-                                enabled: if(listItem.height === enlarged){true}else{false}
-
-                                onClicked:{
-                                    drones[index].visible = !drones[index].visible
-                                }
-                            }
-                        }
-                        Row{
-                            spacing: 5
-                            ComboBox{
-                                id: cbColor
-                                width: 80
-                                height: 20
-                                enabled: if(listItem.height === enlarged){true}else{false}
-                                textRole: "text"
-                                font.pixelSize: 10
-                                property bool initial:false
-
-                                model: ListModel{
-                                    id: colorModel
-                                }
-
-                                Component.onCompleted: {
-                                    for (var k = 0;k<colors.length;k++){
-                                        colorModel.append(({"text": colors[k], "color": colors[k]}))
-                                    }
-                                    currentIndex = find(win.drones[index].droneColor)
-                                    initial = true
-                                }
-                                onCurrentIndexChanged: {
-                                    if (initial){
-                                        droneModel.setProperty(index,"droneColor", colorModel.get(currentIndex).color)
-                                        drones[index].droneColor = colorModel.get(currentIndex).color
-                                        if (drones[index].pathPoly) line.line.color = colorModel.get(currentIndex).color
-
-                                    }
-                                }
-
-                            }
-                            Button{
-                                //U+22B8
-                                text: "Line"
-                                height: 20
-                                width: 40
-                                font.pixelSize: 12
-                                highlighted: drones[index].pathPoly
-                                enabled: if(listItem.height === enlarged){true}else{false}
-                                property int tmp
-                                onClicked:{
-                                    if (drones[index].pathPoly){
-                                        drones[index].pathPoly = false
-                                        line.clearPath()
-                                    }else{
-                                        for (var m = 0; m<drones.length;m++){
-                                            drones[m].pathPoly = false
-                                        }
-                                        line.clearPath()
-                                        drones[index].pathPoly = true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            //Highlight on hover
-            Component{
-                id: mark
-                Rectangle {
-                    width: dronePanel.width
-                    opacity: 0.5
-                    color: "grey"
-                    visible: (list.currentIndex  !== -1)
-                }
-            }
-
-            ListView{
-                id: list
-                anchors.fill: parent
-                model: droneModel
-                delegate: listDelegate
-                highlight: mark
-                highlightFollowsCurrentItem: true
-                highlightResizeVelocity: -1
-                highlightMoveVelocity: -1
-
-            }
-
-            function addItem(droneID, droneColor){
-                droneModel.append({"droneID": droneID, "lat": "-", "lon": "-", "speed": 0, "droneColor": droneColor})
-            }
-
-        }
-
-        //update loc and speed in panel
-        function posChanged(index, newLat, newLon, speed){
-            droneModel.setProperty(index,"lat",Algos.roundNumber(newLat,4).toString())
-            droneModel.setProperty(index,"lon",Algos.roundNumber(newLon,4).toString())
-            droneModel.setProperty(index,"speed",Math.round(speed))
-        }
-
-        //Action PANEL
+//        MapItemView {
+//            model: nodemodel
+//            delegate: ArrowItem{
+//                coordinate: nodeData
+//                transformOrigin: Item.Center
+//                rotation: angleData
+//                z:100
+//                factor: mapOfWorld.zoomLevel
+//            }
+//
 
         //TRANSMITTER (add cpp in MMS)/// Receiver for action handling -> back to PosSource
         /*
@@ -451,59 +209,11 @@ Window {
         TRANSMITTER SEND Coors to SERVER
         */
 
-        Item {
-            id: actionPanel
-            width: 50
 
-
-            anchors{
-                right: parent.right
-                bottom: map.bottom
-                top: map.top
-                rightMargin: 5
-            }
-
-            Rectangle{
-                id: actionBG
-                anchors.centerIn: parent
-                width: parent.width
-                height: 300
-                opacity: 0.7
-                color: "Grey"
-                radius: 10
-            }
-
-            Column{
-                anchors.fill: actionBG
-                leftPadding: 5
-                topPadding: actionBG.height/2-btnSize*4/2
-
-                spacing: 20
-                Button{
-                    text: "X"
-                    height: btnSize
-                    width: btnSize
-                    font.pixelSize: txtSize
-                }
-                RoundButton {
-                    text: "X"
-                    radius: btnSize / 2
-                    font.pixelSize: txtSize
-                }
-                Button{
-                    text: "X"
-                    height: btnSize
-                    width: btnSize
-                    font.pixelSize: txtSize
-                }
-
-            }
-
-        }
-
-        Component.onCompleted: {
-            Listener.start();
-        }
     }
+
+    DronePanel{id:dronePanel}
+
+    ActionPanel{id:actionPanel}
 }
 

@@ -21,7 +21,7 @@ void ClientSocket::startServer(){
     server->listen("dronespos");
 }
 
-void ClientSocket::loadToBuffer(const QString &lastInfo){
+void ClientSocket::loadToBuffer(QString lastInfo){
     buffer.append(lastInfo);
     emit updateBuffer(buffer.count()); //Buffer Label update
 }

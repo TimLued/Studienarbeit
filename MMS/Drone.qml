@@ -8,20 +8,11 @@ MapQuickItem {
     id: drone
     visible: true
 
-    property string droneID
-    property int index
+    //property string droneID
+    //property int index
     property string droneColor
-
-    property bool follow: false //map center on drone
-    property bool pathPoly: false
     property bool marked: false
-
     property int droneSize: 14
-
-    property variant lastPos
-    property variant lastLastPos
-    property date lastTimestamp
-    property double speed: 0
 
     //insted of Rectangle TEXTFIEL??? U+2B9D
     sourceItem: Rectangle{ width: droneSize; height: droneSize; color: droneColor; smooth: true; radius: droneSize/2;}
@@ -47,60 +38,65 @@ MapQuickItem {
     }
 
     //update coordinate
-    property int interval: 10
-    Connections{
-        target: Listener
-        onPosUpdated: {
-            if (droneID === droneInfo){
+//    property int interval: 10
+//    Connections{
+//        target: Listener
+//        onPosUpdated: {
+//            if (droneID === droneInfo){
 
-                smoothThread.stop()
-                idleUpdate = false
+//                smoothThread.stop()
+//                idleUpdate = false
 
-                lastLastPos = lastPos
-                lastPos = pos
+//                lastLastPos = lastPos
+//                lastPos = pos
 
-                coordinate = lastPos
+//                coordinate = lastPos
 
-                if (lastLastPos){
-                    //speed = lastPos.distanceTo(lastPos)/(timestamp - lastTimestamp) * 1000
-                    //for test cases timestamp difference HERE 20ms
-                    speed = lastLastPos.distanceTo(lastPos)/(20) * 1000
+//                if (lastLastPos){
+//                    //speed = lastPos.distanceTo(lastPos)/(timestamp - lastTimestamp) * 1000
+//                    //for test cases timestamp difference HERE 20ms
+//                    speed = lastLastPos.distanceTo(lastPos)/(20) * 1000
 
-                    var bear = Algos.bearing(lastLastPos.latitude,lastLastPos.longitude,lastPos.latitude,lastPos.longitude)
-                    var dist = interval/1000*speed
-                    smoothThread.start(interval,dist,bear,coordinate)
-                }
-                lastTimestamp = timestamp
-            }
-        }
-    }
-    property bool idleUpdate: false
-    Behavior on coordinate{
-        enabled: idleUpdate
-        CoordinateAnimation{
-           duration: interval
-           easing.type: Easing.Linear
-        }
-    }
+//                    var bear = Algos.bearing(lastLastPos.latitude,lastLastPos.longitude,lastPos.latitude,lastPos.longitude)
+//                    var dist = interval/1000*speed
+//                    smoothThread.start(interval,dist,bear,coordinate)
+//                }
+//                lastTimestamp = timestamp
+//            }
+//        }
+//    }
 
-    onCoordinateChanged: {
-        if (follow) map.center = coordinate
-        map.posChanged(index,coordinate.latitude,coordinate.longitude,speed)
 
-        if (pathPoly) map.addLine(coordinate,droneColor)
+//    property bool idleUpdate: false
+//    Behavior on coordinate{
+//        enabled: idleUpdate
+//        CoordinateAnimation{
+//           duration: interval
+//           easing.type: Easing.Linear
+//        }
+//    }
 
-        //ADD
-        //INFO last pos update -> millisecs ago
-        //GET Mission {new entry} --> Number Code
-    }
+//    onCoordinateChanged: {
+//        if (follow) map.center = coordinate
 
-    TransSmoother{
-        id: smoothThread
-        onPosUpdate: {
-            idleUpdate = true
-            coordinate = cor
-        }
-    }
+//        map.posChanged(index,coordinate.latitude,coordinate.longitude,speed)
+
+
+//        //win.lines[index].addCoordinate(coordinate)
+
+
+//        //ADD
+//        //INFO last pos update -> millisecs ago
+//        //GET Mission {new entry} --> Number Code
+//    }
+
+//    TransSmoother{
+//        id: smoothThread
+//        onPosUpdate: {
+//            idleUpdate = true
+//            coordinate = cor
+//        }
+//    }
 
 
 }
