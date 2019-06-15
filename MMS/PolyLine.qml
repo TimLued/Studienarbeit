@@ -4,7 +4,8 @@ import QtPositioning 5.12
 
 MapPolyline {
     id: droneTrail
-    line.width: 2
+    line.width: 1
+
     function clearPath(){
         visible = false
         path = []
@@ -14,6 +15,7 @@ MapPolyline {
         line.color = colorInfo
         path = dronemodel.getDroneHistory(idInfo)
         droneTrail.addCoordinate(posInfo)
+        visible = true
     }
 
     function updatePath(posInfo){

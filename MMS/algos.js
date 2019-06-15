@@ -9,10 +9,10 @@ function formatDistance(meters)
             dist = Math.round(dist / 100)
             dist = dist / 10
         }
-        dist = dist + " km"
+        dist = dist + "km"
     }
     else{
-        dist = dist + " m"
+        dist = dist + "m"
     }
     return dist
 }

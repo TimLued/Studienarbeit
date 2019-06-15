@@ -32,12 +32,9 @@ Item{
             id: listItem
             width: parent.width
             height: small
-            //layer.enabled: true
 
             Rectangle{
                 anchors.fill: parent
-                //opacity: 0.3
-
                 color: "white"
 
                 MouseArea {
@@ -53,14 +50,6 @@ Item{
                     onExited: list.currentIndex = -1
                 }
             }
-            Rectangle{ //on item selected
-                id: itemSelect
-                anchors.fill: parent
-                visible: false
-                opacity: 0.3
-                color: "grey"
-            }
-
 
 
             Column{
@@ -80,8 +69,29 @@ Item{
                 //                        Text{text: "Mission: Transition"; font.pixelSize: txtSize; wrapMode: Text.WordWrap; width: parent.width}
 
 
+
+
+
+
+
                 Row{
                     visible: if(listItem.height === enlarged){true}else{false}
+
+                    Button{
+                        text: "History"
+                        height: 20
+                        width: 50
+                        font.pixelSize: 12
+                        highlighted: followInfo
+                        enabled: if(listItem.height === enlarged){true}else{false}
+                        property int tmp
+                        onClicked:{
+                            win.removeTrail()
+                            if (!followInfo) win.updateStaticPath(idInfo,colorInfo,posInfo)
+                            dronemodel.updateDrone(idInfo,posInfo,true)
+                        }
+                    }
+
 //                    spacing: 5
 //                    Button{
 //                        //\u2295
@@ -129,6 +139,7 @@ Item{
                         id: cbColor
                         width: 80
                         height: 20
+
                         enabled: if(listItem.height === enlarged){true}else{false}
                         textRole: "text"
                         font.pixelSize: 10
@@ -156,21 +167,9 @@ Item{
                         }
 
                     }
-                    Button{
-                        //U+22B8
-                        text: "History"
-                        height: 20
-                        width: 50
-                        font.pixelSize: 12
-                        highlighted: followInfo
-                        enabled: if(listItem.height === enlarged){true}else{false}
-                        property int tmp
-                        onClicked:{
-                            map.removeTrail()
-                            if (!followInfo) map.updateStaticPath(idInfo,colorInfo,posInfo)
-                            dronemodel.updateDrone(idInfo,posInfo,true)
-                        }
-                    }
+
+
+
                 }
             }
         }

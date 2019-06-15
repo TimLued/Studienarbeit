@@ -4,7 +4,7 @@ import QtQuick.Controls 2.5
 Item {
     id: actionPanel
     width: 50
-
+    opacity: 0.7
 
     anchors{
         right: parent.right
@@ -18,9 +18,7 @@ Item {
         anchors.centerIn: parent
         width: parent.width
         height: 300
-        opacity: 0.7
-        color: "Grey"
-        radius: 10
+        color: "grey"
     }
 
     Column{

@@ -21,6 +21,29 @@ ApplicationWindow  {
 
     property int btnSize: 40
 
+    property double zoomCircle
+    property string zoomRadius
+
+    function updateStaticPath(idInfo,colorInfo,posInfo){
+        staticPath.visible = false
+        staticPath.setPath(idInfo,colorInfo,posInfo)
+        dynamicPath.line.color = colorInfo
+    }
+
+    function updateDynamicPath(idInfo,colorInfo,posInfo){
+        if(dynamicPath.pathLength() <= 1000){
+            dynamicPath.updatePath(posInfo)
+        }else{
+            dynamicPath.clearPath()
+            updateStaticPath(idInfo,colorInfo,posInfo)
+        }
+    }
+
+    function removeTrail(){
+        staticPath.clearPath()
+        dynamicPath.clearPath()
+    }
+
     Map{
         id: map
         anchors.fill:parent
@@ -43,9 +66,7 @@ ApplicationWindow  {
 
             dist = Math.round(coord1.distanceTo(coord2))
 
-            if (dist === 0) {
-                // not visible
-            } else {
+            if (dist > 0) {
                 for (var i = 0; i < scaleLengths.length-1; i++) {
                     if (dist < (scaleLengths[i] + scaleLengths[i+1]) / 2 ) {
                         f = scaleLengths[i] / dist
@@ -59,25 +80,27 @@ ApplicationWindow  {
                 }
             }
 
-            info.push(Algos.formatDistance(dist))
+            info.push(dist)
             info.push(f)
             return info
         }
 
         function setZoomScale(){
-
-            scaleText.text = info[0]
+            var info = calculateScale(scaleImage.sourceSize.width)
+            scaleText.text = Algos.formatDistance(info[0])
             scaleImage.width = (scaleImage.sourceSize.width * info[1]) - 2 * scaleImageLeft.sourceSize.width
         }
 
         function setCircleScale(){
-            var info = calculateScale(scaleImage.sourceSize.width)
-            //RADIUS
+            var info = calculateScale(100) //radius 50
+            zoomCircle = (100 * info[1])/2 //border.width 3
+            zoomRadius = Algos.formatDistance(info[0]/2)
         }
 
 
         onZoomLevelChanged:{
-            map.setZoomScale()
+            setZoomScale()
+            setCircleScale()
             zoomLbl.text = "Zoom: " + Math.round(map.zoomLevel)
         }
 
@@ -134,6 +157,7 @@ ApplicationWindow  {
                 id: zoomLbl
                 color: "#004EAE"
                 anchors.left: parent.left
+                text: "Zoom: " + Math.round(map.zoomLevel)
             }
 
             //Coordinate Label
@@ -161,27 +185,121 @@ ApplicationWindow  {
         PolyLine {id: staticPath}
         PolyLine{id: dynamicPath}
 
-        function updateStaticPath(idInfo,colorInfo,posInfo){
-            staticPath.setPath(idInfo,colorInfo,posInfo)
-            dynamicPath.line.color = colorInfo
-        }
 
-        function removeTrail(){
-            staticPath.clearPath()
-            dynamicPath.clearPath()
-        }
+//        MapCircle{
+//            id:circleRuler
+//            property double r: 50
+//            color: "transparent"
+//            border.color: "black"
+//            border.width: 3
+//        }
 
 
         MapItemView{
             model: dronemodel
-            delegate: Drone{
-                coordinate: posInfo
-                droneColor: colorInfo
-                onCoordinateChanged: {
-                    if (followInfo) dynamicPath.updatePath(posInfo)
+            delegate:MapItemGroup{
+                layer.enabled: true
+
+                Drone{
+                    coordinate: posInfo
+                    droneColor: colorInfo
+                    onCoordinateChanged: {
+                        if (followInfo) updateDynamicPath(idInfo,colorInfo,posInfo)
+                    }
                 }
+
+
+//                MapQuickItem{
+//                    id:circleRuler
+//                    coordinate: posInfo
+//                    anchorPoint.x: zoomCircle
+//                    anchorPoint.y: zoomCircle
+//                    layer.enabled: true
+
+//                    sourceItem: Rectangle{
+//                        width: zoomCircle * 2
+//                        height: zoomCircle * 2
+//                        radius: zoomCircle
+//                        border.color: colorInfo
+//                        border.width: 1
+//                        color: '#00000000'
+
+//                        Rectangle{
+//                            id:circleLabelBc
+//                            anchors.horizontalCenter: parent.horizontalCenter
+//                            anchors.top: parent.top
+//                            color:"grey"
+//                            opacity: 0.5
+//                            Text {
+//                                text: zoomRadius
+//                            }
+//                            width: childrenRect.width
+//                            height: childrenRect.height
+//                        }
+
+//                    }
+//                }
+
+                                MapQuickItem{
+                                    id:circleRuler
+                                    coordinate: posInfo
+                                    anchorPoint.x: zoomCircle
+                                    anchorPoint.y: zoomCircle
+
+
+                                    sourceItem: Item{
+                                        width: zoomCircle * 2
+                                        height: zoomCircle * 2
+
+                                        Rectangle{
+                                            anchors.fill: parent
+                                            radius: zoomCircle
+                                            border.color: colorInfo
+                                            border.width: 1
+                                            color: '#00000000'
+                                        }
+
+
+                                        Text {
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            anchors.bottom: parent.top
+                                            text: zoomRadius
+                                            font.bold: true
+                                        }
+
+                                    }
+                                }
+
+//                MapQuickItem{
+//                    coordinate: posInfo
+//                    sourceItem: Column{
+//                        anchors.fill:parent
+//                        Rectangle{
+//                            id:circleLabelBc
+//                            color:"grey"
+//                            opacity: 0.5
+//                            Text {
+//                                text: zoomRadius
+//                                font.bold: true
+//                            }
+//                            width: childrenRect.width
+//                            height: childrenRect.height
+//                        }
+//                    }
+//                    anchorPoint.x: childrenRect.width / 2
+//                    anchorPoint.y: zoomCircle
+
+//                }
+
+
             }
         }
+    }
+
+    DronePanel{id:dronePanel}
+    ActionPanel{id:actionPanel}
+
+}
 
 //        MapItemView {
 //            model: nodemodel
@@ -208,12 +326,4 @@ ApplicationWindow  {
         - side task?
         TRANSMITTER SEND Coors to SERVER
         */
-
-
-    }
-
-    DronePanel{id:dronePanel}
-
-    ActionPanel{id:actionPanel}
-}
 
