@@ -69,53 +69,37 @@ Item{
                 //                        Text{text: "Mission: Transition"; font.pixelSize: txtSize; wrapMode: Text.WordWrap; width: parent.width}
 
 
-
-
-
-
-
                 Row{
                     visible: if(listItem.height === enlarged){true}else{false}
+                    spacing: 5
 
                     Button{
                         text: "History"
                         height: 20
-                        width: 50
+                        width: contentItem.implicitWidth + leftPadding + rightPadding
                         font.pixelSize: 12
-                        highlighted: followInfo
+                        highlighted: trackingHistoryInfo
                         enabled: if(listItem.height === enlarged){true}else{false}
-                        property int tmp
                         onClicked:{
                             win.removeTrail()
-                            if (!followInfo) win.updateStaticPath(idInfo,colorInfo,posInfo)
-                            dronemodel.updateDrone(idInfo,posInfo,true)
+                            if (!trackingHistoryInfo) win.updateStaticPath(idInfo,colorInfo,posInfo)
+                            dronemodel.toggleHistoryTracking(idInfo)
                         }
                     }
 
-//                    spacing: 5
-//                    Button{
-//                        //\u2295
-//                        //\u2A01
-//                        //\u2B99
-//                        text: "Follow"
-//                        height: 20
-//                        width: 50
-//                        font.pixelSize: 11
-//                        highlighted: win.drones[index].follow
-//                        enabled: if(listItem.height === enlarged){true}else{false}
+                    Button{
+                        text: "Follow"
+                        height: 20
+                        width: contentItem.implicitWidth + leftPadding + rightPadding
+                        font.pixelSize: 12
+                        highlighted: followInfo
+                        enabled: if(listItem.height === enlarged){true}else{false}
+                        onClicked:{
+                            dronemodel.toggleFollow(idInfo)
+                            if (followInfo) map.center = posInfo
+                        }
+                    }
 
-//                        onClicked:{
-//                            if (win.drones[index].follow){
-//                                win.drones[index].follow = false
-//                            }else{
-//                                for (var m = 0; m<win.drones.length;m++){
-//                                    win.drones[m].follow = false
-//                                }
-//                                win.drones[index].follow = true
-//                                map.center =win.drones[index].coordinate
-//                            }
-//                        }
-//                    }
 //                    Button{
 //                        // U+20E0
 //                        //U+26C4
@@ -137,9 +121,9 @@ Item{
                     layer.enabled: true
                     ComboBox{
                         id: cbColor
-                        width: 80
-                        height: 20
 
+                        height: 20
+                        width: 100
                         enabled: if(listItem.height === enlarged){true}else{false}
                         textRole: "text"
                         font.pixelSize: 10
@@ -159,7 +143,7 @@ Item{
                         onCurrentIndexChanged: {
                             if (initial){
                                 dronemodel.setColor(idInfo,colorModel.get(currentIndex).color)
-                                if (followInfo){
+                                if (trackingHistoryInfo){
                                     map.removeTrail()
                                     map.updateStaticPath(idInfo,colorInfo,posInfo)
                                 }

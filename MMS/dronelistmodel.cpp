@@ -15,27 +15,13 @@ void DroneListModel::register_objects(const QString &droneId,
     context->setContextProperty(nodeName, model);
 }
 
-bool DroneListModel::updateDrone(const QString & id,QGeoCoordinate coord,bool follow,int angle){
+bool DroneListModel::updateDrone(const QString & id,QGeoCoordinate coord,int angle){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
     if(it != mDrones.end()){
         //append
         int row = it - mDrones.begin();
         QModelIndex ix = index(row);
-        if (follow) {//switches follow stae
-            it->setFollow();
-            emit dataChanged(ix, ix, QVector<int>{FollowRole});
-
-            //others set false
-            for (int i=0;i<mDrones.count();i++){
-                if(i != row && mDrones[i].following()) {
-                    mDrones[i].setFollow();
-                    emit dataChanged(index(i), index(i), QVector<int>{FollowRole});
-                }
-            }
-            return true;
-        }
-
 
         QGeoCoordinate c = ix.data(PosRole).value<QGeoCoordinate>();
         //int a = ix.data(AngleRole).toInt();
@@ -51,6 +37,56 @@ bool DroneListModel::updateDrone(const QString & id,QGeoCoordinate coord,bool fo
 
 }
 
+bool DroneListModel::createDrone(QGeoCoordinate coord, const QString & id){
+   beginInsertRows(QModelIndex(), rowCount(), rowCount());
+
+   Drone it;
+   it.sedId(id);
+   it.setPos(coord);
+   it.setColor("red");
+   mDrones<< it;
+   endInsertRows();
+   return true;
+}
+
+bool DroneListModel::toggleFollow(const QString &id){
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+            return obj.id() == id;});
+    int row = it - mDrones.begin();
+    QModelIndex ix = index(row);
+
+    it->setFollow();
+    emit dataChanged(ix, ix, QVector<int>{FollowRole});
+
+    //others set false
+    for (int i=0;i<mDrones.count();i++){
+        if(i != row && mDrones[i].following()) {
+            mDrones[i].setFollow();
+            emit dataChanged(index(i), index(i), QVector<int>{FollowRole});
+        }
+    }
+    return true;
+}
+
+bool DroneListModel::toggleHistoryTracking(const QString &id){
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+            return obj.id() == id;});
+    int row = it - mDrones.begin();
+    QModelIndex ix = index(row);
+
+    it->setTrackHistory();
+    emit dataChanged(ix, ix, QVector<int>{HistoryRole});
+
+    //others set false
+    for (int i=0;i<mDrones.count();i++){
+        if(i != row && mDrones[i].trackingHistory()) {
+            mDrones[i].setTrackHistory();
+            emit dataChanged(index(i), index(i), QVector<int>{HistoryRole});
+        }
+    }
+    return true;
+}
+
 QVariant DroneListModel::getDroneHistory(const QString &id){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
@@ -63,18 +99,6 @@ void DroneListModel::setColor(const QString &id, QString color){
     it->setColor(color);
     QModelIndex ix = index(it - mDrones.begin());
     emit dataChanged(ix, ix, QVector<int>{ColorRole});
-}
-
- bool DroneListModel::createDrone(QGeoCoordinate coord, const QString & id){
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
-
-    Drone it;
-    it.sedId(id);
-    it.setPos(coord);
-    it.setColor("red");
-    mDrones<< it;
-    endInsertRows();
-    return true;
 }
 
  int DroneListModel::rowCount(const QModelIndex &parent) const {
@@ -95,9 +119,10 @@ void DroneListModel::setColor(const QString &id, QString color){
              return it.getColor();
          else if (role == AngleRole)
              return it.getAngle();
+         else if(role == HistoryRole)
+             return it.trackingHistory();
          else if(role == FollowRole)
              return it.following();
-
      }
      return QVariant();
  }
@@ -108,6 +133,7 @@ void DroneListModel::setColor(const QString &id, QString color){
    roles[PosRole] = "posInfo";
    roles[AngleRole] = "angleInfo";
    roles[ColorRole] = "colorInfo";
+   roles[HistoryRole] = "trackingHistoryInfo";
    roles[FollowRole] = "followInfo";
    return roles;
  }

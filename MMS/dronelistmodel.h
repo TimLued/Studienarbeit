@@ -30,6 +30,7 @@ public:
         IdRole = Qt::UserRole + 1,
         PosRole,
         ColorRole,
+        HistoryRole,
         FollowRole,
         AngleRole
     };
@@ -38,8 +39,10 @@ public:
                           const QString &nodeName,
                           QQmlContext *context);
 
-    Q_INVOKABLE bool updateDrone(const QString & id,QGeoCoordinate coord,bool follow = false,int angle = 0);
+    Q_INVOKABLE bool updateDrone(const QString & id,QGeoCoordinate coord,int angle = 0);
     Q_INVOKABLE bool createDrone(QGeoCoordinate coord, const QString & id);
+    Q_INVOKABLE bool toggleHistoryTracking(const QString & id);
+    Q_INVOKABLE bool toggleFollow(const QString & id);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 

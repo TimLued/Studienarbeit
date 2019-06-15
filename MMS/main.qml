@@ -12,15 +12,11 @@ ApplicationWindow  {
     width: 800
     height: 500
 
-
-    property variant usedColors: []
-
+    property variant usedColors: [] //NOT YET IMPLEMENTED
     property int txtSize: 14
     property int enlarged: 200
     property int small: txtSize + 15
-
     property int btnSize: 40
-
     property double zoomCircle
     property string zoomRadius
 
@@ -44,6 +40,50 @@ ApplicationWindow  {
         dynamicPath.clearPath()
     }
 
+    //MAP SCALE
+    property variant scaleLengths: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000]
+    function calculateScale(objWidth)
+    {
+        var coord1, coord2, dist, f
+        var info = []
+
+        f = 0 //factor
+        coord1 = map.toCoordinate(Qt.point(0,scale.y))
+        coord2 = map.toCoordinate(Qt.point(objWidth,scale.y))
+
+        dist = Math.round(coord1.distanceTo(coord2))
+
+        if (dist > 0) {
+            for (var i = 0; i < scaleLengths.length-1; i++) {
+                if (dist < (scaleLengths[i] + scaleLengths[i+1]) / 2 ) {
+                    f = scaleLengths[i] / dist
+                    dist = scaleLengths[i]
+                    break;
+                }
+            }
+            if (f === 0) {
+                f = dist / scaleLengths[i]
+                dist = scaleLengths[i]
+            }
+        }
+
+        info.push(dist)
+        info.push(f)
+        return info
+    }
+
+    function setCircleScale(){
+        var info = calculateScale(100) //radius 50
+        zoomCircle = (100 * info[1])/2 //border.width 3
+        zoomRadius = Algos.formatDistance(info[0]/2)
+    }
+
+    function setZoomScale(){
+        var info = calculateScale(scaleImage.sourceSize.width)
+        scaleText.text = Algos.formatDistance(info[0])
+        scaleImage.width = (scaleImage.sourceSize.width * info[1]) - 2 * scaleImageLeft.sourceSize.width
+    }
+
     Map{
         id: map
         anchors.fill:parent
@@ -51,56 +91,9 @@ ApplicationWindow  {
         center: QtPositioning.coordinate(54.3107,10.1291)
         zoomLevel: 14
 
-
-        //MAP SCALE
-        property variant scaleLengths: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000]
-
-        function calculateScale(objWidth)
-        {
-            var coord1, coord2, dist, f
-            var info = []
-
-            f = 0 //factor
-            coord1 = map.toCoordinate(Qt.point(0,scale.y))
-            coord2 = map.toCoordinate(Qt.point(objWidth,scale.y))
-
-            dist = Math.round(coord1.distanceTo(coord2))
-
-            if (dist > 0) {
-                for (var i = 0; i < scaleLengths.length-1; i++) {
-                    if (dist < (scaleLengths[i] + scaleLengths[i+1]) / 2 ) {
-                        f = scaleLengths[i] / dist
-                        dist = scaleLengths[i]
-                        break;
-                    }
-                }
-                if (f === 0) {
-                    f = dist / scaleLengths[i]
-                    dist = scaleLengths[i]
-                }
-            }
-
-            info.push(dist)
-            info.push(f)
-            return info
-        }
-
-        function setZoomScale(){
-            var info = calculateScale(scaleImage.sourceSize.width)
-            scaleText.text = Algos.formatDistance(info[0])
-            scaleImage.width = (scaleImage.sourceSize.width * info[1]) - 2 * scaleImageLeft.sourceSize.width
-        }
-
-        function setCircleScale(){
-            var info = calculateScale(100) //radius 50
-            zoomCircle = (100 * info[1])/2 //border.width 3
-            zoomRadius = Algos.formatDistance(info[0]/2)
-        }
-
-
         onZoomLevelChanged:{
-            setZoomScale()
-            setCircleScale()
+            win.setZoomScale()
+            win.setCircleScale()
             zoomLbl.text = "Zoom: " + Math.round(map.zoomLevel)
         }
 
@@ -139,7 +132,7 @@ ApplicationWindow  {
                 text: "0 m"
             }
             Component.onCompleted: {
-                map.setZoomScale();
+                win.setZoomScale();
             }
         }
 
@@ -203,94 +196,45 @@ ApplicationWindow  {
                 Drone{
                     coordinate: posInfo
                     droneColor: colorInfo
+
+                    //property variant tmp
                     onCoordinateChanged: {
-                        if (followInfo) updateDynamicPath(idInfo,colorInfo,posInfo)
+                        if (trackingHistoryInfo) updateDynamicPath(idInfo,colorInfo,posInfo)
+                        if (followInfo) map.center = posInfo
+
+//                        if(tmp) console.log(posInfo.latitude + ",  " + tmp.azimuthTo(posInfo))
+//                        tmp = posInfo
                     }
                 }
 
-
-//                MapQuickItem{
-//                    id:circleRuler
-//                    coordinate: posInfo
-//                    anchorPoint.x: zoomCircle
-//                    anchorPoint.y: zoomCircle
-//                    layer.enabled: true
-
-//                    sourceItem: Rectangle{
-//                        width: zoomCircle * 2
-//                        height: zoomCircle * 2
-//                        radius: zoomCircle
-//                        border.color: colorInfo
-//                        border.width: 1
-//                        color: '#00000000'
-
-//                        Rectangle{
-//                            id:circleLabelBc
-//                            anchors.horizontalCenter: parent.horizontalCenter
-//                            anchors.top: parent.top
-//                            color:"grey"
-//                            opacity: 0.5
-//                            Text {
-//                                text: zoomRadius
-//                            }
-//                            width: childrenRect.width
-//                            height: childrenRect.height
-//                        }
-
-//                    }
-//                }
-
-                                MapQuickItem{
-                                    id:circleRuler
-                                    coordinate: posInfo
-                                    anchorPoint.x: zoomCircle
-                                    anchorPoint.y: zoomCircle
+                MapQuickItem{
+                    id:circleRuler
+                    coordinate: posInfo
+                    anchorPoint.x: zoomCircle
+                    anchorPoint.y: zoomCircle
 
 
-                                    sourceItem: Item{
-                                        width: zoomCircle * 2
-                                        height: zoomCircle * 2
+                    sourceItem: Item{
+                        width: zoomCircle * 2
+                        height: zoomCircle * 2
 
-                                        Rectangle{
-                                            anchors.fill: parent
-                                            radius: zoomCircle
-                                            border.color: colorInfo
-                                            border.width: 1
-                                            color: '#00000000'
-                                        }
+                        Rectangle{
+                            anchors.fill: parent
+                            radius: zoomCircle
+                            border.color: colorInfo
+                            border.width: 1
+                            color: '#00000000'
+                        }
 
-
-                                        Text {
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            anchors.bottom: parent.top
-                                            text: zoomRadius
-                                            font.bold: true
-                                        }
-
-                                    }
-                                }
-
-//                MapQuickItem{
-//                    coordinate: posInfo
-//                    sourceItem: Column{
-//                        anchors.fill:parent
-//                        Rectangle{
-//                            id:circleLabelBc
-//                            color:"grey"
-//                            opacity: 0.5
-//                            Text {
-//                                text: zoomRadius
-//                                font.bold: true
-//                            }
-//                            width: childrenRect.width
-//                            height: childrenRect.height
-//                        }
-//                    }
-//                    anchorPoint.x: childrenRect.width / 2
-//                    anchorPoint.y: zoomCircle
-
-//                }
-
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.bottom: parent.top
+                            text: zoomRadius
+                            font.bold: true
+                        }
+                    }
+                    Component.onCompleted: win.setCircleScale()
+                }
 
             }
         }
@@ -311,6 +255,8 @@ ApplicationWindow  {
 //                factor: mapOfWorld.zoomLevel
 //            }
 //
+
+
 
         //TRANSMITTER (add cpp in MMS)/// Receiver for action handling -> back to PosSource
         /*

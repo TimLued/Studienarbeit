@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_DroneListModel_t {
-    QByteArrayData data[12];
-    char stringdata0[108];
+    QByteArrayData data[13];
+    char stringdata0[136];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -37,18 +37,19 @@ QT_MOC_LITERAL(2, 27, 0), // ""
 QT_MOC_LITERAL(3, 28, 2), // "id"
 QT_MOC_LITERAL(4, 31, 14), // "QGeoCoordinate"
 QT_MOC_LITERAL(5, 46, 5), // "coord"
-QT_MOC_LITERAL(6, 52, 6), // "follow"
-QT_MOC_LITERAL(7, 59, 5), // "angle"
-QT_MOC_LITERAL(8, 65, 11), // "createDrone"
-QT_MOC_LITERAL(9, 77, 15), // "getDroneHistory"
-QT_MOC_LITERAL(10, 93, 8), // "setColor"
-QT_MOC_LITERAL(11, 102, 5) // "color"
+QT_MOC_LITERAL(6, 52, 5), // "angle"
+QT_MOC_LITERAL(7, 58, 11), // "createDrone"
+QT_MOC_LITERAL(8, 70, 21), // "toggleHistoryTracking"
+QT_MOC_LITERAL(9, 92, 12), // "toggleFollow"
+QT_MOC_LITERAL(10, 105, 15), // "getDroneHistory"
+QT_MOC_LITERAL(11, 121, 8), // "setColor"
+QT_MOC_LITERAL(12, 130, 5) // "color"
 
     },
     "DroneListModel\0updateDrone\0\0id\0"
-    "QGeoCoordinate\0coord\0follow\0angle\0"
-    "createDrone\0getDroneHistory\0setColor\0"
-    "color"
+    "QGeoCoordinate\0coord\0angle\0createDrone\0"
+    "toggleHistoryTracking\0toggleFollow\0"
+    "getDroneHistory\0setColor\0color"
 };
 #undef QT_MOC_LITERAL
 
@@ -58,7 +59,7 @@ static const uint qt_meta_data_DroneListModel[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-       6,   14, // methods
+       7,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -66,20 +67,22 @@ static const uint qt_meta_data_DroneListModel[] = {
        0,       // signalCount
 
  // methods: name, argc, parameters, tag, flags
-       1,    4,   44,    2, 0x02 /* Public */,
-       1,    3,   53,    2, 0x22 /* Public | MethodCloned */,
-       1,    2,   60,    2, 0x22 /* Public | MethodCloned */,
-       8,    2,   65,    2, 0x02 /* Public */,
-       9,    1,   70,    2, 0x02 /* Public */,
-      10,    2,   73,    2, 0x02 /* Public */,
+       1,    3,   49,    2, 0x02 /* Public */,
+       1,    2,   56,    2, 0x22 /* Public | MethodCloned */,
+       7,    2,   61,    2, 0x02 /* Public */,
+       8,    1,   66,    2, 0x02 /* Public */,
+       9,    1,   69,    2, 0x02 /* Public */,
+      10,    1,   72,    2, 0x02 /* Public */,
+      11,    2,   75,    2, 0x02 /* Public */,
 
  // methods: parameters
-    QMetaType::Bool, QMetaType::QString, 0x80000000 | 4, QMetaType::Bool, QMetaType::Int,    3,    5,    6,    7,
-    QMetaType::Bool, QMetaType::QString, 0x80000000 | 4, QMetaType::Bool,    3,    5,    6,
+    QMetaType::Bool, QMetaType::QString, 0x80000000 | 4, QMetaType::Int,    3,    5,    6,
     QMetaType::Bool, QMetaType::QString, 0x80000000 | 4,    3,    5,
     QMetaType::Bool, 0x80000000 | 4, QMetaType::QString,    5,    3,
+    QMetaType::Bool, QMetaType::QString,    3,
+    QMetaType::Bool, QMetaType::QString,    3,
     QMetaType::QVariant, QMetaType::QString,    3,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString,    3,   11,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString,    3,   12,
 
        0        // eod
 };
@@ -90,17 +93,19 @@ void DroneListModel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         auto *_t = static_cast<DroneListModel *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: { bool _r = _t->updateDrone((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QGeoCoordinate(*)>(_a[2])),(*reinterpret_cast< bool(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4])));
+        case 0: { bool _r = _t->updateDrone((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QGeoCoordinate(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3])));
             if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
-        case 1: { bool _r = _t->updateDrone((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QGeoCoordinate(*)>(_a[2])),(*reinterpret_cast< bool(*)>(_a[3])));
+        case 1: { bool _r = _t->updateDrone((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QGeoCoordinate(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
-        case 2: { bool _r = _t->updateDrone((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QGeoCoordinate(*)>(_a[2])));
+        case 2: { bool _r = _t->createDrone((*reinterpret_cast< QGeoCoordinate(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
-        case 3: { bool _r = _t->createDrone((*reinterpret_cast< QGeoCoordinate(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2])));
+        case 3: { bool _r = _t->toggleHistoryTracking((*reinterpret_cast< const QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
-        case 4: { QVariant _r = _t->getDroneHistory((*reinterpret_cast< const QString(*)>(_a[1])));
+        case 4: { bool _r = _t->toggleFollow((*reinterpret_cast< const QString(*)>(_a[1])));
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
+        case 5: { QVariant _r = _t->getDroneHistory((*reinterpret_cast< const QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
-        case 5: _t->setColor((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 6: _t->setColor((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -121,13 +126,6 @@ void DroneListModel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
             break;
         case 2:
-            switch (*reinterpret_cast<int*>(_a[1])) {
-            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
-            case 1:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QGeoCoordinate >(); break;
-            }
-            break;
-        case 3:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
@@ -167,13 +165,13 @@ int DroneListModel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     }
     return _id;
 }

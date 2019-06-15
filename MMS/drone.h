@@ -54,6 +54,14 @@ public:
         return follow;
     }
 
+    void setTrackHistory(){
+        trackHistory = !trackHistory;
+    }
+
+    bool trackingHistory() const{
+        return trackHistory;
+    }
+
     int getAngle() const{
         return mAngle;
     }
@@ -68,6 +76,7 @@ private:
     QString mColor;
     int mAngle;
     bool follow=false;
+    bool trackHistory=false;
 
 };
 

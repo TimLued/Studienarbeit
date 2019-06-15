@@ -25,9 +25,7 @@ int main(int argc, char *argv[])
 
     Controller c;
 
-
     DroneListModel droneModel;
-
 
     QQmlApplicationEngine  engine;
     droneModel.register_objects("dronemodel","nodemodel",engine.rootContext());
