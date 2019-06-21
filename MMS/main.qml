@@ -90,12 +90,14 @@ ApplicationWindow  {
         plugin: Plugin{name:"mapboxgl"}
         center: QtPositioning.coordinate(54.3107,10.1291)
         zoomLevel: 14
+        property bool rotating: false
+        property bool centerFollowing: false
 
         onZoomLevelChanged:{
             win.setZoomScale()
             win.setCircleScale()
             zoomLbl.text = "Zoom: " + Math.round(map.zoomLevel)
-        }
+        }       
 
         Item {
             id: scale
@@ -168,48 +170,117 @@ ApplicationWindow  {
             hoverEnabled: true
 
             property variant cor
+            property int nn
+            property double nnBear
+
             onPositionChanged: {
                 cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
                 coorLbl.text = Algos.roundNumber(cor.latitude,3) + ", " +  Algos.roundNumber(cor.longitude,3)
+
+                //rotation
+                //scale win.height - nn = 360
+                if (map.rotating){
+
+                    map.bearing = nnBear + (nn - mouseY) * (360/win.height)
+                }
             }
 
+            onEntered: dronePanel.noMark()
+
+            onClicked: {
+                if (mouse.button === Qt.LeftButton && !map.centerFollowing){
+                    map.rotating = !map.rotating
+                    nn = mouseY
+                    nnBear = map.bearing
+                    if (!map.rotating) map.droneRotAniLock = false
+                }
+            }
+
+            onPressAndHold:{
+                map.rotating = false
+                map.bearing = 0
+            }
         }
 
         PolyLine {id: staticPath}
         PolyLine{id: dynamicPath}
 
+        property bool droneRotAniLock: false
+        property double lastMapBearing
 
-//        MapCircle{
-//            id:circleRuler
-//            property double r: 50
-//            color: "transparent"
-//            border.color: "black"
-//            border.width: 3
-//        }
+        onBearingChanged: {
+            if(lastMapBearing){
+                if (Math.abs(lastMapBearing - map.bearing) > 0.1){
+                    droneRotAniLock = true
+                }else{
+                    droneRotAniLock = false
+                }
+            }
 
+            lastMapBearing = map.bearing
+        }
+
+        Behavior on bearing{
+            enabled: !map.rotating
+            RotationAnimation{
+                id: rotAni
+                duration: 100
+                direction: RotationAnimation.Shortest
+                easing.type: Easing.Linear
+                onRunningChanged: {
+                    if (!rotAni.running) { //stop
+                        map.droneRotAniLock = false
+                    } else { //start
+
+                    }
+                }
+            }
+        }
 
         MapItemView{
             model: dronemodel
+
             delegate:MapItemGroup{
-                layer.enabled: true
 
                 Drone{
-                    coordinate: posInfo
+                    id: droneBody
                     droneColor: colorInfo
+                    extrapolating: extrapolateInfo
 
-                    //property variant tmp
+                    extrapolationTime: 1000
+
+                    onExtrapolatingChanged: {
+                        if (extrapolating){
+                            //extrapolationTime/1000*speed
+                            extrapolatingAnimation = true
+                            var dist = extrapolationTime/1000*100
+                            coordinate = posInfo.atDistanceAndAzimuth(dist,angleInfo)
+                        }else{
+                            extrapolatingAnimation = false
+                            coordinate = posInfo
+                        }
+                    }
+
                     onCoordinateChanged: {
-                        if (trackingHistoryInfo) updateDynamicPath(idInfo,colorInfo,posInfo)
-                        if (followInfo) map.center = posInfo
 
-//                        if(tmp) console.log(posInfo.latitude + ",  " + tmp.azimuthTo(posInfo))
-//                        tmp = posInfo
+                        if (trackingHistoryInfo) updateDynamicPath(idInfo,colorInfo,posInfo)
+                        if (followInfo){
+                            map.center = coordinate
+                            map.bearing = angleInfo
+                            bearing = 0
+                        }else{
+                            bearing= angleInfo - map.bearing
+                        }
+
+                        //update Panel info
+                        //ADD -> save index of Key & add field in DronePanel
+                        //
                     }
                 }
 
                 MapQuickItem{
                     id:circleRuler
-                    coordinate: posInfo
+                    coordinate: droneBody.coordinate
                     anchorPoint.x: zoomCircle
                     anchorPoint.y: zoomCircle
 
@@ -239,6 +310,7 @@ ApplicationWindow  {
             }
         }
     }
+
 
     DronePanel{id:dronePanel}
     ActionPanel{id:actionPanel}

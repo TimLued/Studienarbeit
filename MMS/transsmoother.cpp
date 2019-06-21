@@ -14,7 +14,6 @@ TransSmoother::TransSmoother(QObject *parent):
     connect(timer, SIGNAL(timeout()), this, SLOT(timeTrigger()));
 }
 
-
 void TransSmoother::start(int interval, double dist, double bearing, QGeoCoordinate lastCor){ //speed, bearing
     mInterval = interval;
     mDist = dist;

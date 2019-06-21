@@ -24,10 +24,11 @@ signals:
     void posUpdated(QString);
 
 private:
-    QFile *logFile;
     QTimer *timer;
     QString lastInfo;
-    int index;
+    int lvIndex;
+    QList<QString> droneInfo;
+    int currentInfoIndex;
 
 };
 

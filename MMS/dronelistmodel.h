@@ -13,11 +13,26 @@ class NodeModel;
 
 struct Data {
   QGeoCoordinate coord;
-  int angle;
+  double angle;
+  QVariantList infos;
+  QVariantList infoNames;
 };
+
+struct Info{
+    Q_GADGET
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString value MEMBER value)
+public:
+    QString name;
+    QString value;
+    Info(const QString& name="", const QString& value=""){
+        this->name = name;
+        this->value = value;
+    }
+};
+
 Q_DECLARE_METATYPE(Data)
-
-
+Q_DECLARE_METATYPE(Info)
 
 class DroneListModel: public QAbstractListModel
 {
@@ -26,23 +41,24 @@ class DroneListModel: public QAbstractListModel
 public:
     explicit  DroneListModel(QObject *parent = nullptr);
 
-    enum AirportsRoles{
+    enum Roles{
         IdRole = Qt::UserRole + 1,
         PosRole,
         ColorRole,
         HistoryRole,
         FollowRole,
-        AngleRole
+        AngleRole,
+        InfoNamesRole,
+        InfoRole,
+        AnimationStateRole,
+
     };
 
-    void register_objects(const QString &droneId,
-                          const QString &nodeName,
+    void register_object(const QString &droneId,
                           QQmlContext *context);
 
-    Q_INVOKABLE bool updateDrone(const QString & id,QGeoCoordinate coord,int angle = 0);
-    Q_INVOKABLE bool createDrone(QGeoCoordinate coord, const QString & id);
-    Q_INVOKABLE bool toggleHistoryTracking(const QString & id);
-    Q_INVOKABLE bool toggleFollow(const QString & id);
+    Q_INVOKABLE bool updateDrone(const QString & jInfo);
+    Q_INVOKABLE bool createDrone(const QString & id,QGeoCoordinate coord);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -54,10 +70,18 @@ public:
 
     Q_INVOKABLE QVariant getDroneHistory(const QString&id);
     Q_INVOKABLE void setColor(const QString &id,QString color);
+    Q_INVOKABLE void toggleHistoryTracking(const QString & id);
+    Q_INVOKABLE void toggleFollow(const QString & id);
+    Q_INVOKABLE QVariant getInfoNameList(const QString&id);
+    Q_INVOKABLE void setSeelectedInfoList(const QString&id,QString info);
+    Q_INVOKABLE void setUnselectedInfoList(const QString&id,QString info);
+
+
 private:
     QList<Drone> mDrones;
     NodeModel *model;
-
+    QList<QString> colors = {"red","blue","green","purple","yellow","cyan","coral","chartreuse","darkorange","darkred","fuchsia"};
+    QList<QString> usedColors;
 };
 
 #endif // DRONELISTMODEL_H

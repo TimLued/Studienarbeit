@@ -9,6 +9,9 @@ Item{
     opacity: 0.7
     property variant colors: ["red","blue","green","purple","yellow","cyan","coral","chartreuse","darkorange","darkred","fuchsia"]
 
+
+    function noMark(){list.currentIndex = -1}
+
     anchors{
         top: parent.top
         bottom: parent.bottom
@@ -23,6 +26,11 @@ Item{
         id:bc
         anchors.fill: parent
         color: "grey"
+        MouseArea {
+            hoverEnabled: true
+            anchors.fill: parent
+            onEntered: list.currentIndex = -1
+        }
     }
 
 
@@ -47,13 +55,13 @@ Item{
                     }
 
                     onEntered: list.currentIndex = index
-                    onExited: list.currentIndex = -1
                 }
             }
 
 
             Column{
                 spacing: 5
+
                 anchors{
                     fill: parent
                     leftMargin: 10
@@ -62,12 +70,6 @@ Item{
                     bottomMargin: 5
                 }
                 Text{text: idInfo; color: colorInfo; font.pixelSize: txtSize;wrapMode: Text.WordWrap; width: parent.width}
-                //                        Text{text: droneID; font.pixelSize: txtSize; font.underline: drones[index].marked; font.bold: drones[index].marked; wrapMode: Text.WordWrap; width: parent.width}
-                //                        Text{text: "Lat: " + lat; font.pixelSize: txtSize; wrapMode: Text.WordWrap; width: parent.width}
-                //                        Text{text: "Lon: " + lon; font.pixelSize: txtSize; wrapMode: Text.WordWrap; width: parent.width}
-                //                        Text{text: "Speed: " + speed + " m/s"; font.pixelSize: txtSize; wrapMode: Text.WordWrap; width: parent.width}
-                //                        Text{text: "Mission: Transition"; font.pixelSize: txtSize; wrapMode: Text.WordWrap; width: parent.width}
-
 
                 Row{
                     visible: if(listItem.height === enlarged){true}else{false}
@@ -96,36 +98,45 @@ Item{
                         enabled: if(listItem.height === enlarged){true}else{false}
                         onClicked:{
                             dronemodel.toggleFollow(idInfo)
-                            if (followInfo) map.center = posInfo
+                            if (followInfo) {
+                                map.center = posInfo
+                                map.centerFollowing = true
+                                map.rotating = false
+                            }else{
+                                map.bearing=0
+                                map.centerFollowing = false
+                            }
                         }
                     }
 
-//                    Button{
-//                        // U+20E0
-//                        //U+26C4
-//                        text: "Visible"
-//                        height: 20
-//                        width: 50
-//                        font.pixelSize: 11
-//                        highlighted: win.drones[index].visible
-//                        enabled: if(listItem.height === enlarged){true}else{false}
+                    //                    Button{
+                    //                        // U+20E0
+                    //                        //U+26C4
+                    //                        text: "Visible"
+                    //                        height: 20
+                    //                        width: 50
+                    //                        font.pixelSize: 11
+                    //                        highlighted: win.drones[index].visible
+                    //                        enabled: if(listItem.height === enlarged){true}else{false}
 
-//                        onClicked:{
-//                            win.drones[index].visible = !win.drones[index].visible
-//                        }
-//                    }
+                    //                        onClicked:{
+                    //                            win.drones[index].visible = !win.drones[index].visible
+                    //                        }
+                    //                    }
+
                 }
-                Row{
+                Column{
                     visible: if(listItem.height === enlarged){true}else{false}
                     spacing: 5
                     layer.enabled: true
+
                     ComboBox{
                         id: cbColor
 
                         height: 20
-                        width: 100
+                        width: 80
                         enabled: if(listItem.height === enlarged){true}else{false}
-                        textRole: "text"
+                        textRole: "color"
                         font.pixelSize: 10
                         property bool initial:false
 
@@ -135,7 +146,7 @@ Item{
 
                         Component.onCompleted: {
                             for (var k = 0;k<colors.length;k++){
-                                colorModel.append(({"text": colors[k], "color": colors[k]}))
+                                colorModel.append(({"color": colors[k]}))
                             }
                             currentIndex = find(colorInfo)
                             initial = true
@@ -144,15 +155,86 @@ Item{
                             if (initial){
                                 dronemodel.setColor(idInfo,colorModel.get(currentIndex).color)
                                 if (trackingHistoryInfo){
-                                    map.removeTrail()
-                                    map.updateStaticPath(idInfo,colorInfo,posInfo)
+                                    win.removeTrail()
+                                    win.updateStaticPath(idInfo,colorInfo,posInfo)
                                 }
+                            }
+                        }
+                    }
+
+                    Row{
+                        spacing: 5
+
+                        ComboBox{ //available data to display
+                            id: dataCB
+                            height: 20
+                            width: 80
+                            enabled: if(listItem.height === enlarged){true}else{false}
+                            textRole: "name"
+                            font.pixelSize: 10
+                            model: ListModel{id: infoNamesModel}
+
+                            property variant infoList
+                            onPressedChanged: {
+                                if (pressed){
+                                    infoNamesModel.clear()
+                                    infoList = dronemodel.getInfoNameList(idInfo)
+                                    for (var i = 0; i< infoList.length;i++){
+                                        infoNamesModel.append({"name": infoList[i]})
+                                    }
+                                }
+                            }
+                        }
+
+                        Button{
+                            text: "+"
+                            width: 20
+                            height: 20
+                            onClicked: {
+                                if (dataCB.currentIndex!=-1) dronemodel.setSeelectedInfoList(idInfo,infoNamesModel.get(dataCB.currentIndex).name)
+                            }
+                        }
+
+                        Button{
+                            text: "-"
+                            width: 20
+                            height: 20
+                            onClicked: {
+                                if (dataCB.currentIndex!=-1) dronemodel.setUnselectedInfoList(idInfo,infoNamesModel.get(dataCB.currentIndex).name)
                             }
                         }
 
                     }
 
+                    Flickable  {
+                        id: fparent
+                        height: 100
+                        width: parent.width
 
+                        interactive: true
+                        clip: true
+                        flickableDirection: Flickable.VerticalFlick
+                        contentHeight: dataLV.height
+
+                        ListView{
+                            //                        height: 100
+                            //                        width: 100
+                            id: dataLV
+                            width: fparent.width
+                            height: childrenRect.height
+                            clip: true
+
+                            spacing: 3
+                            model: infoInfo
+                            delegate: Text{text: "<b>" + infoInfo[index].name + "</b>: " + infoInfo[index].value; wrapMode: Text.WordWrap;width: dataLV.width}
+
+                            interactive: false
+                            onCountChanged: {
+                                fparent.returnToBounds();
+                            }
+
+                        }
+                    }
 
                 }
             }
@@ -172,6 +254,7 @@ Item{
     ListView{
         id: list
         anchors.fill: parent
+        clip:true
         model: dronemodel
         delegate: listDelegate
         highlight: mark
@@ -179,6 +262,8 @@ Item{
         highlightMoveVelocity: -1
         highlightResizeVelocity: -1
         Component.onCompleted: currentIndex = -1
+
+
     }
 
 }

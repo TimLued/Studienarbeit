@@ -8,33 +8,68 @@ MapQuickItem {
     id: drone
     visible: true
 
-    //property string droneID
-    //property int index
     property string droneColor
-    property bool marked: false
-    property int droneSize: 14
+    property int droneSize: 25
+    property double bearing
+    property bool extrapolating
+    property bool extrapolatingAnimation
+    property double extrapolationTime
 
-    //insted of Rectangle TEXTFIEL??? U+2B9D
-    sourceItem: Rectangle{ width: droneSize; height: droneSize; color: droneColor; smooth: true; radius: droneSize/2;}
-    anchorPoint.x: droneSize/2
-    anchorPoint.y: droneSize/2
-
-    MouseArea{
-        anchors.fill: parent
-        hoverEnabled: true
-
-        onEntered: {
-            droneSize = 17
-        }
-
-        onExited: {
-            if (!marked) droneSize = 14
-        }
-
-        onClicked: {
-            marked = !marked
-            if (!marked) droneSize = 14
+    sourceItem: Rectangle{
+        width: droneSize
+        height: droneSize
+        radius: droneSize/2
+        color: "white"
+        Text{
+            y: -7
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "\u2B9D"
+            font.pixelSize: 25
+            color: droneColor
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+        } 
+        transform: Rotation {
+            origin.x: droneSize/2
+            origin.y: droneSize/2
+            angle: bearing
+            Behavior on angle {
+                enabled: !map.droneRotAniLock
+                RotationAnimation{
+                    id:rotAni
+                    duration: 100
+                    direction: RotationAnimation.Shortest
+                    easing.type: Easing.Linear
+                }
+            }
         }
     }
 
+
+    Behavior on coordinate {
+        enabled: extrapolatingAnimation
+        CoordinateAnimation{
+            easing.type: Easing.Linear
+            duration: extrapolationTime
+            //extrapolateDistance / speed * 1000
+        }
+    }
+
+//    TransSmoother{
+//        id:animationSmooth
+//        onPosUpdate: {
+//            if (extrapolating){
+//                //change in MODEL
+//            }
+//        }
+//    }
+
+//    onCoordinateChanged: {
+//        //ACTUALLY get speed from JSON, now 100
+//        //animationSmooth.start(1000,100,bearing,coordinate)
+
+//    }
+
+    anchorPoint.x: droneSize/2
+    anchorPoint.y: droneSize/2
 }

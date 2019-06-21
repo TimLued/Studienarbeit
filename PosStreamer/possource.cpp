@@ -1,11 +1,10 @@
 #include "possource.h"
 #include <QtCore>
-
+#include <QJsonDocument>
 #include <iostream>
 
 PosSource::PosSource(QObject *parent):
     QObject (parent),
-    logFile(new QFile(this)),
     timer(new QTimer(this))
 {
     running = false;
@@ -14,19 +13,35 @@ PosSource::PosSource(QObject *parent):
 }
 
 void PosSource::setupSource(QString file,int i){
-    index = i;
-    logFile->setFileName(file);
-    logFile->open(QIODevice::ReadOnly);
+    lvIndex = i;
+    currentInfoIndex = 0;
+
+    QFile logFile;
+
+    logFile.setFileName(file);
+    logFile.open(QIODevice::ReadOnly);
+
+    QString val = logFile.readAll();
+    logFile.close();
+
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(val.toUtf8());
+    QJsonObject jsonObject = jsonResponse.object();
+    QJsonArray jsonArray = jsonObject["drone"].toArray();
+
+    foreach (const QJsonValue & value, jsonArray) {
+        QJsonObject obj = value.toObject();
+        QJsonDocument doc(obj);
+        QString strJson(doc.toJson((QJsonDocument::Compact)));
+        droneInfo.append(strJson);
+    }
+
 }
 
+//JSON
 void PosSource::readNextPos(){
-    try {
-        lastInfo = logFile->readLine();
-        emit posUpdated(lastInfo);
-        if (logFile->atEnd()) logFile->seek(0);
-    } catch (const std::exception& ex) {
-         std::cerr << "Error: " << ex.what() << std::endl;
-    }
+
+    emit posUpdated(droneInfo[currentInfoIndex]);
+    if (currentInfoIndex<droneInfo.count()-1){ currentInfoIndex+=1;}else{currentInfoIndex=0;}
 
 }
 
@@ -39,5 +54,5 @@ void PosSource::startStop(bool start){
 }
 
 void PosSource::setRunning(bool status,int i){
-    if (i==index) running = status;
+    if (i==lvIndex) running = status;
 }

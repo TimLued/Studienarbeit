@@ -35,8 +35,6 @@ void ClientSocket::resetBuffer(){
 void ClientSocket::nextPos()
 {
     try {
-
-
     emit updateStatus(); //connected
 
     QString line;

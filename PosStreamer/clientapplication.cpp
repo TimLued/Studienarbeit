@@ -17,7 +17,7 @@
 #include <qlocalserver.h>
 #include <qlocalsocket.h>
 
-static QList<QString> files = {":/drone1.txt",":/drone2.txt",":/drone3.txt",":/drone4.txt",":/drone5.txt",":/drone6.txt",":/drone7.txt"};
+static QList<QString> files = {":/jdrone1.txt",":/jdrone2.txt",":/jdrone3.txt"};
 
 ClientApplication::ClientApplication(QWidget *parent)
     : QDialog(parent),
@@ -83,6 +83,7 @@ ClientApplication::ClientApplication(QWidget *parent)
 
     server->listen("dronespos");
 
+    connect(timer,SIGNAL(timeout()),this,SLOT(startAllStep()));
 }
 
 void ClientApplication::loadToBuffer(QString info){ //solves segmentastion fault???
@@ -117,7 +118,6 @@ void ClientApplication::startStopUpdates()
 
 void ClientApplication::startAll()
 {
-    connect(timer,SIGNAL(timeout()),this,SLOT(startAllStep()));
     for (int i = 0; i<droneLW->count();++i){
         droneLW->item(i)->setCheckState(Qt::CheckState::Unchecked);
     }
@@ -126,17 +126,15 @@ void ClientApplication::startAll()
 
 void ClientApplication::startAllStep()
 {
-
-
-    for (int i = 0; i<droneLW->count();++i){
-        if (droneLW->item(i)->checkState() == Qt::CheckState::Unchecked){
+    for (int k = 0; k<droneLW->count();++k){
+        if (droneLW->item(k)->checkState() == Qt::CheckState::Unchecked){
             startBtn->setChecked(0);
             startStopUpdates();
-            droneLW->item(i)->setCheckState(Qt::CheckState::Checked);
+            droneLW->item(k)->setCheckState(Qt::CheckState::Checked);
             startBtn->setChecked(1);
             startStopUpdates();
 
-            if (i==droneLW->count()-1) timer->stop();
+            if (k==droneLW->count()-1)timer->stop();
             break;
         }
     }

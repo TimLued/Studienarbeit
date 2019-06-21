@@ -62,11 +62,67 @@ public:
         return trackHistory;
     }
 
-    int getAngle() const{
+    double getAngle() const{
         return mAngle;
     }
-    void setAngle(int angle){
+    void setAngle(double angle){
         mAngle = angle;
+
+    }
+    bool extrapolating() const{
+        return extrapolate;
+    }
+    void setExtrapolate(bool status){
+        extrapolate = status;
+    }
+
+//    QVariantList getInfos() const{
+//        return mInfos;
+//    }
+
+    void setInfos(QVariantList infos){
+        mInfos = infos;
+    }
+
+    QVariantList getInfoList() const{
+        return mInfos;
+    }
+
+    void setInfoNames(QVariantList infoNames){
+        mInfoNames = infoNames;
+    }
+
+    QVariantList getInfoNames() const{
+        return mInfoNames;
+    }
+
+
+//    QVariantList getInfoNameList() const{
+//        QVariantList infoList;
+//        for (const QPair<QString, QVariant> &info : mInfos) {
+//          infoList << info.first;
+//        }
+//        return infoList;
+//    }
+
+//    QVariantList getInfoValueList() const{
+//        QVariantList infoList;
+//        for (const QPair<QString, QVariant> &info : mInfos) {
+//          infoList << info.second;
+//        }
+//        return infoList;
+//    }
+
+    QVariantList getSelectedInfoList() const{
+        return selectedInfos;
+    }
+
+    void addSelectedInfo(QString key){
+        if (selectedInfos.indexOf(key) == -1) selectedInfos.append(key);
+    }
+
+    void removeSelectedInfo(QString key){
+        if (selectedInfos.indexOf(key) != -1) selectedInfos.removeOne(key);
     }
 
 private:
@@ -74,10 +130,14 @@ private:
     QGeoCoordinate mPos;
     QList<QGeoCoordinate> history;
     QString mColor;
-    int mAngle;
+    double mAngle;
+    QVariantList mInfos;
+    QVariantList mInfoNames;
+    QVariantList selectedInfos;
+
     bool follow=false;
     bool trackHistory=false;
-
+    bool extrapolate = false;
 };
 
 

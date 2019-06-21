@@ -1,55 +1,79 @@
 #include <dronelistmodel.h>
-#include "nodemodel.h"
 #include <QGeoCoordinate>
-
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QQmlContext>
 
-DroneListModel::DroneListModel(QObject *parent):QAbstractListModel(parent) {
-    model = new NodeModel(this);
-}
+#include <iostream>
 
-void DroneListModel::register_objects(const QString &droneId,
-                      const QString &nodeName,
-                      QQmlContext *context){
+DroneListModel::DroneListModel(QObject *parent):QAbstractListModel(parent) {}
+
+void DroneListModel::register_object(const QString &droneId,
+                                     QQmlContext *context){
     context->setContextProperty(droneId, this);
-    context->setContextProperty(nodeName, model);
 }
 
-bool DroneListModel::updateDrone(const QString & id,QGeoCoordinate coord,int angle){
+bool DroneListModel::updateDrone(const QString & jInfo){
+
+    QJsonObject jDroneInfo = QJsonDocument::fromJson(jInfo.toUtf8()).object();
+    const QString id = jDroneInfo["id"].toString();
+    QGeoCoordinate coord = QGeoCoordinate(jDroneInfo["lat"].toString().toDouble(),jDroneInfo["lon"].toString().toDouble());
+
+    double angle = jDroneInfo["bearing"].toString().toDouble();
+
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
+
     if(it != mDrones.end()){
         //append
+
+        QVariantList infos;
+        QVariantList infoNames;
+        QRegExp re("[+-]?\\d*\\.?\\d+");
+        foreach(const QString& key, jDroneInfo.keys()) {
+
+            QString val = jDroneInfo.value(key).toString();
+
+            if (re.exactMatch(val)) val = QString::number(val.toDouble(),'f',5); //round if info is numerical
+            Info info{key,val};
+
+            if (it->getSelectedInfoList().indexOf(key) != -1) infos << QVariant::fromValue(info); //add if in selected list
+
+            infoNames << key;
+        }
+
         int row = it - mDrones.begin();
         QModelIndex ix = index(row);
 
         QGeoCoordinate c = ix.data(PosRole).value<QGeoCoordinate>();
-        //int a = ix.data(AngleRole).toInt();
-        Data data{coord, angle};
+        Data data{coord, angle, infos,infoNames};
         bool result = setData(ix, QVariant::fromValue(data), PosRole);
-        if (result)
-            model->appendNode(c);
         return result;
     }else{
         //create
-        return createDrone(coord, id);
+        return createDrone(id, coord);
     }
-
 }
 
-bool DroneListModel::createDrone(QGeoCoordinate coord, const QString & id){
-   beginInsertRows(QModelIndex(), rowCount(), rowCount());
+bool DroneListModel::createDrone(const QString & id,QGeoCoordinate coord){
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
-   Drone it;
-   it.sedId(id);
-   it.setPos(coord);
-   it.setColor("red");
-   mDrones<< it;
-   endInsertRows();
-   return true;
+    Drone it;
+    it.sedId(id);
+    it.setPos(coord);
+    for (int i = 0;i<colors.count();i++){
+        if (usedColors.indexOf(colors[i]) == -1){
+            it.setColor(colors[i]);
+            usedColors.append(colors[i]);
+            break;
+        }else if (i == colors.count()-1) {usedColors.clear();}
+    }
+    mDrones<< it;
+    endInsertRows();
+    return true;
 }
 
-bool DroneListModel::toggleFollow(const QString &id){
+void DroneListModel::toggleFollow(const QString &id){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
     int row = it - mDrones.begin();
@@ -65,10 +89,9 @@ bool DroneListModel::toggleFollow(const QString &id){
             emit dataChanged(index(i), index(i), QVector<int>{FollowRole});
         }
     }
-    return true;
 }
 
-bool DroneListModel::toggleHistoryTracking(const QString &id){
+void DroneListModel::toggleHistoryTracking(const QString &id){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
     int row = it - mDrones.begin();
@@ -84,13 +107,39 @@ bool DroneListModel::toggleHistoryTracking(const QString &id){
             emit dataChanged(index(i), index(i), QVector<int>{HistoryRole});
         }
     }
-    return true;
 }
 
 QVariant DroneListModel::getDroneHistory(const QString &id){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
     return it->getHistory();
+}
+
+//QList<QPair<QString, QVariant>> DroneListModel::getInfos(const QString &id){
+//    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+//            return obj.id() == id;});
+//    return it->getInfos();
+//}
+
+QVariant DroneListModel::getInfoNameList(const QString&id){
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+            return obj.id() == id;});
+    return it->getInfoNames();
+}
+
+
+
+void DroneListModel::setSeelectedInfoList(const QString&id,QString info){
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+            return obj.id() == id;});
+    it->addSelectedInfo(info);
+
+}
+
+void DroneListModel::setUnselectedInfoList(const QString&id,QString info){
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+            return obj.id() == id;});
+    it->removeSelectedInfo(info);
 }
 
 void DroneListModel::setColor(const QString &id, QString color){
@@ -101,58 +150,71 @@ void DroneListModel::setColor(const QString &id, QString color){
     emit dataChanged(ix, ix, QVector<int>{ColorRole});
 }
 
- int DroneListModel::rowCount(const QModelIndex &parent) const {
-   Q_UNUSED(parent)
-   return mDrones.count();
- }
+int DroneListModel::rowCount(const QModelIndex &parent) const {
+    Q_UNUSED(parent)
+    return mDrones.count();
+}
 
- QVariant DroneListModel::data(const QModelIndex &index, int role) const {
-     if (!index.isValid())
-         return QVariant();
-     if (index.row() >= 0 && index.row() < rowCount()) {
-         const Drone &it = mDrones[index.row()];
-         if (role == IdRole)
-             return it.id();
-         else if (role == PosRole)
-             return QVariant::fromValue(it.pos());
-         else if (role == ColorRole)
-             return it.getColor();
-         else if (role == AngleRole)
-             return it.getAngle();
-         else if(role == HistoryRole)
-             return it.trackingHistory();
-         else if(role == FollowRole)
-             return it.following();
-     }
-     return QVariant();
- }
+QVariant DroneListModel::data(const QModelIndex &index, int role) const {
+    if (!index.isValid())
+        return QVariant();
+    if (index.row() >= 0 && index.row() < rowCount()) {
+        const Drone &it = mDrones[index.row()];
+        if (role == IdRole)
+            return it.id();
+        else if (role == PosRole)
+            return QVariant::fromValue(it.pos());
+        else if (role == ColorRole)
+            return it.getColor();
+        else if (role == AngleRole)
+            return it.getAngle();
+        else if(role == HistoryRole)
+            return it.trackingHistory();
+        else if(role == FollowRole)
+            return it.following();
+        else if(role == AnimationStateRole)
+            return it.extrapolating();
+        else if(role == InfoRole)
+            return it.getInfoList();
+        else if(role == InfoNamesRole)
+            return it.getInfoNames();
+    }
+    return QVariant();
+}
 
- QHash<int, QByteArray> DroneListModel::roleNames() const {
-   QHash<int, QByteArray> roles;
-   roles[IdRole] = "idInfo";
-   roles[PosRole] = "posInfo";
-   roles[AngleRole] = "angleInfo";
-   roles[ColorRole] = "colorInfo";
-   roles[HistoryRole] = "trackingHistoryInfo";
-   roles[FollowRole] = "followInfo";
-   return roles;
- }
+QHash<int, QByteArray> DroneListModel::roleNames() const {
+    QHash<int, QByteArray> roles;
+    roles[IdRole] = "idInfo";
+    roles[PosRole] = "posInfo";
+    roles[AngleRole] = "angleInfo";
+    roles[ColorRole] = "colorInfo";
+    roles[HistoryRole] = "trackingHistoryInfo";
+    roles[FollowRole] = "followInfo";
+    roles[AnimationStateRole] = "extrapolateInfo";
+    roles[InfoRole] = "infoInfo";
+    roles[InfoNamesRole] = "infoNamesInfo";
+    return roles;
+}
 
- bool DroneListModel::setData(const QModelIndex &index, const QVariant &value,
-                              int role) {
-   if (!index.isValid())
-     return false;
-   if (index.row() >= 0 && index.row() < rowCount()) {
-     if (role == PosRole) {
-       const Data &data = value.value<Data>();
-       QGeoCoordinate new_pos(data.coord);
-       mDrones[index.row()].setPos(new_pos);
-       mDrones[index.row()].setAngle(data.angle);
-       emit dataChanged(index, index, QVector<int>{PosRole});
-       return true;
-     }
-   }
-   return false;
- }
+bool DroneListModel::setData(const QModelIndex &index, const QVariant &value,
+                             int role) {
+    if (!index.isValid())
+        return false;
+    if (index.row() >= 0 && index.row() < rowCount()) {
+        if (role == PosRole) {
+            const Data &data = value.value<Data>();
+            mDrones[index.row()].setPos(data.coord);
+            mDrones[index.row()].setAngle(data.angle);
+            mDrones[index.row()].setInfos(data.infos);
+            mDrones[index.row()].setInfoNames(data.infoNames);
+            mDrones[index.row()].setExtrapolate(false);
+            emit dataChanged(index, index, QVector<int>{PosRole,AngleRole,AnimationStateRole,InfoRole,InfoNamesRole});
+            mDrones[index.row()].setExtrapolate(true);
+            emit dataChanged(index, index, QVector<int>{AnimationStateRole});
+            return true;
+        }
+    }
+    return false;
+}
 
 

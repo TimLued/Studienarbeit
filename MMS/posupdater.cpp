@@ -52,22 +52,12 @@ void PosUpdater::readPos()
     if (socket->bytesAvailable() < blockSize || in.atEnd())
         return;
 
-    QString newPos;
-    in >> newPos;
+    QString newData;
+    in >> newData;
 
-    if (newPos == "-") return;
+    if (newData == "-") return;
 
     //std::cout << newPos.toUtf8().constData() <<std::endl;
 
-    //update drone if new timestamp
-    QList<QString> data = newPos.split(QRegExp("\\s+"),QString::SkipEmptyParts);
-
-    if (data.count() == 4){
-        QDateTime timestamp = QDateTime::fromString(QString(data.value(1)), Qt::ISODate);
-        QGeoCoordinate cor;
-        cor.setLatitude(data[2].toDouble());
-        cor.setLongitude(data.value(3).toDouble());
-        emit posUpdated(data[0],cor,timestamp);
-    }
-
+     emit posUpdated(newData);
 }

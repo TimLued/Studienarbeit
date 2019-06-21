@@ -5,7 +5,6 @@
 #include <QQmlContext>
 
 #include <transsmoother.h>
-#include <nodemodel.h>
 
 #include <dronelistmodel.h>
 
@@ -28,7 +27,7 @@ int main(int argc, char *argv[])
     DroneListModel droneModel;
 
     QQmlApplicationEngine  engine;
-    droneModel.register_objects("dronemodel","nodemodel",engine.rootContext());
+    droneModel.register_object("dronemodel",engine.rootContext());
 
     //EDIT!!
     qmlRegisterType<TransSmoother>("TransSmoother", 1, 0, "TransSmoother");
@@ -38,7 +37,8 @@ int main(int argc, char *argv[])
         return -1;
 
     QObject::connect(&c, &Controller::posUpdated, [&droneModel, &c]() {
-        droneModel.updateDrone(c.currentId,c.currentPos);
+        //json input
+        droneModel.updateDrone(c.currentInfo);
     });
 
 
