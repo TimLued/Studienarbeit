@@ -12,7 +12,6 @@ ApplicationWindow  {
     width: 800
     height: 500
 
-    property variant usedColors: [] //NOT YET IMPLEMENTED
     property int txtSize: 14
     property int enlarged: 200
     property int small: txtSize + 15
@@ -22,12 +21,12 @@ ApplicationWindow  {
 
     function updateStaticPath(idInfo,colorInfo,posInfo){
         staticPath.visible = false
-        staticPath.setPath(idInfo,colorInfo,posInfo)
         dynamicPath.line.color = colorInfo
+        staticPath.setPath(idInfo,colorInfo,posInfo)
     }
 
     function updateDynamicPath(idInfo,colorInfo,posInfo){
-        if(dynamicPath.pathLength() <= 1000){
+        if(dynamicPath.pathLength() <= 500){
             dynamicPath.updatePath(posInfo)
         }else{
             dynamicPath.clearPath()
@@ -168,7 +167,7 @@ ApplicationWindow  {
         MouseArea{
             anchors.fill: parent
             hoverEnabled: true
-
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             property variant cor
             property int nn
             property double nnBear
@@ -188,7 +187,10 @@ ApplicationWindow  {
             onEntered: dronePanel.noMark()
 
             onClicked: {
-                if (mouse.button === Qt.LeftButton && !map.centerFollowing){
+                dronePop.visible = false
+                dronePop.droneId = ""
+
+                if (mouse.button === Qt.MiddleButton && !map.centerFollowing){
                     map.rotating = !map.rotating
                     nn = mouseY
                     nnBear = map.bearing
@@ -197,8 +199,10 @@ ApplicationWindow  {
             }
 
             onPressAndHold:{
-                map.rotating = false
-                map.bearing = 0
+                if (mouse.button === Qt.MiddleButton){
+                    map.rotating = false
+                    map.bearing = 0
+                }
             }
         }
 
@@ -246,8 +250,9 @@ ApplicationWindow  {
                     id: droneBody
                     droneColor: colorInfo
                     extrapolating: extrapolateInfo
-
+                    droneId: idInfo
                     extrapolationTime: 1000
+                    visible: visibleInfo
 
                     onExtrapolatingChanged: {
                         if (extrapolating){
@@ -272,9 +277,12 @@ ApplicationWindow  {
                             bearing= angleInfo - map.bearing
                         }
 
-                        //update Panel info
-                        //ADD -> save index of Key & add field in DronePanel
-                        //
+
+                        //update PopUp if visible
+                        if (dronePop.visible && idInfo == dronePop.droneId) {
+                            dronePop.coordinate = coordinate
+                        }
+
                     }
                 }
 
@@ -283,6 +291,7 @@ ApplicationWindow  {
                     coordinate: droneBody.coordinate
                     anchorPoint.x: zoomCircle
                     anchorPoint.y: zoomCircle
+                    visible: visibleInfo
 
 
                     sourceItem: Item{
@@ -301,7 +310,6 @@ ApplicationWindow  {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.bottom: parent.top
                             text: zoomRadius
-                            font.bold: true
                         }
                     }
                     Component.onCompleted: win.setCircleScale()
@@ -309,6 +317,8 @@ ApplicationWindow  {
 
             }
         }
+
+        PopUp{id:dronePop}
     }
 
 
@@ -316,18 +326,6 @@ ApplicationWindow  {
     ActionPanel{id:actionPanel}
 
 }
-
-//        MapItemView {
-//            model: nodemodel
-//            delegate: ArrowItem{
-//                coordinate: nodeData
-//                transformOrigin: Item.Center
-//                rotation: angleData
-//                z:100
-//                factor: mapOfWorld.zoomLevel
-//            }
-//
-
 
 
         //TRANSMITTER (add cpp in MMS)/// Receiver for action handling -> back to PosSource

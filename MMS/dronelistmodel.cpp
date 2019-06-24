@@ -34,7 +34,7 @@ bool DroneListModel::updateDrone(const QString & jInfo){
 
             QString val = jDroneInfo.value(key).toString();
 
-            if (re.exactMatch(val)) val = QString::number(val.toDouble(),'f',5); //round if info is numerical
+            if (re.exactMatch(val)) val = QString::number(val.toDouble(),'f',3); //round if info is numerical
             Info info{key,val};
 
             if (it->getSelectedInfoList().indexOf(key) != -1) infos << QVariant::fromValue(info); //add if in selected list
@@ -115,12 +115,6 @@ QVariant DroneListModel::getDroneHistory(const QString &id){
     return it->getHistory();
 }
 
-//QList<QPair<QString, QVariant>> DroneListModel::getInfos(const QString &id){
-//    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
-//            return obj.id() == id;});
-//    return it->getInfos();
-//}
-
 QVariant DroneListModel::getInfoNameList(const QString&id){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
@@ -128,18 +122,28 @@ QVariant DroneListModel::getInfoNameList(const QString&id){
 }
 
 
-
 void DroneListModel::setSeelectedInfoList(const QString&id,QString info){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
     it->addSelectedInfo(info);
-
 }
 
 void DroneListModel::setUnselectedInfoList(const QString&id,QString info){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
     it->removeSelectedInfo(info);
+}
+
+QVariant DroneListModel::getAllDronePos(){
+    QVariantList dronePos_list;
+    for (const Drone &drone:mDrones){
+        auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+                return obj.id() == drone.id();});
+        QVariantMap pair1;
+
+        dronePos_list<<QVariant::fromValue(it->pos());
+    }
+    return dronePos_list;
 }
 
 void DroneListModel::setColor(const QString &id, QString color){
@@ -149,6 +153,15 @@ void DroneListModel::setColor(const QString &id, QString color){
     QModelIndex ix = index(it - mDrones.begin());
     emit dataChanged(ix, ix, QVector<int>{ColorRole});
 }
+
+void DroneListModel::setVisibility(const QString & id,bool visibility){
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+            return obj.id() == id;});
+    it->setVisible(visibility);
+    QModelIndex ix = index(it - mDrones.begin());
+    emit dataChanged(ix, ix, QVector<int>{VisibleRole});
+}
+
 
 int DroneListModel::rowCount(const QModelIndex &parent) const {
     Q_UNUSED(parent)
@@ -178,6 +191,8 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getInfoList();
         else if(role == InfoNamesRole)
             return it.getInfoNames();
+        else if(role == VisibleRole)
+            return it.visibility();
     }
     return QVariant();
 }
@@ -193,6 +208,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[AnimationStateRole] = "extrapolateInfo";
     roles[InfoRole] = "infoInfo";
     roles[InfoNamesRole] = "infoNamesInfo";
+    roles[VisibleRole] = "visibleInfo";
     return roles;
 }
 

@@ -17,7 +17,7 @@
 #include <qlocalserver.h>
 #include <qlocalsocket.h>
 
-static QList<QString> files = {":/jdrone1.txt",":/jdrone2.txt",":/jdrone3.txt"};
+static QList<QString> files = {":/jdrone1.txt",":/jdrone2.txt",":/jdrone3.txt",":/jdrone4.txt"};
 
 ClientApplication::ClientApplication(QWidget *parent)
     : QDialog(parent),

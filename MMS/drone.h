@@ -76,9 +76,13 @@ public:
         extrapolate = status;
     }
 
-//    QVariantList getInfos() const{
-//        return mInfos;
-//    }
+    bool visibility() const{
+        return mVisible;
+    }
+
+    void setVisible(bool visibility){
+        mVisible = visibility;
+    }
 
     void setInfos(QVariantList infos){
         mInfos = infos;
@@ -95,23 +99,6 @@ public:
     QVariantList getInfoNames() const{
         return mInfoNames;
     }
-
-
-//    QVariantList getInfoNameList() const{
-//        QVariantList infoList;
-//        for (const QPair<QString, QVariant> &info : mInfos) {
-//          infoList << info.first;
-//        }
-//        return infoList;
-//    }
-
-//    QVariantList getInfoValueList() const{
-//        QVariantList infoList;
-//        for (const QPair<QString, QVariant> &info : mInfos) {
-//          infoList << info.second;
-//        }
-//        return infoList;
-//    }
 
     QVariantList getSelectedInfoList() const{
         return selectedInfos;
@@ -138,6 +125,7 @@ private:
     bool follow=false;
     bool trackHistory=false;
     bool extrapolate = false;
+    bool mVisible = true;
 };
 
 

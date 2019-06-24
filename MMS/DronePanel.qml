@@ -61,7 +61,6 @@ Item{
 
             Column{
                 spacing: 5
-
                 anchors{
                     fill: parent
                     leftMargin: 10
@@ -109,20 +108,20 @@ Item{
                         }
                     }
 
-                    //                    Button{
-                    //                        // U+20E0
-                    //                        //U+26C4
-                    //                        text: "Visible"
-                    //                        height: 20
-                    //                        width: 50
-                    //                        font.pixelSize: 11
-                    //                        highlighted: win.drones[index].visible
-                    //                        enabled: if(listItem.height === enlarged){true}else{false}
-
-                    //                        onClicked:{
-                    //                            win.drones[index].visible = !win.drones[index].visible
-                    //                        }
-                    //                    }
+                    Button{
+                        //Visible
+                        // \u20E0
+                        //\u26C4
+                        text: "\u20E0"
+                        height: 20
+                        width: contentItem.implicitWidth + leftPadding + rightPadding
+                        font.pixelSize: 12
+                        highlighted: !visibleInfo
+                        enabled: if(listItem.height === enlarged){true}else{false}
+                        onClicked:{
+                            if (visibleInfo) {dronemodel.setVisibility(idInfo,false)}else{dronemodel.setVisibility(idInfo,true)}
+                        }
+                    }
 
                 }
                 Column{
@@ -217,18 +216,24 @@ Item{
                         contentHeight: dataLV.height
 
                         ListView{
-                            //                        height: 100
-                            //                        width: 100
                             id: dataLV
                             width: fparent.width
                             height: childrenRect.height
                             clip: true
-
+                            interactive: false
                             spacing: 3
                             model: infoInfo
-                            delegate: Text{text: "<b>" + infoInfo[index].name + "</b>: " + infoInfo[index].value; wrapMode: Text.WordWrap;width: dataLV.width}
 
-                            interactive: false
+                            delegate: Text{
+                                text: "<b>" + infoInfo[index].name + "</b>: " + infoInfo[index].value
+                                wrapMode: Text.WordWrap
+                                width: dataLV.width
+                            }
+
+                            onModelChanged: {
+                                if(idInfo == dronePop.droneId) dronePop.setModel(dataLV.model)
+                            }
+
                             onCountChanged: {
                                 fparent.returnToBounds();
                             }
@@ -262,8 +267,7 @@ Item{
         highlightMoveVelocity: -1
         highlightResizeVelocity: -1
         Component.onCompleted: currentIndex = -1
-
-
     }
+
 
 }

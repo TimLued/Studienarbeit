@@ -109,8 +109,8 @@ QT_INIT_METAOBJECT const QMetaObject Info::staticMetaObject = { {
 } };
 
 struct qt_meta_stringdata_DroneListModel_t {
-    QByteArrayData data[17];
-    char stringdata0[200];
+    QByteArrayData data[20];
+    char stringdata0[240];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -132,18 +132,22 @@ QT_MOC_LITERAL(9, 86, 8), // "setColor"
 QT_MOC_LITERAL(10, 95, 5), // "color"
 QT_MOC_LITERAL(11, 101, 21), // "toggleHistoryTracking"
 QT_MOC_LITERAL(12, 123, 12), // "toggleFollow"
-QT_MOC_LITERAL(13, 136, 15), // "getInfoNameList"
-QT_MOC_LITERAL(14, 152, 20), // "setSeelectedInfoList"
-QT_MOC_LITERAL(15, 173, 4), // "info"
-QT_MOC_LITERAL(16, 178, 21) // "setUnselectedInfoList"
+QT_MOC_LITERAL(13, 136, 13), // "setVisibility"
+QT_MOC_LITERAL(14, 150, 10), // "visibility"
+QT_MOC_LITERAL(15, 161, 15), // "getInfoNameList"
+QT_MOC_LITERAL(16, 177, 20), // "setSeelectedInfoList"
+QT_MOC_LITERAL(17, 198, 4), // "info"
+QT_MOC_LITERAL(18, 203, 21), // "setUnselectedInfoList"
+QT_MOC_LITERAL(19, 225, 14) // "getAllDronePos"
 
     },
     "DroneListModel\0updateDrone\0\0jInfo\0"
     "createDrone\0id\0QGeoCoordinate\0coord\0"
     "getDroneHistory\0setColor\0color\0"
     "toggleHistoryTracking\0toggleFollow\0"
-    "getInfoNameList\0setSeelectedInfoList\0"
-    "info\0setUnselectedInfoList"
+    "setVisibility\0visibility\0getInfoNameList\0"
+    "setSeelectedInfoList\0info\0"
+    "setUnselectedInfoList\0getAllDronePos"
 };
 #undef QT_MOC_LITERAL
 
@@ -153,7 +157,7 @@ static const uint qt_meta_data_DroneListModel[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-       9,   14, // methods
+      11,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -161,15 +165,17 @@ static const uint qt_meta_data_DroneListModel[] = {
        0,       // signalCount
 
  // methods: name, argc, parameters, tag, flags
-       1,    1,   59,    2, 0x02 /* Public */,
-       4,    2,   62,    2, 0x02 /* Public */,
-       8,    1,   67,    2, 0x02 /* Public */,
-       9,    2,   70,    2, 0x02 /* Public */,
-      11,    1,   75,    2, 0x02 /* Public */,
-      12,    1,   78,    2, 0x02 /* Public */,
-      13,    1,   81,    2, 0x02 /* Public */,
-      14,    2,   84,    2, 0x02 /* Public */,
-      16,    2,   89,    2, 0x02 /* Public */,
+       1,    1,   69,    2, 0x02 /* Public */,
+       4,    2,   72,    2, 0x02 /* Public */,
+       8,    1,   77,    2, 0x02 /* Public */,
+       9,    2,   80,    2, 0x02 /* Public */,
+      11,    1,   85,    2, 0x02 /* Public */,
+      12,    1,   88,    2, 0x02 /* Public */,
+      13,    2,   91,    2, 0x02 /* Public */,
+      15,    1,   96,    2, 0x02 /* Public */,
+      16,    2,   99,    2, 0x02 /* Public */,
+      18,    2,  104,    2, 0x02 /* Public */,
+      19,    0,  109,    2, 0x02 /* Public */,
 
  // methods: parameters
     QMetaType::Bool, QMetaType::QString,    3,
@@ -178,9 +184,11 @@ static const uint qt_meta_data_DroneListModel[] = {
     QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   10,
     QMetaType::Void, QMetaType::QString,    5,
     QMetaType::Void, QMetaType::QString,    5,
+    QMetaType::Void, QMetaType::QString, QMetaType::Bool,    5,   14,
     QMetaType::QVariant, QMetaType::QString,    5,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   15,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   15,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   17,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   17,
+    QMetaType::QVariant,
 
        0        // eod
 };
@@ -200,10 +208,13 @@ void DroneListModel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         case 3: _t->setColor((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
         case 4: _t->toggleHistoryTracking((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 5: _t->toggleFollow((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 6: { QVariant _r = _t->getInfoNameList((*reinterpret_cast< const QString(*)>(_a[1])));
+        case 6: _t->setVisibility((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
+        case 7: { QVariant _r = _t->getInfoNameList((*reinterpret_cast< const QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
-        case 7: _t->setSeelectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
-        case 8: _t->setUnselectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 8: _t->setSeelectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 9: _t->setUnselectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 10: { QVariant _r = _t->getAllDronePos();
+            if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -249,13 +260,13 @@ int DroneListModel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 9)
+        if (_id < 11)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 11;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 9)
+        if (_id < 11)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 11;
     }
     return _id;
 }

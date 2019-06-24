@@ -1,5 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
+import "algos.js" as Algos
+import QtPositioning 5.12
 
 Item {
     id: actionPanel
@@ -18,7 +20,7 @@ Item {
         anchors.centerIn: parent
         width: parent.width
         height: 300
-        color: "grey"
+        color: "white"
     }
 
     Column{
@@ -39,10 +41,24 @@ Item {
             font.pixelSize: txtSize
         }
         Button{
-            text: "X"
+            text: "O"
             height: btnSize
             width: btnSize
             font.pixelSize: txtSize
+            property variant droneCorList
+            onClicked: {
+                droneCorList = dronemodel.getAllDronePos()
+                var cors = []
+                for (var i = 0;i<droneCorList.length;i++){
+                    var corPair = []
+                    corPair.push(droneCorList[i].latitude)
+                    corPair.push(droneCorList[i].longitude)
+                    cors.push(corPair)
+                }
+
+                var dronesCenter = Algos.getLatLngCenter(cors)
+                map.center = QtPositioning.coordinate(dronesCenter[0],dronesCenter[1])
+            }
         }
 
     }

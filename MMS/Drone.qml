@@ -8,6 +8,7 @@ MapQuickItem {
     id: drone
     visible: true
 
+    property string droneId
     property string droneColor
     property int droneSize: 25
     property double bearing
@@ -43,6 +44,22 @@ MapQuickItem {
                 }
             }
         }
+
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                if (dronePop.droneId == droneId){
+                    dronePop.visible = false
+                    dronePop.droneId = ""
+                }else{
+                    dronePop.coordinate = coordinate
+                    dronePop.droneId = droneId
+                    dronePop.droneColor = droneColor
+                    dronePop.visible = true
+                }
+
+            }
+        }
     }
 
 
@@ -51,24 +68,8 @@ MapQuickItem {
         CoordinateAnimation{
             easing.type: Easing.Linear
             duration: extrapolationTime
-            //extrapolateDistance / speed * 1000
         }
     }
-
-//    TransSmoother{
-//        id:animationSmooth
-//        onPosUpdate: {
-//            if (extrapolating){
-//                //change in MODEL
-//            }
-//        }
-//    }
-
-//    onCoordinateChanged: {
-//        //ACTUALLY get speed from JSON, now 100
-//        //animationSmooth.start(1000,100,bearing,coordinate)
-
-//    }
 
     anchorPoint.x: droneSize/2
     anchorPoint.y: droneSize/2

@@ -8,5 +8,6 @@
         <file>PolyLine.qml</file>
         <file>DronePanel.qml</file>
         <file>ActionPanel.qml</file>
+        <file>PopUp.qml</file>
     </qresource>
 </RCC>
