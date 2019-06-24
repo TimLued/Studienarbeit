@@ -48,10 +48,13 @@ MapQuickItem {
         MouseArea{
             anchors.fill: parent
             onClicked: {
+
                 if (dronePop.droneId == droneId){
                     dronePop.visible = false
                     dronePop.droneId = ""
+                    dronePop.clearModel()
                 }else{
+                    dronePop.clearModel()
                     dronePop.coordinate = coordinate
                     dronePop.droneId = droneId
                     dronePop.droneColor = droneColor

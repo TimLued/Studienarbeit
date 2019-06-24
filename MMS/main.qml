@@ -21,13 +21,13 @@ ApplicationWindow  {
 
     function updateStaticPath(idInfo,colorInfo,posInfo){
         staticPath.visible = false
-        dynamicPath.line.color = colorInfo
         staticPath.setPath(idInfo,colorInfo,posInfo)
+        dynamicPath.line.color = colorInfo
     }
 
     function updateDynamicPath(idInfo,colorInfo,posInfo){
-        if(dynamicPath.pathLength() <= 500){
-            dynamicPath.updatePath(posInfo)
+        if(dynamicPath.pathLength() <= 1000){
+            //dynamicPath.updatePath(posInfo) //still PROBLEMS with dynamic path
         }else{
             dynamicPath.clearPath()
             updateStaticPath(idInfo,colorInfo,posInfo)
@@ -187,14 +187,16 @@ ApplicationWindow  {
             onEntered: dronePanel.noMark()
 
             onClicked: {
-                dronePop.visible = false
-                dronePop.droneId = ""
 
                 if (mouse.button === Qt.MiddleButton && !map.centerFollowing){
                     map.rotating = !map.rotating
                     nn = mouseY
                     nnBear = map.bearing
                     if (!map.rotating) map.droneRotAniLock = false
+                }else{
+                    dronePop.visible = false
+                    dronePop.droneId = ""
+                    dronePop.clearModel()
                 }
             }
 

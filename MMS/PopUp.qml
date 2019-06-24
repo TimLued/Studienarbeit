@@ -14,9 +14,9 @@ MapQuickItem {
         dataLV.model = droneModel
     }
 
+    function clearModel() {dataLV.model = []}
+
     //STILL: update model
-
-
 
 
 
