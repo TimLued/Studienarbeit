@@ -16,6 +16,7 @@ MapQuickItem {
     property bool extrapolatingAnimation
     property double extrapolationTime
     property bool trackingHistory
+    property bool popUp: false
 
     sourceItem: Rectangle{
         width: droneSize
@@ -48,21 +49,7 @@ MapQuickItem {
 
         MouseArea{
             anchors.fill: parent
-            onClicked: {
-
-                if (dronePop.droneId == droneId){
-                    dronePop.visible = false
-                    dronePop.droneId = ""
-                    dronePop.clearModel()
-                }else{
-                    dronePop.clearModel()
-                    dronePop.coordinate = coordinate
-                    dronePop.droneId = droneId
-                    dronePop.droneColor = droneColor
-                    dronePop.visible = true
-                }
-
-            }
+            onClicked: popUp = !popUp
         }
     }
 

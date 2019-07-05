@@ -68,7 +68,7 @@ Item{
                     topMargin: 5
                     bottomMargin: 5
                 }
-                Text{text: idInfo; color: colorInfo; font.pixelSize: txtSize;wrapMode: Text.WordWrap; width: parent.width}
+                Text{text: idInfo; color: colorInfo; font.pixelSize: txtSize;wrapMode: Text.WrapAnywhere; width: parent.width}
 
                 Row{
                     visible: if(listItem.height === enlarged){true}else{false}
@@ -220,13 +220,13 @@ Item{
 
                             delegate: Text{
                                 text: "<b>" + infoInfo[index].name + "</b>: " + infoInfo[index].value
-                                wrapMode: Text.WordWrap
+                                wrapMode: Text.WrapAnywhere
                                 width: dataLV.width
                             }
 
-                            onModelChanged: {
-                                if(idInfo == dronePop.droneId) dronePop.setModel(dataLV.model)
-                            }
+//                            onModelChanged: {
+//                                if(idInfo == dronePop.droneId) dronePop.setModel(dataLV.model)
+//                            }
 
                             onCountChanged: {
                                 fparent.returnToBounds();

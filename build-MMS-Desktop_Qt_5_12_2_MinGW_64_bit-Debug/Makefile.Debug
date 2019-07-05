@@ -121,8 +121,9 @@ compiler_rcc_clean:
 debug/qrc_qml.cpp: ../MMS/qml.qrc \
 		C:/Qt/5.12.2/mingw73_64/bin/rcc.exe \
 		../MMS/algos.js \
+		../MMS/ActionPanel.qml \
+		../MMS/PopUp.qml \
 		../MMS/Drone.qml \
-		../MMS/PolyLine.qml \
 		../MMS/DronePanel.qml \
 		../MMS/main.qml \
 		../MMS/img/scale_end.png \
@@ -670,8 +671,11 @@ debug/dronelistmodel.o: ../MMS/dronelistmodel.cpp ../MMS/dronelistmodel.h \
 		C:/Qt/5.12.2/mingw73_64/include/QtQml/qtqml-config.h \
 		C:/Qt/5.12.2/mingw73_64/include/QtNetwork/qtnetworkglobal.h \
 		C:/Qt/5.12.2/mingw73_64/include/QtNetwork/qtnetwork-config.h \
-		../MMS/nodemodel.h \
-		C:/Qt/5.12.2/mingw73_64/include/QtCore/QDebug
+		C:/Qt/5.12.2/mingw73_64/include/QtCore/QJsonDocument \
+		C:/Qt/5.12.2/mingw73_64/include/QtCore/qjsondocument.h \
+		C:/Qt/5.12.2/mingw73_64/include/QtCore/qjsonvalue.h \
+		C:/Qt/5.12.2/mingw73_64/include/QtCore/QJsonObject \
+		C:/Qt/5.12.2/mingw73_64/include/QtCore/qjsonobject.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\dronelistmodel.o ..\MMS\dronelistmodel.cpp
 
 debug/main.o: ../MMS/main.cpp C:/Qt/5.12.2/mingw73_64/include/QtGui/QGuiApplication \
@@ -791,16 +795,19 @@ debug/main.o: ../MMS/main.cpp C:/Qt/5.12.2/mingw73_64/include/QtGui/QGuiApplicat
 		C:/Qt/5.12.2/mingw73_64/include/QtQml/QQmlContext \
 		C:/Qt/5.12.2/mingw73_64/include/QtQml/qqmlcontext.h \
 		../MMS/transsmoother.h \
-		../MMS/nodemodel.h \
+		../MMS/dronelistmodel.h \
 		C:/Qt/5.12.2/mingw73_64/include/QtCore/QAbstractListModel \
 		C:/Qt/5.12.2/mingw73_64/include/QtCore/qabstractitemmodel.h \
-		../MMS/dronelistmodel.h \
 		../MMS/drone.h \
 		C:/Qt/5.12.2/mingw73_64/include/QtGui/QColor \
 		C:/Qt/5.12.2/mingw73_64/include/QtGui/qcolor.h \
 		C:/Qt/5.12.2/mingw73_64/include/QtGui/qrgb.h \
 		C:/Qt/5.12.2/mingw73_64/include/QtGui/qrgba64.h \
-		C:/Qt/5.12.2/mingw73_64/include/QtCore/QDebug
+		C:/Qt/5.12.2/mingw73_64/include/QtPositioning/QGeoPath \
+		C:/Qt/5.12.2/mingw73_64/include/QtPositioning/qgeopath.h \
+		C:/Qt/5.12.2/mingw73_64/include/QtPositioning/QGeoShape \
+		C:/Qt/5.12.2/mingw73_64/include/QtPositioning/qgeoshape.h \
+		C:/Qt/5.12.2/mingw73_64/include/QtCore/QVariantList
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\main.o ..\MMS\main.cpp
 
 debug/posupdater.o: ../MMS/posupdater.cpp ../MMS/posupdater.h \

@@ -3,7 +3,6 @@ import QtPositioning 5.12
 import QtLocation 5.12
 
 MapQuickItem {
-    id: popup
     visible: false
 
     property string droneId
@@ -68,9 +67,6 @@ MapQuickItem {
                 }
             }
         }
-
-
-
 
     }
 

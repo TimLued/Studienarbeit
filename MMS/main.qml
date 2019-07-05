@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Window 2.12
+import QtQuick.Layouts 1.12
 import QtPositioning 5.12
 import QtLocation 5.12
 import "algos.js" as Algos
@@ -174,10 +175,8 @@ ApplicationWindow  {
                     nn = mouseY
                     nnBear = map.bearing
                     if (!map.rotating) map.droneRotAniLock = false
-                }else{
-                    dronePop.visible = false
-                    dronePop.droneId = ""
-                    dronePop.clearModel()
+                }else if (mouse.button === Qt.LeftButton){
+                    //hide popUp
                 }
             }
 
@@ -283,28 +282,7 @@ ApplicationWindow  {
                         }else{
                             bearing= angleInfo - map.bearing
                         }
-
-
-                        //update PopUp if visible
-                        if (dronePop.visible && idInfo == dronePop.droneId) {
-                            dronePop.coordinate = coordinate
-                        }
-
                     }
-                }
-
-                MapPolyline{//Static
-                    id: staticPath
-                    line.width: 1
-                    visible: trackingHistoryInfo
-                    line.color: colorInfo
-                }
-
-                MapPolyline{//dynamic
-                    id: dynamicPath
-                    line.width: 1
-                    visible: trackingHistoryInfo
-                    line.color: colorInfo
                 }
 
                 MapQuickItem{
@@ -336,10 +314,102 @@ ApplicationWindow  {
                     Component.onCompleted: win.setCircleScale()
                 }
 
+                MapQuickItem {//PopUp
+                    visible: droneBody.popUp
+                    coordinate: posInfo
+
+                    sourceItem: Item{
+                        width: 100
+                        height: 100
+                        Rectangle{anchors.fill: parent; color: "white"; opacity: 0.8}
+                        Column{
+                            anchors.fill: parent
+                            anchors.margins: 5
+                            spacing: 4
+                            layer.enabled: true
+                            RowLayout {
+                                width: parent.width
+                                Rectangle{
+                                    color: "transparent"
+                                    height: childrenRect.height
+                                    width: childrenRect.width
+                                    Layout.alignment: Qt.AlignLeft
+                                    Text{text: idInfo
+                                        font.bold: true
+                                        font.pixelSize: txtSize
+                                        color: colorInfo
+
+                                    }
+                                }
+                                Rectangle{
+                                    color: "transparent"
+                                    height: childrenRect.height
+                                    width: childrenRect.width
+                                    Layout.alignment: Qt.AlignRight
+                                    Button{
+                                        width: 20
+                                        height:20
+                                        text: "X"
+                                        onClicked: droneBody.popUp = !droneBody.popUp
+                                    }
+                                }
+
+
+                            }
+
+                            Flickable {
+                                id: fparent
+                                height:70
+                                width: parent.width
+
+                                interactive: true
+                                clip: true
+                                flickableDirection: Flickable.VerticalFlick
+                                contentHeight: dataLV.height
+
+                                ListView{
+                                    id: dataLV
+                                    width: fparent.width
+                                    height: childrenRect.height
+                                    clip: true
+                                    interactive: false
+                                    spacing: 2
+                                    model: infoInfo
+
+                                    delegate: Text{
+                                        text: dataLV.model[index].name + ": " + dataLV.model[index].value
+                                        wrapMode: Text.WrapAnywhere
+                                        width: dataLV.width
+                                    }
+
+                                    onCountChanged: {
+                                        fparent.returnToBounds();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    anchorPoint.x: -10
+                    anchorPoint.y: -10
+                }
+
+                MapPolyline{//Static
+                    id: staticPath
+                    line.width: 1
+                    visible: trackingHistoryInfo
+                    line.color: colorInfo
+                }
+
+                MapPolyline{//dynamic
+                    id: dynamicPath
+                    line.width: 1
+                    visible: trackingHistoryInfo
+                    line.color: colorInfo
+                }
+
             }
         }
 
-        PopUp{id:dronePop}
     }
 
 

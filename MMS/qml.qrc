@@ -1,13 +1,12 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
         <file>algos.js</file>
+        <file>ActionPanel.qml</file>
+        <file>Drone.qml</file>
+        <file>DronePanel.qml</file>
+        <file>main.qml</file>
+        <file>PopUp.qml</file>
         <file>img/scale.png</file>
         <file>img/scale_end.png</file>
-        <file>Drone.qml</file>
-        <file>PolyLine.qml</file>
-        <file>DronePanel.qml</file>
-        <file>ActionPanel.qml</file>
-        <file>PopUp.qml</file>
     </qresource>
 </RCC>

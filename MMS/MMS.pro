@@ -17,7 +17,8 @@ SOURCES += \
         posupdater.cpp \
         transsmoother.cpp
 
-RESOURCES += qml.qrc
+RESOURCES += \
+    qml.qrc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
