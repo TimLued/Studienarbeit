@@ -6,16 +6,12 @@ MapPolyline {
     id: droneTrail
     line.width: 1
 
-    function clearPath(){
-        visible = false
-        path = []
-        visible = true
-    }
+
     function setPath(idInfo,colorInfo,posInfo){
         line.color = colorInfo
         path = dronemodel.getDroneHistory(idInfo)
         droneTrail.addCoordinate(posInfo)
-        visible = true
+        //visible = true
     }
 
     function updatePath(posInfo){

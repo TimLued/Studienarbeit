@@ -126,6 +126,7 @@ private:
     bool trackHistory=false;
     bool extrapolate = false;
     bool mVisible = true;
+
 };
 
 

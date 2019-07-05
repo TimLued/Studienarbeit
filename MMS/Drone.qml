@@ -15,6 +15,7 @@ MapQuickItem {
     property bool extrapolating
     property bool extrapolatingAnimation
     property double extrapolationTime
+    property bool trackingHistory
 
     sourceItem: Rectangle{
         width: droneSize

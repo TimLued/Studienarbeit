@@ -113,13 +113,10 @@ compiler_rcc_clean:
 	-$(DEL_FILE) debug\qrc_logfile.cpp
 debug/qrc_logfile.cpp: ../PosStreamer/logfile.qrc \
 		C:/Qt/5.12.1/mingw73_64/bin/rcc.exe \
-		../PosStreamer/drone3.txt \
-		../PosStreamer/drone7.txt \
-		../PosStreamer/drone2.txt \
-		../PosStreamer/drone6.txt \
-		../PosStreamer/drone1.txt \
-		../PosStreamer/drone5.txt \
-		../PosStreamer/drone4.txt
+		../PosStreamer/jdrone4.txt \
+		../PosStreamer/jdrone3.txt \
+		../PosStreamer/jdrone2.txt \
+		../PosStreamer/jdrone1.txt
 	C:\Qt\5.12.1\mingw73_64\bin\rcc.exe -name logfile ..\PosStreamer\logfile.qrc -o debug\qrc_logfile.cpp
 
 compiler_moc_predefs_make_all: debug/moc_predefs.h
@@ -271,7 +268,6 @@ debug/moc_clientapplication.cpp: ../PosStreamer/clientapplication.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtWidgets/qlistwidget.h \
 		../PosStreamer/possource.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtCore/QObject \
-		../PosStreamer/clientsocket.h \
 		debug/moc_predefs.h \
 		C:/Qt/5.12.1/mingw73_64/bin/moc.exe
 	C:\Qt\5.12.1\mingw73_64\bin\moc.exe $(DEFINES) --include "C:/Users/Timothy/Google Drive/Uni/Studienarbeit/github/Studienarbeit/build-PosStreamer-Desktop_Qt_5_12_1_MinGW_64_bit-Debug/debug/moc_predefs.h" -IC:/Qt/5.12.1/mingw73_64/mkspecs/win32-g++ -I"C:/Users/Timothy/Google Drive/Uni/Studienarbeit/github/Studienarbeit/PosStreamer" -IC:/Qt/5.12.1/mingw73_64/include -IC:/Qt/5.12.1/mingw73_64/include/QtWidgets -IC:/Qt/5.12.1/mingw73_64/include/QtGui -IC:/Qt/5.12.1/mingw73_64/include/QtANGLE -IC:/Qt/5.12.1/mingw73_64/include/QtNetwork -IC:/Qt/5.12.1/mingw73_64/include/QtCore -I. -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++ -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/backward -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include-fixed -IC:/Qt/Tools/mingw730_64/x86_64-w64-mingw32/include ..\PosStreamer\clientapplication.h -o debug\moc_clientapplication.cpp
@@ -802,7 +798,6 @@ debug/main.o: ../PosStreamer/main.cpp ../PosStreamer/clientapplication.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtWidgets/qlistwidget.h \
 		../PosStreamer/possource.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtCore/QObject \
-		../PosStreamer/clientsocket.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtWidgets/QApplication \
 		C:/Qt/5.12.1/mingw73_64/include/QtWidgets/qapplication.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtCore/qcoreapplication.h \
@@ -952,7 +947,6 @@ debug/clientapplication.o: ../PosStreamer/clientapplication.cpp ../PosStreamer/c
 		C:/Qt/5.12.1/mingw73_64/include/QtWidgets/qlistwidget.h \
 		../PosStreamer/possource.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtCore/QObject \
-		../PosStreamer/clientsocket.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtCore/QtCore \
 		C:/Qt/5.12.1/mingw73_64/include/QtCore/QtCoreDepends \
 		C:/Qt/5.12.1/mingw73_64/include/QtCore/qabstractanimation.h \
@@ -1078,7 +1072,68 @@ debug/clientapplication.o: ../PosStreamer/clientapplication.cpp ../PosStreamer/c
 		C:/Qt/5.12.1/mingw73_64/include/QtWidgets/QDialogButtonBox \
 		C:/Qt/5.12.1/mingw73_64/include/QtWidgets/qdialogbuttonbox.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtWidgets/QListWidgetItem \
-		C:/Qt/5.12.1/mingw73_64/include/QtCore/QThread
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QThread \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/QtNetwork \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/QtNetworkDepends \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qtnetworkglobal.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qtnetwork-config.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qabstractnetworkcache.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkrequest.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QSharedDataPointer \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QString \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QUrl \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QVariant \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qabstractsocket.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qauthenticator.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qdnslookup.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qdtls.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsslsocket.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qtcpsocket.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsslerror.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsslcertificate.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qssl.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QFlags \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qhostaddress.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qhostinfo.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qhstspolicy.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qhttpmultipart.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QByteArray \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QIODevice \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/QNetworkRequest \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qlocalserver.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qlocalsocket.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkaccessmanager.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QVector \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/QSslConfiguration \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsslconfiguration.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/QSslPreSharedKeyAuthenticator \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsslpresharedkeyauthenticator.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QMetaType \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkconfigmanager.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkconfiguration.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkcookie.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QList \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkcookiejar.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkdatagram.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkdiskcache.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkinterface.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkproxy.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworkreply.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/QNetworkAccessManager \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qnetworksession.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qpassworddigestor.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QCryptographicHash \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsctpserver.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qtcpserver.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsctpsocket.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsslcertificateextension.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsslcipher.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qssldiffiehellmanparameters.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsslellipticcurve.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QHash \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qsslkey.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qudpsocket.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtNetwork/qtnetworkversion.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\clientapplication.o ..\PosStreamer\clientapplication.cpp
 
 debug/possource.o: ../PosStreamer/possource.cpp ../PosStreamer/possource.h \
@@ -1274,7 +1329,8 @@ debug/possource.o: ../PosStreamer/possource.cpp ../PosStreamer/possource.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtCore/qwaitcondition.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtCore/qwineventnotifier.h \
 		C:/Qt/5.12.1/mingw73_64/include/QtCore/qxmlstream.h \
-		C:/Qt/5.12.1/mingw73_64/include/QtCore/qtcoreversion.h
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/qtcoreversion.h \
+		C:/Qt/5.12.1/mingw73_64/include/QtCore/QJsonDocument
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\possource.o ..\PosStreamer\possource.cpp
 
 debug/qrc_logfile.o: debug/qrc_logfile.cpp 

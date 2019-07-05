@@ -82,8 +82,6 @@ Item{
                         highlighted: trackingHistoryInfo
                         enabled: if(listItem.height === enlarged){true}else{false}
                         onClicked:{
-                            win.removeTrail()
-                            if (!trackingHistoryInfo) win.updateStaticPath(idInfo,colorInfo,posInfo)
                             dronemodel.toggleHistoryTracking(idInfo)
                         }
                     }
@@ -110,7 +108,7 @@ Item{
 
                     Button{
                         //Visible
-                        // \u20E0
+                        //\u20E0
                         //\u26C4
                         text: "\u20E0"
                         height: 20
@@ -153,10 +151,6 @@ Item{
                         onCurrentIndexChanged: {
                             if (initial){
                                 dronemodel.setColor(idInfo,colorModel.get(currentIndex).color)
-                                if (trackingHistoryInfo){
-                                    win.removeTrail()
-                                    win.updateStaticPath(idInfo,colorInfo,posInfo)
-                                }
                             }
                         }
                     }

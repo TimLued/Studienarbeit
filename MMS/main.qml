@@ -19,25 +19,6 @@ ApplicationWindow  {
     property double zoomCircle
     property string zoomRadius
 
-    function updateStaticPath(idInfo,colorInfo,posInfo){
-        staticPath.visible = false
-        staticPath.setPath(idInfo,colorInfo,posInfo)
-        dynamicPath.line.color = colorInfo
-    }
-
-    function updateDynamicPath(idInfo,colorInfo,posInfo){
-        if(dynamicPath.pathLength() <= 1000){
-            //dynamicPath.updatePath(posInfo) //still PROBLEMS with dynamic path
-        }else{
-            dynamicPath.clearPath()
-            updateStaticPath(idInfo,colorInfo,posInfo)
-        }
-    }
-
-    function removeTrail(){
-        staticPath.clearPath()
-        dynamicPath.clearPath()
-    }
 
     //MAP SCALE
     property variant scaleLengths: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000]
@@ -96,7 +77,9 @@ ApplicationWindow  {
             win.setZoomScale()
             win.setCircleScale()
             zoomLbl.text = "Zoom: " + Math.round(map.zoomLevel)
-        }       
+        }
+
+
 
         Item {
             id: scale
@@ -178,10 +161,8 @@ ApplicationWindow  {
 
                 //rotation
                 //scale win.height - nn = 360
-                if (map.rotating){
+                if (map.rotating)map.bearing = nnBear + (nn - mouseY) * (360/win.height)
 
-                    map.bearing = nnBear + (nn - mouseY) * (360/win.height)
-                }
             }
 
             onEntered: dronePanel.noMark()
@@ -204,12 +185,11 @@ ApplicationWindow  {
                 if (mouse.button === Qt.MiddleButton){
                     map.rotating = false
                     map.bearing = 0
+                }else if(mouse.button === Qt.LeftButton){
                 }
             }
-        }
 
-        PolyLine {id: staticPath}
-        PolyLine{id: dynamicPath}
+        }
 
         property bool droneRotAniLock: false
         property double lastMapBearing
@@ -255,6 +235,7 @@ ApplicationWindow  {
                     droneId: idInfo
                     extrapolationTime: 1000
                     visible: visibleInfo
+                    trackingHistory: trackingHistoryInfo
 
                     onExtrapolatingChanged: {
                         if (extrapolating){
@@ -268,9 +249,33 @@ ApplicationWindow  {
                         }
                     }
 
+                    onTrackingHistoryChanged: {
+                        if (!trackingHistory){
+                            dynamicPath.path = []
+                            staticPath.path = []
+                        }else{
+                            staticPath.path = historyInfo
+                        }
+                    }
+
+                    property int k: 50
                     onCoordinateChanged: {
 
-                        if (trackingHistoryInfo) updateDynamicPath(idInfo,colorInfo,posInfo)
+                        if (trackingHistory) {
+                            if (k == 50){
+                                if(dynamicPath.pathLength() <= 100){
+                                    dynamicPath.addCoordinate(posInfo)
+                                }else{
+                                    dynamicPath.path = []
+                                    staticPath.path = historyInfo
+                                }
+
+                                k = 0
+                            }else{
+                                k+=1
+                            }
+                        }
+
                         if (followInfo){
                             map.center = coordinate
                             map.bearing = angleInfo
@@ -286,6 +291,20 @@ ApplicationWindow  {
                         }
 
                     }
+                }
+
+                MapPolyline{//Static
+                    id: staticPath
+                    line.width: 1
+                    visible: trackingHistoryInfo
+                    line.color: colorInfo
+                }
+
+                MapPolyline{//dynamic
+                    id: dynamicPath
+                    line.width: 1
+                    visible: trackingHistoryInfo
+                    line.color: colorInfo
                 }
 
                 MapQuickItem{

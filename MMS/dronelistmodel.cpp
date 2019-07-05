@@ -91,6 +91,7 @@ void DroneListModel::toggleFollow(const QString &id){
     }
 }
 
+
 void DroneListModel::toggleHistoryTracking(const QString &id){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
@@ -98,21 +99,7 @@ void DroneListModel::toggleHistoryTracking(const QString &id){
     QModelIndex ix = index(row);
 
     it->setTrackHistory();
-    emit dataChanged(ix, ix, QVector<int>{HistoryRole});
-
-    //others set false
-    for (int i=0;i<mDrones.count();i++){
-        if(i != row && mDrones[i].trackingHistory()) {
-            mDrones[i].setTrackHistory();
-            emit dataChanged(index(i), index(i), QVector<int>{HistoryRole});
-        }
-    }
-}
-
-QVariant DroneListModel::getDroneHistory(const QString &id){
-    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
-            return obj.id() == id;});
-    return it->getHistory();
+    emit dataChanged(ix, ix, QVector<int>{TrackingRole});
 }
 
 QVariant DroneListModel::getInfoNameList(const QString&id){
@@ -181,8 +168,10 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getColor();
         else if (role == AngleRole)
             return it.getAngle();
-        else if(role == HistoryRole)
+        else if(role == TrackingRole)
             return it.trackingHistory();
+        else if(role == HistoryRole)
+            return it.getHistory();
         else if(role == FollowRole)
             return it.following();
         else if(role == AnimationStateRole)
@@ -203,7 +192,8 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[PosRole] = "posInfo";
     roles[AngleRole] = "angleInfo";
     roles[ColorRole] = "colorInfo";
-    roles[HistoryRole] = "trackingHistoryInfo";
+    roles[TrackingRole] = "trackingHistoryInfo";
+    roles[HistoryRole] = "historyInfo";
     roles[FollowRole] = "followInfo";
     roles[AnimationStateRole] = "extrapolateInfo";
     roles[InfoRole] = "infoInfo";
@@ -224,7 +214,7 @@ bool DroneListModel::setData(const QModelIndex &index, const QVariant &value,
             mDrones[index.row()].setInfos(data.infos);
             mDrones[index.row()].setInfoNames(data.infoNames);
             mDrones[index.row()].setExtrapolate(false);
-            emit dataChanged(index, index, QVector<int>{PosRole,AngleRole,AnimationStateRole,InfoRole,InfoNamesRole});
+            emit dataChanged(index, index, QVector<int>{PosRole,AngleRole,AnimationStateRole,InfoRole,InfoNamesRole,HistoryRole});
             mDrones[index.row()].setExtrapolate(true);
             emit dataChanged(index, index, QVector<int>{AnimationStateRole});
             return true;

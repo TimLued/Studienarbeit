@@ -45,6 +45,7 @@ public:
         IdRole = Qt::UserRole + 1,
         PosRole,
         ColorRole,
+        TrackingRole,
         HistoryRole,
         FollowRole,
         AngleRole,
@@ -52,7 +53,6 @@ public:
         InfoRole,
         AnimationStateRole,
         VisibleRole
-
     };
 
     void register_object(const QString &droneId,
@@ -69,7 +69,6 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
-    Q_INVOKABLE QVariant getDroneHistory(const QString&id);
     Q_INVOKABLE void setColor(const QString &id,QString color);
     Q_INVOKABLE void toggleHistoryTracking(const QString & id);
     Q_INVOKABLE void toggleFollow(const QString & id);
