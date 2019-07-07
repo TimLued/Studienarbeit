@@ -31,7 +31,8 @@ MapQuickItem {
 
         Column{
             anchors.fill: parent
-            anchors.margins: 5
+            padding: 5
+            bottomPadding: 0
             spacing: 4
             layer.enabled: true
 
@@ -39,13 +40,19 @@ MapQuickItem {
 
             Flickable {
                 id: fparent
-                height:70
+                height: 90
                 width: parent.width
 
                 interactive: true
                 clip: true
                 flickableDirection: Flickable.VerticalFlick
                 contentHeight: dataLV.height
+
+                Rectangle{
+                 anchors.fill: parent
+                 color: "red"
+                 opacity: 0.4
+                }
 
                 ListView{
                     id: dataLV
@@ -57,7 +64,7 @@ MapQuickItem {
 
                     delegate: Text{
                         text: dataLV.model[index].name + ": " + dataLV.model[index].value
-                        wrapMode: Text.WordWrap
+                        wrapMode: Text.WrapAnywhere
                         width: dataLV.width
                     }
 

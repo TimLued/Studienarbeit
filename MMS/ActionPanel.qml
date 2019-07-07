@@ -45,19 +45,11 @@ Item {
             height: btnSize
             width: btnSize
             font.pixelSize: txtSize
-            property variant droneCorList
-            onClicked: {
-                droneCorList = dronemodel.getAllDronePos()
-                var cors = []
-                for (var i = 0;i<droneCorList.length;i++){
-                    var corPair = []
-                    corPair.push(droneCorList[i].latitude)
-                    corPair.push(droneCorList[i].longitude)
-                    cors.push(corPair)
-                }
+            highlighted: map.isCenterOnAll
 
-                var dronesCenter = Algos.getLatLngCenter(cors)
-                map.center = QtPositioning.coordinate(dronesCenter[0],dronesCenter[1])
+            onClicked: {
+                map.isCenterOnAll = !map.isCenterOnAll
+
             }
         }
 

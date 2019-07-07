@@ -2,8 +2,8 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Window 2.12
 import QtQuick.Layouts 1.12
-import QtPositioning 5.12
-import QtLocation 5.12
+import QtPositioning 5.13
+import QtLocation 5.13
 import "algos.js" as Algos
 
 ApplicationWindow  {
@@ -19,6 +19,9 @@ ApplicationWindow  {
     property int btnSize: 40
     property double zoomCircle
     property string zoomRadius
+
+    property variant droneCorList
+    //property double tmpZoom
 
 
     //MAP SCALE
@@ -71,8 +74,13 @@ ApplicationWindow  {
         plugin: Plugin{name:"mapboxgl"}
         center: QtPositioning.coordinate(54.3107,10.1291)
         zoomLevel: 14
+
+        property bool droneRotAniLock: false
+        property double lastMapBearing
+
         property bool rotating: false
         property bool centerFollowing: false
+        property bool isCenterOnAll: false
 
         onZoomLevelChanged:{
             win.setZoomScale()
@@ -80,7 +88,78 @@ ApplicationWindow  {
             zoomLbl.text = "Zoom: " + Math.round(map.zoomLevel)
         }
 
+        Behavior on zoomLevel{
+            NumberAnimation{
+                duration: 100
+            }
+        }
 
+        onBearingChanged: {
+            if(lastMapBearing){
+                if (Math.abs(lastMapBearing - map.bearing) > 0.1){
+                    droneRotAniLock = true
+                }else{
+                    droneRotAniLock = false
+                }
+            }
+
+            lastMapBearing = map.bearing
+        }
+
+        Behavior on bearing{
+            enabled: !map.rotating
+            RotationAnimation{
+                id: rotAni
+                duration: 100
+                direction: RotationAnimation.Shortest
+                easing.type: Easing.Linear
+                onRunningChanged: {
+                    if (!rotAni.running) { //stop
+                        map.droneRotAniLock = false
+                    } else { //start
+                    }
+                }
+            }
+        }
+
+        MouseArea{
+            anchors.fill: parent
+            hoverEnabled: true
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+            property variant cor
+            property int nn
+            property double nnBear
+
+            onPositionChanged: {
+                cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
+                coorLbl.text = Algos.roundNumber(cor.latitude,3) + ", " +  Algos.roundNumber(cor.longitude,3)
+
+                //rotation
+                //scale win.height - nn = 360
+                if (map.rotating)map.bearing = nnBear + (nn - mouseY) * (360/win.height)
+
+            }
+
+            onEntered: dronePanel.noMark()
+
+            onClicked: {
+
+                if (mouse.button === Qt.MiddleButton && !map.centerFollowing){
+                    map.rotating = !map.rotating
+                    nn = mouseY
+                    nnBear = map.bearing
+                    if (!map.rotating) map.droneRotAniLock = false
+                }
+            }
+
+            onPressAndHold:{
+                if (mouse.button === Qt.MiddleButton){
+                    map.rotating = false
+                    map.bearing = 0
+                }else if(mouse.button === Qt.LeftButton){
+                }
+            }
+        }
 
         Item {
             id: scale
@@ -142,83 +221,8 @@ ApplicationWindow  {
             Label {
                 id: coorLbl
                 color: "#004EAE"
-                text: "" //updates on mouse moved on map
                 anchors.top:zoomLbl.bottom
                 anchors.left: parent.left
-            }
-        }
-
-        MouseArea{
-            anchors.fill: parent
-            hoverEnabled: true
-            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-            property variant cor
-            property int nn
-            property double nnBear
-
-            onPositionChanged: {
-                cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
-                coorLbl.text = Algos.roundNumber(cor.latitude,3) + ", " +  Algos.roundNumber(cor.longitude,3)
-
-                //rotation
-                //scale win.height - nn = 360
-                if (map.rotating)map.bearing = nnBear + (nn - mouseY) * (360/win.height)
-
-            }
-
-            onEntered: dronePanel.noMark()
-
-            onClicked: {
-
-                if (mouse.button === Qt.MiddleButton && !map.centerFollowing){
-                    map.rotating = !map.rotating
-                    nn = mouseY
-                    nnBear = map.bearing
-                    if (!map.rotating) map.droneRotAniLock = false
-                }else if (mouse.button === Qt.LeftButton){
-                    //hide popUp
-                }
-            }
-
-            onPressAndHold:{
-                if (mouse.button === Qt.MiddleButton){
-                    map.rotating = false
-                    map.bearing = 0
-                }else if(mouse.button === Qt.LeftButton){
-                }
-            }
-
-        }
-
-        property bool droneRotAniLock: false
-        property double lastMapBearing
-
-        onBearingChanged: {
-            if(lastMapBearing){
-                if (Math.abs(lastMapBearing - map.bearing) > 0.1){
-                    droneRotAniLock = true
-                }else{
-                    droneRotAniLock = false
-                }
-            }
-
-            lastMapBearing = map.bearing
-        }
-
-        Behavior on bearing{
-            enabled: !map.rotating
-            RotationAnimation{
-                id: rotAni
-                duration: 100
-                direction: RotationAnimation.Shortest
-                easing.type: Easing.Linear
-                onRunningChanged: {
-                    if (!rotAni.running) { //stop
-                        map.droneRotAniLock = false
-                    } else { //start
-
-                    }
-                }
             }
         }
 
@@ -238,7 +242,7 @@ ApplicationWindow  {
 
                     onExtrapolatingChanged: {
                         if (extrapolating){
-                            //extrapolationTime/1000*speed
+                            //extrapolationTime/1000*SPEED
                             extrapolatingAnimation = true
                             var dist = extrapolationTime/1000*100
                             coordinate = posInfo.atDistanceAndAzimuth(dist,angleInfo)
@@ -246,6 +250,7 @@ ApplicationWindow  {
                             extrapolatingAnimation = false
                             coordinate = posInfo
                         }
+
                     }
 
                     onTrackingHistoryChanged: {
@@ -258,6 +263,8 @@ ApplicationWindow  {
                     }
 
                     property int k: 50
+                    property variant poly
+
                     onCoordinateChanged: {
 
                         if (trackingHistory) {
@@ -277,13 +284,28 @@ ApplicationWindow  {
 
                         if (followInfo){
                             map.center = coordinate
-                            map.bearing = angleInfo
+                            map.pan(0,-map.height/2+100)
                             bearing = 0
+                            map.bearing = angleInfo
+                            map.centerFollowing = true
+                            map.rotating = false
                         }else{
                             bearing= angleInfo - map.bearing
+                            map.centerFollowing = false
+                        }
+
+                        if (map.isCenterOnAll) {
+                            if (followInfo) dronemodel.toggleFollow(idInfo)
+
+                            //works from three
+                            var drones = dronemodel.getAllDronePos()
+                            poly = QtPositioning.polygon(drones)
+                            map.fitViewportToGeoShape(poly,100)
+
                         }
                     }
                 }
+
 
                 MapQuickItem{
                     id:circleRuler
@@ -321,12 +343,15 @@ ApplicationWindow  {
                     sourceItem: Item{
                         width: 100
                         height: 100
+
                         Rectangle{anchors.fill: parent; color: "white"; opacity: 0.8}
                         Column{
                             anchors.fill: parent
                             anchors.margins: 5
+                            anchors.bottomMargin: 0
                             spacing: 4
                             layer.enabled: true
+
                             RowLayout {
                                 width: parent.width
                                 Rectangle{
@@ -366,6 +391,7 @@ ApplicationWindow  {
                                 clip: true
                                 flickableDirection: Flickable.VerticalFlick
                                 contentHeight: dataLV.height
+
 
                                 ListView{
                                     id: dataLV

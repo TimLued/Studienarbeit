@@ -5,7 +5,6 @@
         <file>Drone.qml</file>
         <file>DronePanel.qml</file>
         <file>main.qml</file>
-        <file>PopUp.qml</file>
         <file>img/scale.png</file>
         <file>img/scale_end.png</file>
     </qresource>

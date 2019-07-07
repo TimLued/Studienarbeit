@@ -94,14 +94,9 @@ Item{
                         highlighted: followInfo
                         enabled: if(listItem.height === enlarged){true}else{false}
                         onClicked:{
-                            dronemodel.toggleFollow(idInfo)
-                            if (followInfo) {
-                                map.center = posInfo
-                                map.centerFollowing = true
-                                map.rotating = false
-                            }else{
-                                map.bearing=0
-                                map.centerFollowing = false
+                            if (!map.isCenterOnAll) {
+                                dronemodel.toggleFollow(idInfo)
+                                if (!followInfo) map.bearing=0
                             }
                         }
                     }
@@ -201,9 +196,8 @@ Item{
 
                     Flickable  {
                         id: fparent
-                        height: 100
+                        height: 90
                         width: parent.width
-
                         interactive: true
                         clip: true
                         flickableDirection: Flickable.VerticalFlick
@@ -211,7 +205,7 @@ Item{
 
                         ListView{
                             id: dataLV
-                            width: fparent.width
+                            width: fparent.width - 2
                             height: childrenRect.height
                             clip: true
                             interactive: false
@@ -223,10 +217,6 @@ Item{
                                 wrapMode: Text.WrapAnywhere
                                 width: dataLV.width
                             }
-
-//                            onModelChanged: {
-//                                if(idInfo == dronePop.droneId) dronePop.setModel(dataLV.model)
-//                            }
 
                             onCountChanged: {
                                 fparent.returnToBounds();

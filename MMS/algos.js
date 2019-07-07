@@ -31,7 +31,6 @@ function roundNumber(number, digits){
     return Math.round(number * multiple) / multiple;
 }
 
-
 function getLatLngCenter(latLngInDegr) {
     var LATIDX = 0;
     var LNGIDX = 1;
@@ -59,3 +58,14 @@ function getLatLngCenter(latLngInDegr) {
 
     return ([rad2degr(lat), rad2degr(lng)]);
 }
+
+function is_point_on_screen(point,mapX,mapY,mapW,mapH) {
+    if (point.x >= 0 && point.x <= (mapX + mapW)
+            && point.y >=0 && point.y <= (mapY + mapH) )
+        return true;
+    else
+        return false;
+}
+
+
+

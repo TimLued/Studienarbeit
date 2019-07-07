@@ -126,9 +126,9 @@ QVariant DroneListModel::getAllDronePos(){
     for (const Drone &drone:mDrones){
         auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
                 return obj.id() == drone.id();});
-        QVariantMap pair1;
 
         dronePos_list<<QVariant::fromValue(it->pos());
+
     }
     return dronePos_list;
 }
