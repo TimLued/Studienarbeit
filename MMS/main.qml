@@ -57,9 +57,9 @@ ApplicationWindow  {
     }
 
     function setCircleScale(){
-        var info = calculateScale(100) //radius 50
-        zoomCircle = (100 * info[1])/2 //border.width 3
-        zoomRadius = Algos.formatDistance(info[0]/2)
+        var info = calculateScale(scaleImage.sourceSize.width)
+        zoomRadius = Algos.formatDistance(info[0])
+        zoomCircle = (scaleImage.sourceSize.width * info[1]) //border.width 3
     }
 
     function setZoomScale(){
@@ -242,9 +242,8 @@ ApplicationWindow  {
 
                     onExtrapolatingChanged: {
                         if (extrapolating){
-                            //extrapolationTime/1000*SPEED
                             extrapolatingAnimation = true
-                            var dist = extrapolationTime/1000*100
+                            var dist = extrapolationTime/1000*speedInfo
                             coordinate = posInfo.atDistanceAndAzimuth(dist,angleInfo)
                         }else{
                             extrapolatingAnimation = false
@@ -263,7 +262,8 @@ ApplicationWindow  {
                     }
 
                     property int k: 50
-                    property variant poly
+                    property variant region
+
 
                     onCoordinateChanged: {
 
@@ -295,12 +295,23 @@ ApplicationWindow  {
                         }
 
                         if (map.isCenterOnAll) {
+
+
                             if (followInfo) dronemodel.toggleFollow(idInfo)
 
-                            //works from three
                             var drones = dronemodel.getAllDronePos()
-                            poly = QtPositioning.polygon(drones)
-                            map.fitViewportToGeoShape(poly,100)
+
+                            if(drones.length === 1){
+                                region = QtPositioning.circle(drones[0],500)
+                            }else if(drones.length === 2){
+                                var radius = drones[0].distanceTo(drones[1])/2
+                                var circleCenter = Algos.getLatLngCenter(drones)
+                                region = QtPositioning.circle(QtPositioning.coordinate(circleCenter[0],circleCenter[1]),radius)
+                            }else if(drones.length > 2){
+                                region = QtPositioning.polygon(drones)
+                            }
+
+                            map.fitViewportToGeoShape(region,100)
 
                         }
                     }

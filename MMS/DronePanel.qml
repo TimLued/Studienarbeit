@@ -68,7 +68,13 @@ Item{
                     topMargin: 5
                     bottomMargin: 5
                 }
-                Text{text: idInfo; color: colorInfo; font.pixelSize: txtSize;wrapMode: Text.WrapAnywhere; width: parent.width}
+                Text{
+                    text: idInfo
+                    color: if(visibleInfo) {colorInfo}else{"grey"}
+                    font.pixelSize: txtSize
+                    wrapMode: Text.WrapAnywhere
+                    width: parent.width
+                }
 
                 Row{
                     visible: if(listItem.height === enlarged){true}else{false}

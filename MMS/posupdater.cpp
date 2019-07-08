@@ -41,23 +41,25 @@ void PosUpdater::update(){
 
 void PosUpdater::readPos()
 {
-
-    if (blockSize == 0) {
-        // Relies on the fact that QDataStream serializes a quint32 into
-        // sizeof(quint32) bytes
-        if (socket->bytesAvailable() < (int)sizeof(quint32))
+    try {
+        if (blockSize == 0) {
+            // Relies on the fact that QDataStream serializes a quint32 into
+            // sizeof(quint32) bytes
+            if (socket->bytesAvailable() < (int)sizeof(quint32))
+                return;
+            in >> blockSize;
+        }
+        if (socket->bytesAvailable() < blockSize || in.atEnd())
             return;
-        in >> blockSize;
+
+        QString newData;
+        in >> newData;
+
+        if (newData == "-") return;
+
+        //std::cout << newPos.toUtf8().constData() <<std::endl;
+
+         emit posUpdated(newData);
+    } catch (...) {
     }
-    if (socket->bytesAvailable() < blockSize || in.atEnd())
-        return;
-
-    QString newData;
-    in >> newData;
-
-    if (newData == "-") return;
-
-    //std::cout << newPos.toUtf8().constData() <<std::endl;
-
-     emit posUpdated(newData);
 }

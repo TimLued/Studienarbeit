@@ -39,8 +39,8 @@ function getLatLngCenter(latLngInDegr) {
     var sumZ = 0;
 
     for (var i=0; i<latLngInDegr.length; i++) {
-        var lat = degr2rad(latLngInDegr[i][LATIDX]);
-        var lng = degr2rad(latLngInDegr[i][LNGIDX]);
+        var lat = degr2rad(latLngInDegr[i].latitude);
+        var lng = degr2rad(latLngInDegr[i].longitude);
         // sum of cartesian coordinates
         sumX += Math.cos(lat) * Math.cos(lng);
         sumY += Math.cos(lat) * Math.sin(lng);
