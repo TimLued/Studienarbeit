@@ -55,6 +55,7 @@ MapQuickItem {
 
 
     Behavior on coordinate {
+        id:smoother
         enabled: extrapolatingAnimation
         CoordinateAnimation{
             easing.type: Easing.Linear

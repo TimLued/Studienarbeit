@@ -27,15 +27,18 @@ void PosUpdater::requestPos()
 
 void PosUpdater::update(){
     blockSize = 0;
-    socket->abort();
-    socket->connectToServer("dronespos");
-    timer->stop();
-    //keep on connecting
+    try {
+        socket->abort();
+        socket->connectToServer("dronespos");
+        timer->stop();
+        //keep on connecting
 
-    if (!socket->waitForConnected(3000) || socket->state() == QAbstractSocket::UnconnectedState){
-        //connection failed
-        //std::cout << "recon" <<std::endl;
-        timer->start(500);
+        if (!socket->waitForConnected(3000) || socket->state() == QAbstractSocket::UnconnectedState){
+            //connection failed
+            //std::cout << "recon" <<std::endl;
+            timer->start(500);
+        }
+    } catch (...) {
     }
 }
 

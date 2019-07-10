@@ -6,7 +6,6 @@ import QtPositioning 5.12
 Item {
     id: actionPanel
     width: 50
-    opacity: 0.7
 
     anchors{
         right: parent.right
@@ -15,38 +14,39 @@ Item {
         rightMargin: 5
     }
 
-    Rectangle{
-        id: actionBG
-        anchors.centerIn: parent
-        width: parent.width
-        height: 300
-        color: "white"
-    }
+//    Rectangle{
+//        id: actionBG
+//        anchors.centerIn: parent
+//        width: parent.width
+//        height: 300
+//        color: "white"
+//    }
 
     Column{
-        anchors.fill: actionBG
-        leftPadding: 5
-        topPadding: actionBG.height/2-btnSize*4/2
+        anchors.verticalCenter: parent.verticalCenter
+
+        //leftPadding: 5
+        //topPadding: actionBG.height/2-btnSize*4/2
 
         spacing: 20
-        Button{
+        RoundButton{
             text: "X"
-            height: btnSize
-            width: btnSize
+            radius: btnSize / 2
             font.pixelSize: txtSize
+            palette {button: "#3EC6AA"}
         }
         RoundButton {
             text: "X"
             radius: btnSize / 2
             font.pixelSize: txtSize
+            palette {button: "#3EC6AA"}
         }
-        Button{
-            text: "O"
-            height: btnSize
-            width: btnSize
+        RoundButton{
+            text: "\u29BF"
+            radius: btnSize / 2
             font.pixelSize: txtSize
+            palette {button: "#3EC6AA"}
             highlighted: map.isCenterOnAll
-
             onClicked: {
                 map.isCenterOnAll = !map.isCenterOnAll
 

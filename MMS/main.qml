@@ -109,12 +109,11 @@ ApplicationWindow  {
         Behavior on bearing{
             enabled: !map.rotating
             RotationAnimation{
-                id: rotAni
                 duration: 100
                 direction: RotationAnimation.Shortest
                 easing.type: Easing.Linear
                 onRunningChanged: {
-                    if (!rotAni.running) { //stop
+                    if (!running) { //stop
                         map.droneRotAniLock = false
                     } else { //start
                     }
@@ -351,7 +350,11 @@ ApplicationWindow  {
                     visible: droneBody.popUp
                     coordinate: posInfo
 
+                    anchorPoint.x: if (!followInfo) {-10}else{droneBody.width / 2}
+                    anchorPoint.y: if (!followInfo) {-10}else{0}
+
                     sourceItem: Item{
+                        id:popItem
                         width: 100
                         height: 100
 
@@ -426,8 +429,6 @@ ApplicationWindow  {
                             }
                         }
                     }
-                    anchorPoint.x: -10
-                    anchorPoint.y: -10
                 }
 
                 MapPolyline{//Static

@@ -67,8 +67,15 @@ public:
     }
     void setAngle(double angle){
         mAngle = angle;
-
     }
+
+    double getSpeed() const{
+        return mSpeed;
+    }
+    void setSpeed(double speed){
+        mSpeed = speed;
+    }
+
     bool extrapolating() const{
         return extrapolate;
     }
@@ -118,6 +125,7 @@ private:
     QList<QGeoCoordinate> history;
     QString mColor;
     double mAngle;
+    double mSpeed;
     QVariantList mInfos;
     QVariantList mInfoNames;
     QVariantList selectedInfos;

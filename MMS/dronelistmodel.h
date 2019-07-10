@@ -14,6 +14,7 @@ class NodeModel;
 struct Data {
   QGeoCoordinate coord;
   double angle;
+  double speed;
   QVariantList infos;
   QVariantList infoNames;
 };
@@ -44,6 +45,7 @@ public:
     enum Roles{
         IdRole = Qt::UserRole + 1,
         PosRole,
+        SpeedRole,
         ColorRole,
         TrackingRole,
         HistoryRole,

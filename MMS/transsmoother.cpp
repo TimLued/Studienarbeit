@@ -20,8 +20,6 @@ void TransSmoother::start(int interval, double dist, double bearing, QGeoCoordin
     mBearing = bearing;
     cor = lastCor;
     timer->start(1);
-
-    //std::cout << mSpeed << std::endl;
 }
 
 void TransSmoother::stop(){
