@@ -81,6 +81,7 @@ ApplicationWindow  {
         property bool rotating: false
         property bool centerFollowing: false
         property bool isCenterOnAll: false
+        property bool circleRulerVisible: false
 
         onZoomLevelChanged:{
             win.setZoomScale()
@@ -310,7 +311,7 @@ ApplicationWindow  {
                                 region = QtPositioning.polygon(drones)
                             }
 
-                            map.fitViewportToGeoShape(region,100)
+                            map.fitViewportToGeoShape(region,80)
 
                         }
                     }
@@ -319,10 +320,10 @@ ApplicationWindow  {
 
                 MapQuickItem{
                     id:circleRuler
+                    visible: map.circleRulerVisible && visibleInfo
                     coordinate: droneBody.coordinate
                     anchorPoint.x: zoomCircle
                     anchorPoint.y: zoomCircle
-                    visible: visibleInfo
 
 
                     sourceItem: Item{
@@ -341,6 +342,7 @@ ApplicationWindow  {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.bottom: parent.top
                             text: zoomRadius
+                            renderType: Text.NativeRendering
                         }
                     }
                     Component.onCompleted: win.setCircleScale()
@@ -348,10 +350,10 @@ ApplicationWindow  {
 
                 MapQuickItem {//PopUp
                     visible: droneBody.popUp
-                    coordinate: posInfo
+                    coordinate: droneBody.coordinate
 
-                    anchorPoint.x: if (!followInfo) {-10}else{droneBody.width / 2}
-                    anchorPoint.y: if (!followInfo) {-10}else{0}
+                    anchorPoint.x: if (!followInfo) {-10}else{-droneBody.width / 2}
+                    anchorPoint.y: if (!followInfo) {-10}else{popItem.height / 2}
 
                     sourceItem: Item{
                         id:popItem
@@ -377,7 +379,7 @@ ApplicationWindow  {
                                         font.bold: true
                                         font.pixelSize: txtSize
                                         color: colorInfo
-
+                                        renderType: Text.NativeRendering
                                     }
                                 }
                                 Rectangle{

@@ -36,10 +36,14 @@ Item {
             palette {button: "#3EC6AA"}
         }
         RoundButton {
-            text: "X"
+            text: "\u25EF"
             radius: btnSize / 2
             font.pixelSize: txtSize
             palette {button: "#3EC6AA"}
+            highlighted: map.circleRulerVisible
+            onClicked: {
+                map.circleRulerVisible = !map.circleRulerVisible
+            }
         }
         RoundButton{
             text: "\u29BF"

@@ -22,11 +22,19 @@ bool DroneListModel::updateDrone(const QString & jInfo){
     double angle = jDroneInfo["bearing"].toString().toDouble();
     double speed = jDroneInfo["speed"].toString().toDouble();
 
+
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
 
+
+
     if(it != mDrones.end()){
         //append
+
+        //DETERMINE bearing and speed from coordinates
+        //std::cout<<it->getHistory().last().value<QGeoCoordinate>().azimuthTo(coord)<<std::endl;
+        //50Hz updates
+        //std::cout<<coord.distanceTo(it->getHistory().last().value<QGeoCoordinate>())/0.02<<std::endl;
 
         QVariantList infos;
         QVariantList infoNames;

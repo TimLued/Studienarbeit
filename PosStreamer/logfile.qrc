@@ -4,5 +4,7 @@
         <file>jdrone2.txt</file>
         <file>jdrone3.txt</file>
         <file>jdrone4.txt</file>
+        <file>jdroneV1.txt</file>
+        <file>jdroneV2.txt</file>
     </qresource>
 </RCC>

@@ -25,6 +25,5 @@ HEADERS += \
     controller.h \
     drone.h \
     dronelistmodel.h \
-    nodemodel.h \
     posupdater.h \
     transsmoother.h

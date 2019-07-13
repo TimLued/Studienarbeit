@@ -4,12 +4,13 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Window 2.12
 import "algos.js" as Algos
 
+
+
 Item{
     id: dronePanel
-    width: 150
+    property bool shown: true
+    width: if(shown) {150}else{0}
     property variant colors: ["red","blue","green","purple","yellow","cyan","coral","chartreuse","darkorange","darkred","fuchsia"]
-
-
     function noMark(){list.currentIndex = -1}
 
     anchors{
@@ -21,15 +22,44 @@ Item{
         bottomMargin: 20
     }
 
+    Behavior on width{
+        PropertyAnimation{
+            duration: 500
+            easing.type: Easing.Linear
+        }
+    }
 
     Rectangle{
-        id:bc
+        id:panelBG
         anchors.fill: parent
+        opacity: 0.8
         color: "#3EC6AA"
         MouseArea {
             hoverEnabled: true
             anchors.fill: parent
             onEntered: list.currentIndex = -1
+        }
+    }
+
+    Rectangle{
+        anchors{
+            verticalCenter: parent.verticalCenter
+            left: panelBG.right
+        }
+        width: 20
+        height: 50
+        color: panelBG.color
+        Text{
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width
+            font.pixelSize: 20
+            font.bold: true
+            text: if(shown){"\u25C1"}else{"\u25B7"}
+            horizontalAlignment: Text.AlignHCenter
+        }
+        MouseArea{
+            anchors.fill:parent
+            onClicked: {shown = !shown}
         }
     }
 
@@ -42,7 +72,7 @@ Item{
             height: small
 
             Rectangle{
-                opacity: 0.6
+                opacity: 0.5
                 anchors.fill: parent
                 color: "white"
 
@@ -59,7 +89,6 @@ Item{
                 }
             }
 
-
             Column{
                 id: mainColumn
                 spacing: 5
@@ -73,13 +102,14 @@ Item{
                     bottomMargin: 5
                 }
 
-                Text{
-                    id: txt1
+                Label{
+                    id: lbl1
                     text: idInfo
                     color: if(visibleInfo) {colorInfo}else{"grey"}
                     font.pixelSize: txtSize
                     wrapMode: Text.WrapAnywhere
                     width: parent.width
+                    renderType: Text.NativeRendering
                 }
 
                 Row{
@@ -138,7 +168,7 @@ Item{
                         }
 
                         delegate: ItemDelegate {
-                            width: cbColor.width
+                            width: 40
                             contentItem: Rectangle {
                                 anchors.fill: parent
                                 color: modelData
@@ -221,7 +251,7 @@ Item{
 
                 Flickable  {
                     id: fparent
-                    height: parent.height - txt1.height - row1.height - row2.height - 3* mainColumn.spacing - 5
+                    height: parent.height - lbl1.height - row1.height - row2.height - 3* mainColumn.spacing - 5
                     width: parent.width
                     interactive: true
                     clip: true
@@ -241,6 +271,7 @@ Item{
                             text: "<b>" + infoInfo[index].name + "</b>: " + infoInfo[index].value
                             wrapMode: Text.WrapAnywhere
                             width: dataLV.width
+                            renderType: Text.NativeRendering
                         }
 
                         onCountChanged: {
@@ -249,17 +280,6 @@ Item{
 
                     }
                 }
-
-
-
-//                Column{
-//                    visible: if(listItem.height === enlarged){true}else{false}
-//                    spacing: 5
-//                    layer.enabled: true
-
-//                }
-
-
 
             }
         }
