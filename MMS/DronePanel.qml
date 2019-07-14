@@ -9,7 +9,7 @@ import "algos.js" as Algos
 Item{
     id: dronePanel
     property bool shown: true
-    width: if(shown) {150}else{0}
+    width: shown ? 150 : 0
     property variant colors: ["red","blue","green","purple","yellow","cyan","coral","chartreuse","darkorange","darkred","fuchsia"]
     function noMark(){list.currentIndex = -1}
 
@@ -54,7 +54,7 @@ Item{
             width: parent.width
             font.pixelSize: 20
             font.bold: true
-            text: if(shown){"\u25C1"}else{"\u25B7"}
+            text: shown? "\u25C1" : "\u25B7"
             horizontalAlignment: Text.AlignHCenter
         }
         MouseArea{
@@ -123,7 +123,7 @@ Item{
                         width: contentItem.implicitWidth + leftPadding + rightPadding
                         font.pixelSize: 12
                         highlighted: trackingHistoryInfo
-                        enabled: if(listItem.height === enlarged){true}else{false}
+                        enabled: listItem.height === enlarged ? true : false
                         onClicked:{
                             dronemodel.toggleHistoryTracking(idInfo)
                         }
@@ -135,7 +135,7 @@ Item{
                         width: contentItem.implicitWidth + leftPadding + rightPadding
                         font.pixelSize: 12
                         highlighted: followInfo
-                        enabled: if(listItem.height === enlarged){true}else{false}
+                        enabled: listItem.height === enlarged ? true : false
                         onClicked:{
                             if (!map.isCenterOnAll) {
                                 dronemodel.toggleFollow(idInfo)
@@ -150,7 +150,7 @@ Item{
                         width: contentItem.implicitWidth + leftPadding + rightPadding
                         font.pixelSize: 12
                         highlighted: !visibleInfo
-                        enabled: if(listItem.height === enlarged){true}else{false}
+                        enabled: listItem.height === enlarged ? true : false
                         onClicked:{
                             if (visibleInfo) {dronemodel.setVisibility(idInfo,false)}else{dronemodel.setVisibility(idInfo,true)}
                         }
@@ -160,7 +160,7 @@ Item{
                         id: cbColor
                         height: 20
                         width: 20
-                        enabled: if(listItem.height === enlarged){true}else{false}
+                        enabled: listItem.height === enlarged ? true : false
                         font.pixelSize: 10
                         background: Rectangle{
                             id: cbBG
@@ -211,7 +211,7 @@ Item{
                         id: dataCB
                         height: 20
                         width: 80
-                        enabled: if(listItem.height === enlarged){true}else{false}
+                        enabled: listItem.height === enlarged ? true : false
                         textRole: "name"
                         font.pixelSize: 10
                         model: ListModel{id: infoNamesModel}

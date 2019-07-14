@@ -456,6 +456,15 @@ ApplicationWindow  {
     DronePanel{id:dronePanel}
     ActionPanel{id:actionPanel}
 
+    WaypointPanel{
+        anchors{
+            right: actionPanel.left
+            rightMargin: 5
+            verticalCenter: map.verticalCenter
+        }
+
+    }
+
 }
 
 

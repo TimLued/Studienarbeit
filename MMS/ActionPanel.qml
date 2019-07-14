@@ -14,14 +14,6 @@ Item {
         rightMargin: 5
     }
 
-//    Rectangle{
-//        id: actionBG
-//        anchors.centerIn: parent
-//        width: parent.width
-//        height: 300
-//        color: "white"
-//    }
-
     Column{
         anchors.verticalCenter: parent.verticalCenter
 
