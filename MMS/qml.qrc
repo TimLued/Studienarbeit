@@ -1,14 +1,16 @@
 <RCC>
     <qresource prefix="/">
-        <file>algos.js</file>
-        <file>ActionPanel.qml</file>
-        <file>Drone.qml</file>
-        <file>DronePanel.qml</file>
+        <file>WaypointPanel.qml</file>
+        <file>WaypointMarker.qml</file>
+        <file>WaypointDraggableItemDropArea.qml</file>
+        <file>WaypointDraggableItem.qml</file>
+        <file>PopUp.qml</file>
         <file>main.qml</file>
+        <file>DronePanel.qml</file>
+        <file>Drone.qml</file>
+        <file>ActionPanel.qml</file>
+        <file>algos.js</file>
         <file>img/scale.png</file>
         <file>img/scale_end.png</file>
-        <file>WaypointPanel.qml</file>
-        <file>WaypointDraggableItem.qml</file>
-        <file>WaypointDraggableItemDropArea.qml</file>
     </qresource>
 </RCC>

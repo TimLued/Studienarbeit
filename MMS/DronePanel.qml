@@ -108,7 +108,7 @@ Item{
                     color: if(visibleInfo) {colorInfo}else{"grey"}
                     font.pixelSize: txtSize
                     wrapMode: Text.WrapAnywhere
-                    width: parent.width
+                    width: 150 -parent.anchors.leftMargin
                     renderType: Text.NativeRendering
                 }
 

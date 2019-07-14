@@ -1,7 +1,8 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
-
+import QtPositioning 5.13
+import "algos.js" as Algos
 
 Item {
     id: mainContent
@@ -37,7 +38,7 @@ Item {
             ListView {
                 id: listView
                 clip: true
-                model: myModel
+                model: wpModel
                 delegate: WaypointDraggableItem {
                     Rectangle {
                         height: textLabel.height * 2
@@ -46,8 +47,10 @@ Item {
 
                         Text {
                             id: textLabel
-                            anchors.centerIn: parent
-                            text: model.text
+                            //anchors.centerIn: parent
+                            anchors.verticalCenter: parent.verticalCenter
+                            leftPadding: 5
+                            text: (index+1) + ". " + (name? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3))
                         }
 
                         // Bottom line border
@@ -65,24 +68,29 @@ Item {
                     draggedItemParent: mainContent
 
                     onMoveItemRequested: {
-                        myModel.move(from, to, 1);
+                        wpModel.move(from, to, 1);
+                        onMapWpModel.update()
                     }
+
                 }
+
             }
         }
     }
 
-    ListModel {
-        id: myModel
-        ListElement {
-            text: "Alpha"
+    RoundButton{
+        anchors{
+            bottom: parent.bottom
+            right: parent.right
+            margins: 5
         }
-        ListElement {
-            text: "Bravo"
-        }
-        ListElement {
-            text: "Charlie"
-        }
+        radius: 20
+        palette {button: "#3EC6AA"}
+        text: "+"
+        font.pixelSize: txtSize
+        highlighted: map.setWaypoints
+        onClicked: map.setWaypoints = !map.setWaypoints
+
     }
 
 }

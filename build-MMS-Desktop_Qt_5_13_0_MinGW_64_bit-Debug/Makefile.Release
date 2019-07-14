@@ -117,10 +117,15 @@ compiler_rcc_clean:
 	-$(DEL_FILE) release\qrc_qml.cpp
 release/qrc_qml.cpp: ../MMS/qml.qrc \
 		C:/Qt/5.13.0/mingw73_64/bin/rcc.exe \
-		../MMS/algos.js \
 		../MMS/ActionPanel.qml \
+		../MMS/algos.js \
+		../MMS/PopUp.qml \
 		../MMS/Drone.qml \
+		../MMS/WaypointPanel.qml \
+		../MMS/WaypointMarker.qml \
+		../MMS/WaypointDraggableItemDropArea.qml \
 		../MMS/DronePanel.qml \
+		../MMS/WaypointDraggableItem.qml \
 		../MMS/main.qml \
 		../MMS/img/scale_end.png \
 		../MMS/img/scale.png

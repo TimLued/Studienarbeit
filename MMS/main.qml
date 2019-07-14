@@ -82,6 +82,8 @@ ApplicationWindow  {
         property bool centerFollowing: false
         property bool isCenterOnAll: false
         property bool circleRulerVisible: false
+        
+        property bool setWaypoints: false
 
         onZoomLevelChanged:{
             win.setZoomScale()
@@ -143,12 +145,15 @@ ApplicationWindow  {
             onEntered: dronePanel.noMark()
 
             onClicked: {
-
                 if (mouse.button === Qt.MiddleButton && !map.centerFollowing){
                     map.rotating = !map.rotating
                     nn = mouseY
                     nnBear = map.bearing
                     if (!map.rotating) map.droneRotAniLock = false
+                }else if(mouse.button === Qt.LeftButton && map.setWaypoints){
+                    var cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
+                    wpModel.append({"name":"","lat":cor.latitude,"lon":cor.longitude})
+                    onMapWpModel.append({"name":"","lat":cor.latitude,"lon":cor.longitude})
                 }
             }
 
@@ -446,10 +451,35 @@ ApplicationWindow  {
                     visible: trackingHistoryInfo
                     line.color: colorInfo
                 }
-
             }
         }
 
+        MapItemView {
+            id: wpMarker
+            model: onMapWpModel
+
+            delegate: MapQuickItem {
+                coordinate: QtPositioning.coordinate(lat,lon)
+
+                anchorPoint.x: 10
+                anchorPoint.y: 10
+
+                sourceItem:Rectangle{
+                    color: "#FF2F44"
+                    width: 20
+                    height: 20
+                    radius: width/2
+                    Text {
+                        text: (index + 1)
+                        color: "white"
+                        anchors.centerIn: parent
+                        font.bold: true
+                    }
+                }
+            }
+
+
+        }
     }
 
 
@@ -462,24 +492,21 @@ ApplicationWindow  {
             rightMargin: 5
             verticalCenter: map.verticalCenter
         }
+    }
 
+    ListModel {
+        id: wpModel
+    }
+
+    ListModel {
+        id: onMapWpModel
+        function update(){
+            onMapWpModel.clear()
+            for (var i = 0; i<wpModel.count;i++){
+                onMapWpModel.append(wpModel.get(i))
+            }
+        }
     }
 
 }
-
-
-        //TRANSMITTER (add cpp in MMS)/// Receiver for action handling -> back to PosSource
-        /*
-        -Waypoint (1 coor)
-        -Rectangle (4 coordinates) U+20DE
-        -Triangle U+20E4
-        -Circle (how many coordinate?)  U+20DD
-        -x points area (closed, transp color)
-        SELECT Drones (RoundBtn change Text in Panel {visible}) U+2713
-        ADDITONAL data (per drone / adept btn
-        - perform when? {ComboBox}
-        - priority?
-        - side task?
-        TRANSMITTER SEND Coors to SERVER
-        */
 

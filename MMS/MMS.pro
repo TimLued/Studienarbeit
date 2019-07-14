@@ -27,3 +27,5 @@ HEADERS += \
     dronelistmodel.h \
     posupdater.h \
     transsmoother.h
+
+DISTFILES +=
