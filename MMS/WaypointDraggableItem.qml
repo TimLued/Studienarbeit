@@ -2,6 +2,7 @@ import QtQuick 2.12
 
 Item {
     id: root
+    property bool mouseHover: false
 
     default property Item contentItem
 
@@ -9,6 +10,7 @@ Item {
     property Item draggedItemParent
 
     signal moveItemRequested(int from, int to)
+    signal meClicked()
 
     width: contentItem.width
     height: contentItem.height
@@ -30,6 +32,11 @@ Item {
 
         MouseArea {
             id: dragArea
+
+            hoverEnabled: true
+            onEntered: mouseHover = true
+            onExited: mouseHover = false
+            onClicked: root.meClicked()
             anchors.fill: parent
             drag.target: parent
             // Keep the dragged item at the same X position. Nice for lists, but not mandatory
@@ -110,8 +117,7 @@ Item {
         if (model.index === dropIndex) {
             return;
         }
+        // execute reorder
         root.moveItemRequested(model.index, dropIndex);
     }
-
-
 }

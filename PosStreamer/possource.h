@@ -13,7 +13,7 @@ public:
     bool running;
 
 public slots:
-    void startStop(bool start);
+    void startStop(bool, bool);
     void setupSource(QString,int);
     void setRunning(bool,int);
 

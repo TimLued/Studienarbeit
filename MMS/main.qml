@@ -150,6 +150,7 @@ ApplicationWindow  {
                     nn = mouseY
                     nnBear = map.bearing
                     if (!map.rotating) map.droneRotAniLock = false
+
                 }else if(mouse.button === Qt.LeftButton && map.setWaypoints){
                     var cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
                     wpModel.append({"name":"","lat":cor.latitude,"lon":cor.longitude})
@@ -232,6 +233,7 @@ ApplicationWindow  {
         }
 
         MapItemView{
+            id: droneObjects
             model: dronemodel
 
             delegate:MapItemGroup{
@@ -268,7 +270,6 @@ ApplicationWindow  {
 
                     property int k: 50
                     property variant region
-
 
                     onCoordinateChanged: {
 
@@ -494,7 +495,7 @@ ApplicationWindow  {
         }
     }
 
-    ListModel {
+    ListModel {//in order to change order without violatioing active model
         id: wpModel
     }
 

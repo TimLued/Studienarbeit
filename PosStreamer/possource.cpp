@@ -40,20 +40,29 @@ void PosSource::setupSource(QString file,int i){
 
 //JSON
 void PosSource::readNextPos(){
-
     emit posUpdated(droneInfo[currentInfoIndex]);
     if (currentInfoIndex<droneInfo.count()-1){ currentInfoIndex+=1;}else{currentInfoIndex=0;}
 
 }
 
-void PosSource::startStop(bool start){
-    if (start){
-        if (running) timer->start();
+void PosSource::startStop(bool start,bool load){
+    if (load && running){
+        //load whole json ones
+        foreach (const QString jLine, droneInfo){
+            emit posUpdated(jLine);
+        }
     }else{
-        timer->stop();
+        if (start&&running){
+            timer->start();
+        }else{
+            timer->stop();
+        }
     }
+
 }
 
 void PosSource::setRunning(bool status,int i){
     if (i==lvIndex) running = status;
 }
+
+

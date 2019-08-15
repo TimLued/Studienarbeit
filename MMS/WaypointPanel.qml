@@ -29,7 +29,53 @@ Item {
                 text: "Waypoints"
                 font.letterSpacing: 2
             }
+
+            Text{
+                text: "X"
+                anchors.right: parent.right
+                anchors.rightMargin: 20
+                height: parent.height
+                verticalAlignment: Text.AlignVCenter
+                MouseArea{
+                    anchors.fill:parent
+                    onClicked: {}
+                }
+            }
+
         }
+
+        // Header
+//        RowLayout {
+//            spacing: 0
+//            width: parent.width
+
+//            Rectangle{
+//                color: "#3EC6AA"
+//                height: 30
+//                Layout.fillWidth: true
+//                Layout.alignment: Qt.AlignLeft
+//                Text{
+//                    text: "Waypoints"
+//                    anchors.centerIn: parent
+//                    font.letterSpacing: 2
+//                }
+//            }
+//            Rectangle{
+//                color: "#3EC6AA"
+//                height: 30
+//                width: 50
+//                Layout.alignment: Qt.AlignRight
+
+//                Text{
+//                    text: "X"
+//                    //anchors.margins: 5
+//                    anchors.centerIn: parent
+//                }
+//            }
+//        }
+
+
+
 
         ScrollView {
             Layout.fillWidth: true
@@ -40,10 +86,12 @@ Item {
                 clip: true
                 model: wpModel
                 delegate: WaypointDraggableItem {
+                    id: listItemMechanic
                     Rectangle {
+                        id: listItemBody
                         height: textLabel.height * 2
                         width: listView.width
-                        color: "white"
+                        color: listItemMechanic.mouseHover? "#3EC6AA":"white"
 
                         Text {
                             id: textLabel
@@ -63,6 +111,13 @@ Item {
                             height: 1
                             color: "lightgrey"
                         }
+
+                    }
+
+                    property variant region
+                    onMeClicked: {
+                        region = QtPositioning.circle(QtPositioning.coordinate(onMapWpModel.get(index).lat,onMapWpModel.get(index).lon),500)
+                        map.fitViewportToGeoShape(region,80)
                     }
 
                     draggedItemParent: mainContent
@@ -73,6 +128,17 @@ Item {
                     }
 
                 }
+
+//                highlightFollowsCurrentItem: false
+//                focus: true
+//                highlight: Component{
+//                    Rectangle{
+//                        width: listView.width
+//                        height:
+//                        color: "#3EC6AA"
+//                        opacity: 0.5
+//                        y: listView.currentItem.y
+//                    }}
 
             }
         }

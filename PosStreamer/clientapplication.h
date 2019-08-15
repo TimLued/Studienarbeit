@@ -27,6 +27,7 @@ private:
     QPushButton *startBtn;
     QPushButton *resetBtn;
     QPushButton *startAllBtn;
+    QPushButton *loadBtn;
     QListWidget *droneLW;
 
     PosSource* source;
@@ -42,6 +43,7 @@ private slots:
     void itemChanged();
     void startAll();
     void startAllStep();
+    void loadDrone();
 
     void loadToBuffer(QString);
     void resetBuffer();
@@ -49,7 +51,7 @@ private slots:
 
 
 signals:
-    void startStop(bool start);
+    void startStop(bool,bool);
     void setRunning(bool,int);
 };
 

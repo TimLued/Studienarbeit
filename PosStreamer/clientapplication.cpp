@@ -44,13 +44,17 @@ ClientApplication::ClientApplication(QWidget *parent)
     startBtn = new QPushButton("Start",this);
     startBtn->setCheckable(true);
     resetBtn = new QPushButton("Reset",this);
-    startAllBtn= new QPushButton("ALL",this);
+    startAllBtn = new QPushButton("ALL",this);
+    loadBtn = new QPushButton("Load",this);
+
     connect(startBtn,SIGNAL(clicked()),this,SLOT(startStopUpdates()));
     connect(resetBtn,SIGNAL(clicked()),this,SLOT(resetBuffer()));
     connect(startAllBtn,SIGNAL(clicked()),this,SLOT(startAll()));
+    connect(loadBtn,SIGNAL(clicked()),this,SLOT(loadDrone()));
     buttonBox->addButton(startBtn, QDialogButtonBox::ActionRole);
     buttonBox->addButton(resetBtn, QDialogButtonBox::RejectRole);
     buttonBox->addButton(startAllBtn, QDialogButtonBox::RejectRole);
+    buttonBox->addButton(loadBtn, QDialogButtonBox::RejectRole);
     //fromRow, fromColumn, rowSpan, columnSpan
     mainLayout->addWidget(bufferLbl,0,0);
     mainLayout->addWidget(statusLbl,1,0);
@@ -67,7 +71,7 @@ ClientApplication::ClientApplication(QWidget *parent)
         source->setupSource(files[i],i);
         sources.append(source);
         t = new QThread;
-        connect(this, SIGNAL(startStop(bool)),source,SLOT(startStop(bool)));
+        connect(this, SIGNAL(startStop(bool,bool)),source,SLOT(startStop(bool,bool)));
         connect(this, SIGNAL(setRunning(bool,int)),source,SLOT(setRunning(bool,int)));
         connect(source, SIGNAL(posUpdated(QString)),this,SLOT(loadToBuffer(QString))); //Buffer of ClientSocket
         source->moveToThread(t);
@@ -86,7 +90,7 @@ ClientApplication::ClientApplication(QWidget *parent)
     connect(timer,SIGNAL(timeout()),this,SLOT(startAllStep()));
 }
 
-void ClientApplication::loadToBuffer(QString info){ //solves segmentastion fault???
+void ClientApplication::loadToBuffer(QString info){
     buffer.append(info);
     bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
 }
@@ -106,15 +110,17 @@ void ClientApplication::itemChanged()
 
 void ClientApplication::startStopUpdates()
 {
-    if (startBtn->isChecked())
-    {
-        emit startStop(1);
+    if (startBtn->isChecked()){
+        emit startStop(1,0);
         startBtn->setText("Stop");
     }else{
-        emit startStop(0);
+        emit startStop(0,0);
         startBtn->setText("Start");
     }
+
 }
+
+void ClientApplication::loadDrone(){emit startStop(1,1);}
 
 void ClientApplication::startAll()
 {

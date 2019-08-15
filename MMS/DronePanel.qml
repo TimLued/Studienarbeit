@@ -47,7 +47,7 @@ Item{
             left: panelBG.right
         }
         width: 20
-        height: 50
+        height: 80
         color: panelBG.color
         Text{
             anchors.verticalCenter: parent.verticalCenter
