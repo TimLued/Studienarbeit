@@ -32,7 +32,7 @@ Item{
     Rectangle{
         id:panelBG
         anchors.fill: parent
-        opacity: 0.8
+        opacity: 1.0
         color: "#3EC6AA"
         MouseArea {
             hoverEnabled: true
@@ -41,7 +41,7 @@ Item{
         }
     }
 
-    Rectangle{
+    Rectangle{//Closer
         anchors{
             verticalCenter: parent.verticalCenter
             left: panelBG.right
@@ -52,7 +52,7 @@ Item{
         Text{
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width
-            font.pixelSize: 20
+            font.pixelSize: 25
             font.bold: true
             text: shown? "\u25C1" : "\u25B7"
             horizontalAlignment: Text.AlignHCenter
@@ -72,7 +72,7 @@ Item{
             height: small
 
             Rectangle{
-                opacity: 0.5
+                //opacity: 0.5
                 anchors.fill: parent
                 color: "white"
 
@@ -168,12 +168,11 @@ Item{
                         }
 
                         delegate: ItemDelegate {
-                            width: 40
+                            width: 60
                             contentItem: Rectangle {
                                 anchors.fill: parent
                                 color: modelData
                             }
-                            //highlighted: cbColor.highlightedIndex === index
                         }
 
                         indicator: Canvas {}
@@ -228,16 +227,16 @@ Item{
                         }
                     }
 
-                    Button{
+                    Button{// add info displayed
                         text: "+"
                         width: 20
                         height: 20
                         onClicked: {
-                            if (dataCB.currentIndex!=-1) dronemodel.setSeelectedInfoList(idInfo,infoNamesModel.get(dataCB.currentIndex).name)
+                            if (dataCB.currentIndex!=-1) dronemodel.setSelectedInfoList(idInfo,infoNamesModel.get(dataCB.currentIndex).name)
                         }
                     }
 
-                    Button{
+                    Button{// delete info displayed
                         text: "-"
                         width: 20
                         height: 20
@@ -301,11 +300,12 @@ Item{
         clip:true
         model: dronemodel
         delegate: listDelegate
-        highlight: mark
+        //highlight: mark
         highlightFollowsCurrentItem: true
         highlightMoveVelocity: -1
         highlightResizeVelocity: -1
         Component.onCompleted: currentIndex = -1
+        spacing: 2
     }
 
 

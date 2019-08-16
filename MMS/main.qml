@@ -21,7 +21,6 @@ ApplicationWindow  {
     property string zoomRadius
 
     property variant droneCorList
-    //property double tmpZoom
 
 
     //MAP SCALE
@@ -134,6 +133,7 @@ ApplicationWindow  {
 
             onPositionChanged: {
                 cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
+
                 coorLbl.text = Algos.roundNumber(cor.latitude,3) + ", " +  Algos.roundNumber(cor.longitude,3)
 
                 //rotation
@@ -264,7 +264,8 @@ ApplicationWindow  {
                             dynamicPath.path = []
                             staticPath.path = []
                         }else{
-                            staticPath.path = historyInfo
+                            if (historyInfo.length > 1) staticPath.mPath = historyInfo
+                            staticPath.scalePoly()
                         }
                     }
 
@@ -272,14 +273,14 @@ ApplicationWindow  {
                     property variant region
 
                     onCoordinateChanged: {
-
                         if (trackingHistory) {
                             if (k == 50){
                                 if(dynamicPath.pathLength() <= 100){
                                     dynamicPath.addCoordinate(posInfo)
                                 }else{
                                     dynamicPath.path = []
-                                    staticPath.path = historyInfo
+                                    staticPath.mPath = historyInfo
+                                    staticPath.scalePoly()
                                 }
 
                                 k = 0
@@ -441,17 +442,36 @@ ApplicationWindow  {
 
                 MapPolyline{//Static
                     id: staticPath
+                    property variant mPath
+                    property int zoom: Math.round(map.zoomLevel)
                     line.width: 1
-                    visible: trackingHistoryInfo
+                    visible: trackingHistoryInfo && visibleInfo
                     line.color: colorInfo
+
+                    onZoomChanged: if(staticPath.visible) scalePoly()
+
+                    function scalePoly(){
+                        var nPath = []
+                        var step = (21 - Math.round(map.zoomLevel)) * 5 //20-0
+                        for (var i = 0; i<mPath.length; i+=step+1){
+                            nPath.push(mPath[i])
+                        }
+                        if ((mPath.length-1)%(step+1) != 0) nPath.push(mPath[mPath.length-1])
+                        staticPath.path = nPath
+                    }
+
                 }
 
                 MapPolyline{//dynamic
                     id: dynamicPath
                     line.width: 1
-                    visible: trackingHistoryInfo
+                    visible: trackingHistoryInfo && visibleInfo
                     line.color: colorInfo
                 }
+
+
+
+
             }
         }
 
@@ -478,11 +498,8 @@ ApplicationWindow  {
                     }
                 }
             }
-
-
         }
     }
-
 
     DronePanel{id:dronePanel}
     ActionPanel{id:actionPanel}

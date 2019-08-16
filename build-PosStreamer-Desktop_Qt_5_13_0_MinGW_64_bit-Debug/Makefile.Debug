@@ -114,9 +114,9 @@ compiler_rcc_clean:
 debug/qrc_logfile.cpp: ../PosStreamer/logfile.qrc \
 		C:/Qt/5.13.0/mingw73_64/bin/rcc.exe \
 		../PosStreamer/jdrone4.txt \
-		../PosStreamer/jdroneV2.txt \
 		../PosStreamer/jdrone3.txt \
 		../PosStreamer/jdroneV1.txt \
+		../PosStreamer/jwp2.txt \
 		../PosStreamer/jdrone2.txt \
 		../PosStreamer/jdrone1.txt
 	C:\Qt\5.13.0\mingw73_64\bin\rcc.exe -name logfile ..\PosStreamer\logfile.qrc -o debug\qrc_logfile.cpp

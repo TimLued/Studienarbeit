@@ -26,19 +26,38 @@ bool DroneListModel::updateDrone(const QString & jInfo){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
 
+    // loading waypoints
+    if(jDroneInfo.keys().contains("drone")){
+        auto it_wp = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+                return obj.id() == jDroneInfo["drone"].toString();});
 
+        Waypoint wp{jDroneInfo["id"].toString(),jDroneInfo["lat"].toString(),jDroneInfo["lon"].toString()};
+
+        if(it_wp != mDrones.end()){
+            it_wp->appendRoute(QVariant::fromValue(wp));
+        }else{//should occur just once per drone
+            createDrone(jDroneInfo["drone"].toString());
+        }
+
+        QModelIndex ix = index(it_wp - mDrones.begin());
+        emit dataChanged(ix, ix, QVector<int>{WaypointRole});
+        return true;
+    }
 
     if(it != mDrones.end()){
-        //append
 
-        //DETERMINE bearing and speed from coordinates
-        //std::cout<<it->getHistory().last().value<QGeoCoordinate>().azimuthTo(coord)<<std::endl;
-        //50Hz updates
-        //std::cout<<coord.distanceTo(it->getHistory().last().value<QGeoCoordinate>())/0.02<<std::endl;
+        /*append
+        DETERMINE bearing and speed from coordinates
+        std::cout<<it->getHistory().last().value<QGeoCoordinate>().azimuthTo(coord)<<std::endl;
+        50Hz updates
+        std::cout<<coord.distanceTo(it->getHistory().last().value<QGeoCoordinate>())/0.02<<std::endl;
+        */
 
+        //save all data
         QVariantList infos;
-        QVariantList infoNames;
+        QVariantList infoNames = it -> getInfoNames(); //load old list (so if later value is not updated)
         QRegExp re("[+-]?\\d*\\.?\\d+");
+
         foreach(const QString& key, jDroneInfo.keys()) {
 
             QString val = jDroneInfo.value(key).toString();
@@ -48,8 +67,9 @@ bool DroneListModel::updateDrone(const QString & jInfo){
 
             if (it->getSelectedInfoList().indexOf(key) != -1) infos << QVariant::fromValue(info); //add if in selected list
 
-            infoNames << key;
+            if (!infoNames.contains(key)) infoNames << key;
         }
+
 
         int row = it - mDrones.begin();
         QModelIndex ix = index(row);
@@ -60,16 +80,16 @@ bool DroneListModel::updateDrone(const QString & jInfo){
         return result;
     }else{
         //create
-        return createDrone(id, coord);
+        return createDrone(id);
     }
 }
 
-bool DroneListModel::createDrone(const QString & id,QGeoCoordinate coord){
+bool DroneListModel::createDrone(const QString & id){
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
     Drone it;
     it.sedId(id);
-    it.setPos(coord);
+    //it.setPos(coord);
     for (int i = 0;i<colors.count();i++){
         if (usedColors.indexOf(colors[i]) == -1){
             it.setColor(colors[i]);
@@ -117,7 +137,7 @@ QVariant DroneListModel::getInfoNameList(const QString&id){
     return it->getInfoNames();
 }
 
-void DroneListModel::setSeelectedInfoList(const QString&id,QString info){
+void DroneListModel::setSelectedInfoList(const QString&id,QString info){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
     it->addSelectedInfo(info);
@@ -192,6 +212,8 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getInfoNames();
         else if(role == VisibleRole)
             return it.visibility();
+        else if(role == WaypointRole)
+            return it.getRoute();
     }
     return QVariant();
 }
@@ -210,6 +232,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[InfoRole] = "infoInfo";
     roles[InfoNamesRole] = "infoNamesInfo";
     roles[VisibleRole] = "visibleInfo";
+    roles[WaypointRole] = "wpInfo";
     return roles;
 }
 

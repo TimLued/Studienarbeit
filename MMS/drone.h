@@ -35,7 +35,16 @@ public:
           history_list << QVariant::fromValue(coord);
         }
         history_list << QVariant::fromValue(mPos);
+
         return history_list;
+    }
+
+    void appendRoute (QVariant waypoint){
+        mRoute << waypoint;
+    }
+
+    QVariantList getRoute() const{
+        return mRoute;
     }
 
     QString getColor() const{
@@ -129,6 +138,8 @@ private:
     QVariantList mInfos;
     QVariantList mInfoNames;
     QVariantList selectedInfos;
+    QVariantList mRoute;
+
 
     bool follow=false;
     bool trackHistory=false;

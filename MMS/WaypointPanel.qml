@@ -38,7 +38,7 @@ Item {
                 verticalAlignment: Text.AlignVCenter
                 MouseArea{
                     anchors.fill:parent
-                    onClicked: {}
+                    onClicked: {mainContent.visible = false}
                 }
             }
 
