@@ -265,7 +265,7 @@ ApplicationWindow  {
                             staticPath.path = []
                         }else{
                             if (historyInfo.length > 1) staticPath.mPath = historyInfo
-                            staticPath.scalePoly()
+                            k = 0
                         }
                     }
 
@@ -274,13 +274,14 @@ ApplicationWindow  {
 
                     onCoordinateChanged: {
                         if (trackingHistory) {
+
                             if (k == 50){
                                 if(dynamicPath.pathLength() <= 100){
                                     dynamicPath.addCoordinate(posInfo)
+
                                 }else{
                                     dynamicPath.path = []
                                     staticPath.mPath = historyInfo
-                                    staticPath.scalePoly()
                                 }
 
                                 k = 0
@@ -319,7 +320,6 @@ ApplicationWindow  {
                             }
 
                             map.fitViewportToGeoShape(region,80)
-
                         }
                     }
                 }
@@ -440,37 +440,20 @@ ApplicationWindow  {
                     }
                 }
 
-                MapPolyline{//Static
+                HistoryPoly{//Static
                     id: staticPath
-                    property variant mPath
-                    property int zoom: Math.round(map.zoomLevel)
-                    line.width: 1
                     visible: trackingHistoryInfo && visibleInfo
                     line.color: colorInfo
 
-                    onZoomChanged: if(staticPath.visible) scalePoly()
-
-                    function scalePoly(){
-                        var nPath = []
-                        var step = (21 - Math.round(map.zoomLevel)) * 5 //20-0
-                        for (var i = 0; i<mPath.length; i+=step+1){
-                            nPath.push(mPath[i])
-                        }
-                        if ((mPath.length-1)%(step+1) != 0) nPath.push(mPath[mPath.length-1])
-                        staticPath.path = nPath
-                    }
 
                 }
 
                 MapPolyline{//dynamic
                     id: dynamicPath
-                    line.width: 1
                     visible: trackingHistoryInfo && visibleInfo
                     line.color: colorInfo
+                    line.width: 1
                 }
-
-
-
 
             }
         }
