@@ -6,21 +6,26 @@ MapPolyline{
     id: poly
     line.width: 1
     property variant mPath
-    property variant sPath
+    //property variant sPath
     property variant center: map.center
     property int zoom: Math.round(map.zoomLevel)
 
-    onZoomChanged: if(poly.visible) updatePoly()
-    onCenterChanged: if(poly.visible) poly.path = onviewPoly(sPath)
-    onMPathChanged: if(poly.visible) {
-                        sPath = doublePoly(mPath)
-                        updatePoly()
-                    }
+//    onZoomChanged: if(poly.visible) updatePoly()
+//    onCenterChanged: if(poly.visible) poly.path = onviewPoly(sPath)
+//    onMPathChanged: if(poly.visible) {
+//                        sPath = doublePoly(mPath)
+//                        updatePoly()
+//                    }
 
-    function updatePoly(){
-        var nPoly = scalePoly(sPath)
-        poly.path = onviewPoly(nPoly)
-    }
+//    function updatePoly(){
+//        var nPoly = scalePoly(sPath)
+//        poly.path = onviewPoly(nPoly)
+//    }
+
+    onZoomChanged: if(poly.visible) poly.path = optimize(mPath)
+    onCenterChanged: if(poly.visible) poly.path = optimize(mPath)
+    onMPathChanged: if(poly.visible) poly.path = optimize(mPath)
+
 
     function maxCheck(){
         /*Wenn größer Differenz rausschmeißen
@@ -33,25 +38,35 @@ MapPolyline{
         */
     }
 
-    function doublePoly(oPath){
-        var doublePath = []
-        for (var j = 0; j<oPath.length; j++){
-            if(doublePath.indexOf(oPath[j])===-1) doublePath.push(oPath[j])
-        }
-        return doublePath
-    }
 
-    function scalePoly(oPath){
-        var scaledPath = []
+    function optimize(oPath){
+        var nPath = []
         var step = (21 - Math.round(map.zoomLevel)) * 8 //20-0
-        for (var i = 0; i<oPath.length; i+=step+1){
-            scaledPath.push(oPath[i])
+        for (var j = 0; j<oPath.length; j++){
+            if(nPath.indexOf(oPath[j])===-1) {//--doubleCheck
+                if(j>9){
+                    if(nPath.indexOf(oPath[j-10])===-1){
+                        if(j<oPath.length-11){
+                            if(nPath.indexOf(oPath[j+10])===-1){
+                                //doubleCheck--
+                                if (j%step === 0){//scaling
+                                    nPath.push(oPath[j])
+                                }else if(j>0 && j<oPath.length-1){//still add if corner
+                                    if (Math.abs(oPath[j-1].azimuthTo(oPath[j])-oPath[j].azimuthTo(oPath[j+1]))>5){
+                                        nPath.push(oPath[j])
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        if ((oPath.length-1)%(step+1) != 0) scaledPath.push(oPath[oPath.length-1])
-        return scaledPath
+        if ((oPath.length-1)%(step+1) != 0) nPath.push(oPath[oPath.length-1]) //add last coordinate thus connecting to dynamic
+        return onviewPoly(nPath)
     }
 
-    function onviewPoly(oPath){
+    function onviewPoly(oPath){ //keep
         var visiblePath = []
 
         var topleft = map.toCoordinate(Qt.point(0,0))
@@ -75,6 +90,26 @@ MapPolyline{
         }else{
             return oPath
         }
+    }
+
+
+
+    function doublePoly(oPath){ //ev raus?
+        var doublePath = []
+        for (var j = 0; j<oPath.length; j++){
+            if(doublePath.indexOf(oPath[j])===-1) doublePath.push(oPath[j])
+        }
+        return doublePath
+    }
+
+    function scalePoly(oPath){//Ecken drin behalten!!!
+        var scaledPath = []
+        var step = (21 - Math.round(map.zoomLevel)) * 8 //20-0
+        for (var i = 0; i<oPath.length; i+=step+1){
+            scaledPath.push(oPath[i])
+        }
+        if ((oPath.length-1)%(step+1) != 0) scaledPath.push(oPath[oPath.length-1])
+        return scaledPath
     }
 
     //max Beschränkung

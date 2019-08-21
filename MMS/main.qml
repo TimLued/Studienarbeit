@@ -19,13 +19,13 @@ ApplicationWindow  {
     property int btnSize: 40
     property double zoomCircle
     property string zoomRadius
-
+    property int zoomOffset: 0
     property variant droneCorList
 
 
     //MAP SCALE
     property variant scaleLengths: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000]
-    function calculateScale(objWidth)
+    function calculateScale(objWidth,direction)
     {
         var coord1, coord2, dist, f
         var info = []
@@ -39,14 +39,23 @@ ApplicationWindow  {
         if (dist > 0) {
             for (var i = 0; i < scaleLengths.length-1; i++) {
                 if (dist < (scaleLengths[i] + scaleLengths[i+1]) / 2 ) {
-                    f = scaleLengths[i] / dist
-                    dist = scaleLengths[i]
+
+                    if(i+direction>= scaleLengths.length-1){
+                        direction = scaleLengths.length-1-i
+                        zoomOffset = direction
+                    }else if(i+direction < 0){
+                        direction = -i
+                        zoomOffset = direction
+                    }
+
+                    f = scaleLengths[i+direction] / dist
+                    dist = scaleLengths[i+direction]
                     break;
                 }
             }
             if (f === 0) {
-                f = dist / scaleLengths[i]
-                dist = scaleLengths[i]
+                f = dist / scaleLengths[i+direction]
+                dist = scaleLengths[i+direction]
             }
         }
 
@@ -55,14 +64,15 @@ ApplicationWindow  {
         return info
     }
 
-    function setCircleScale(){
-        var info = calculateScale(scaleImage.sourceSize.width)
+
+    function setCircleScale(k){
+        var info = calculateScale(scaleImage.sourceSize.width,k)
         zoomRadius = Algos.formatDistance(info[0])
         zoomCircle = (scaleImage.sourceSize.width * info[1]) //border.width 3
     }
 
     function setZoomScale(){
-        var info = calculateScale(scaleImage.sourceSize.width)
+        var info = calculateScale(scaleImage.sourceSize.width,0)
         scaleText.text = Algos.formatDistance(info[0])
         scaleImage.width = (scaleImage.sourceSize.width * info[1]) - 2 * scaleImageLeft.sourceSize.width
     }
@@ -86,7 +96,7 @@ ApplicationWindow  {
 
         onZoomLevelChanged:{
             win.setZoomScale()
-            win.setCircleScale()
+            win.setCircleScale(zoomOffset)
             zoomLbl.text = "Zoom: " + Math.round(map.zoomLevel)
         }
 
@@ -272,20 +282,25 @@ ApplicationWindow  {
 
                     property int k: 50
                     property variant region
-
                     onCoordinateChanged: {
                         if (trackingHistory) {
-
-                            if (k == 50){
-                                if(dynamicPath.pathLength() <= 100){
+                            var n = dynamicPath.pathLength()
+                            if (k == 50){ //every 50th or corner
+                                if(n <= 100){
                                     dynamicPath.addCoordinate(posInfo)
-
+                                    k = 0
                                 }else{
                                     dynamicPath.path = []
                                     staticPath.mPath = historyInfo
+                                    k = 50
                                 }
-
-                                k = 0
+                            }else if(n>1){
+                                if (Math.abs(dynamicPath.path[n-2].azimuthTo(dynamicPath.path[n-1])-dynamicPath.path[n-1].azimuthTo(posInfo))>5){
+                                    dynamicPath.addCoordinate(posInfo)
+                                    k=50
+                                }else{
+                                    k+=1
+                                }
                             }else{
                                 k+=1
                             }
@@ -347,13 +362,13 @@ ApplicationWindow  {
                         }
 
                         Text {
+                            text: zoomRadius
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.bottom: parent.top
-                            text: zoomRadius
                             renderType: Text.NativeRendering
                         }
                     }
-                    Component.onCompleted: win.setCircleScale()
+                    Component.onCompleted: win.setCircleScale(zoomOffset)
                 }
 
                 MapQuickItem {//PopUp
@@ -506,7 +521,7 @@ ApplicationWindow  {
 
             anchors{
                 right: actionPanel.left
-                rightMargin: 5
+                rightMargin: 26
                 verticalCenter: map.verticalCenter
             }
         }

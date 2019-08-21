@@ -101,20 +101,33 @@ Item {
                     }
 
                 }
-
-                //                highlightFollowsCurrentItem: false
-                //                focus: true
-                //                highlight: Component{
-                //                    Rectangle{
-                //                        width: listView.width
-                //                        height:
-                //                        color: "#3EC6AA"
-                //                        opacity: 0.5
-                //                        y: listView.currentItem.y
-                //                    }}
-
             }
         }
+    }
+
+    TextField{
+        id:nameField
+        anchors{
+            left: parent.left
+            leftMargin: 5
+        }
+        y: addWpBtn.y - 30
+        height: 24
+        width: 80
+    }
+
+    Button{
+        id:changeNameBtn
+        anchors{
+            left: nameField.right
+            leftMargin: 5
+        }
+        text: "ok"
+        palette {button: "#3EC6AA"}
+        height: nameField.height
+        width: contentItem.implicitWidth + leftPadding + rightPadding
+        y: nameField.y
+
     }
 
     RoundButton{
@@ -124,7 +137,9 @@ Item {
             right: parent.right
             margins: 5
         }
-        radius: 20
+        width: 50
+        height: width
+        radius: width / 2
         palette {button: "#3EC6AA"}
         text: "+"
         font.pixelSize: txtSize

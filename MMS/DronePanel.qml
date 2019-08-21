@@ -146,6 +146,9 @@ Item{
 
                                 wpPanel.droneId = idInfo
                                 wpPanel.show()
+                            }else if(wpInfo.length===0){
+                                wpPanel.droneId = idInfo
+                                wpPanel.show()
                             }else{
                                 wpModel.clear()
                                 onMapWpModel.update()
