@@ -1,6 +1,9 @@
 import QtQuick 2.12
-import QtPositioning 5.12
-import QtLocation 5.12
+import QtPositioning 5.13
+import QtLocation 5.13
+//NOT IN USE
+//See in main.qml under drone
+
 
 MapQuickItem {
     visible: false
@@ -16,8 +19,6 @@ MapQuickItem {
     function clearModel() {dataLV.model = []}
 
     //STILL: update model
-
-
 
     sourceItem: Item{
         width: 100

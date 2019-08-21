@@ -65,6 +65,7 @@ public:
         SpeedRole,
         ColorRole,
         TrackingRole,
+        ShowingRouteRole,
         HistoryRole,
         FollowRole,
         AngleRole,
@@ -91,6 +92,7 @@ public:
 
     Q_INVOKABLE void setColor(const QString &id,QString color);
     Q_INVOKABLE void toggleHistoryTracking(const QString & id);
+    Q_INVOKABLE void toggleShowingRoute(const QString & id);
     Q_INVOKABLE void toggleFollow(const QString & id);
     Q_INVOKABLE void setVisibility(const QString & id,bool visibility);
     Q_INVOKABLE QVariant getInfoNameList(const QString&id);

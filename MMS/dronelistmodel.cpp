@@ -130,6 +130,16 @@ void DroneListModel::toggleHistoryTracking(const QString &id){
     emit dataChanged(ix, ix, QVector<int>{TrackingRole});
 }
 
+void DroneListModel::toggleShowingRoute(const QString &id){
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+            return obj.id() == id;});
+    int row = it - mDrones.begin();
+    QModelIndex ix = index(row);
+
+    it->setShowRoute();
+    emit dataChanged(ix, ix, QVector<int>{ShowingRouteRole});
+}
+
 //{For Generic List in DronePanel
 QVariant DroneListModel::getInfoNameList(const QString&id){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
@@ -200,6 +210,8 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getSpeed();
         else if(role == TrackingRole)
             return it.trackingHistory();
+        else if(role == ShowingRouteRole)
+            return it.showingRoute();
         else if(role == HistoryRole)
             return it.getHistory();
         else if(role == FollowRole)
@@ -226,6 +238,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[SpeedRole] = "speedInfo";
     roles[ColorRole] = "colorInfo";
     roles[TrackingRole] = "trackingHistoryInfo";
+    roles[ShowingRouteRole] = "showingRouteInfo";
     roles[HistoryRole] = "historyInfo";
     roles[FollowRole] = "followInfo";
     roles[AnimationStateRole] = "extrapolateInfo";

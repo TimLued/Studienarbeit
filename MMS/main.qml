@@ -153,8 +153,9 @@ ApplicationWindow  {
 
                 }else if(mouse.button === Qt.LeftButton && map.setWaypoints){
                     var cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
-                    wpModel.append({"name":"","lat":cor.latitude,"lon":cor.longitude})
-                    onMapWpModel.append({"name":"","lat":cor.latitude,"lon":cor.longitude})
+                    wpModel.append({"name":"","lat":cor.latitude.toString(),"lon":cor.longitude.toString()})
+                    //onMapWpModel.append({"name":"","lat":cor.latitude.toString(),"lon":cor.longitude.toString()})
+                    onMapWpModel.update()
                 }
             }
 
@@ -265,7 +266,7 @@ ApplicationWindow  {
                             staticPath.path = []
                         }else{
                             if (historyInfo.length > 1) staticPath.mPath = historyInfo
-                            k = 0
+                            k = 50
                         }
                     }
 
@@ -458,6 +459,23 @@ ApplicationWindow  {
             }
         }
 
+        MapPolyline{
+            id: routePoly
+            line.color: "red"
+            line.width: 1
+
+            property variant lats: [] //because model as strings -> path conversion
+            property variant lons: []
+            onLatsChanged: {
+                var mPath = []
+                for (var i = 0;i<lats.length;i++){
+                    mPath.push(QtPositioning.coordinate(lats[i],lons[i]))
+                }
+                //mPath.push(QtPositioning.coordinate(lats[0],lons[0]))
+                path = mPath
+            }
+        }
+
         MapItemView {
             id: wpMarker
             model: onMapWpModel
@@ -474,7 +492,7 @@ ApplicationWindow  {
                     height: 20
                     radius: width/2
                     Text {
-                        text: (index + 1)
+                        text: index!=-1? (index + 1) : ""
                         color: "white"
                         anchors.centerIn: parent
                         font.bold: true
@@ -482,31 +500,40 @@ ApplicationWindow  {
                 }
             }
         }
-    }
 
-    DronePanel{id:dronePanel}
-    ActionPanel{id:actionPanel}
+        WaypointPanel{
+            id: wpPanel
 
-    WaypointPanel{
-        anchors{
-            right: actionPanel.left
-            rightMargin: 5
-            verticalCenter: map.verticalCenter
-        }
-    }
-
-    ListModel {//in order to change order without violatioing active model
-        id: wpModel
-    }
-
-    ListModel {
-        id: onMapWpModel
-        function update(){
-            onMapWpModel.clear()
-            for (var i = 0; i<wpModel.count;i++){
-                onMapWpModel.append(wpModel.get(i))
+            anchors{
+                right: actionPanel.left
+                rightMargin: 5
+                verticalCenter: map.verticalCenter
             }
         }
+
+        ListModel {//in order to change order without violatioing active model
+            id: wpModel
+        }
+
+        ListModel {
+            id: onMapWpModel
+            function update(){
+                onMapWpModel.clear()
+                var lats = []
+                var lons = []
+                for (var i = 0; i<wpModel.count;i++){
+                    onMapWpModel.append(wpModel.get(i))
+                    lats.push(wpModel.get(i).lat)
+                    lons.push(wpModel.get(i).lon)
+                }
+                routePoly.lons = lons
+                routePoly.lats = lats
+            }
+        }
+
+        DronePanel{id:dronePanel}
+        ActionPanel{id:actionPanel}
+
     }
 
 }

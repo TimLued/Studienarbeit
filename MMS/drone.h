@@ -71,6 +71,14 @@ public:
         return trackHistory;
     }
 
+    void setShowRoute(){
+        showRoute = !showRoute;
+    }
+
+    bool showingRoute() const{
+        return showRoute;
+    }
+
     double getAngle() const{
         return mAngle;
     }
@@ -143,6 +151,7 @@ private:
 
     bool follow=false;
     bool trackHistory=false;
+    bool showRoute=false;
     bool extrapolate = false;
     bool mVisible = true;
 

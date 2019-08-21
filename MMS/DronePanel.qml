@@ -118,7 +118,7 @@ Item{
                     spacing: 5
 
                     Button{//History
-                        text: "History"
+                        text: "H"
                         height: 20
                         width: contentItem.implicitWidth + leftPadding + rightPadding
                         font.pixelSize: 12
@@ -126,6 +126,31 @@ Item{
                         enabled: listItem.height === enlarged ? true : false
                         onClicked:{
                             dronemodel.toggleHistoryTracking(idInfo)
+                        }
+                    }
+
+                    Button{//Route
+                        text: "R"
+                        height: 20
+                        width: contentItem.implicitWidth + leftPadding + rightPadding
+                        font.pixelSize: 12
+                        highlighted: showingRouteInfo
+                        enabled: listItem.height === enlarged ? true : false
+                        onClicked:{
+                            dronemodel.toggleShowingRoute(idInfo)
+                            if(showingRouteInfo && wpInfo.length>0) {
+                                for (var i = wpInfo.length-1;i>=0;i--){
+                                    wpModel.append({"name":"","lat":wpInfo[i].lat,"lon":wpInfo[i].lon})
+                                }
+                                onMapWpModel.update()
+
+                                wpPanel.droneId = idInfo
+                                wpPanel.show()
+                            }else{
+                                wpModel.clear()
+                                onMapWpModel.update()
+                                wpPanel.hide()
+                            }
                         }
                     }
 
@@ -251,7 +276,7 @@ Item{
                 Flickable  {
                     id: fparent
                     height: parent.height - lbl1.height - row1.height - row2.height - 3* mainColumn.spacing - 5
-                    width: parent.width
+                    width: 150
                     interactive: true
                     clip: true
                     flickableDirection: Flickable.VerticalFlick

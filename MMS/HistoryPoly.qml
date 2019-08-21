@@ -18,8 +18,8 @@ MapPolyline{
                     }
 
     function updatePoly(){
-        var nPoly = onviewPoly(sPath)
-        poly.path = scalePoly(nPoly)
+        var nPoly = scalePoly(sPath)
+        poly.path = onviewPoly(nPoly)
     }
 
     function maxCheck(){
@@ -29,6 +29,7 @@ MapPolyline{
         1200/200
         6 abrunden!
         Jeden 6. Raus
+        Max Value?
         */
     }
 

@@ -2,10 +2,16 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import QtPositioning 5.13
+import QtLocation 5.13
 import "algos.js" as Algos
 
 Item {
-    id: mainContent
+    id: content
+    property string droneId
+    visible: false
+
+    function show(){content.visible = true}
+    function hide(){content.visible = false}
 
     width: 200
     height: 400
@@ -26,7 +32,7 @@ Item {
 
             Text {
                 anchors.centerIn: parent
-                text: "Waypoints"
+                text: droneId
                 font.letterSpacing: 2
             }
 
@@ -38,44 +44,11 @@ Item {
                 verticalAlignment: Text.AlignVCenter
                 MouseArea{
                     anchors.fill:parent
-                    onClicked: {mainContent.visible = false}
+                    onClicked: {hide()}
                 }
             }
 
         }
-
-        // Header
-//        RowLayout {
-//            spacing: 0
-//            width: parent.width
-
-//            Rectangle{
-//                color: "#3EC6AA"
-//                height: 30
-//                Layout.fillWidth: true
-//                Layout.alignment: Qt.AlignLeft
-//                Text{
-//                    text: "Waypoints"
-//                    anchors.centerIn: parent
-//                    font.letterSpacing: 2
-//                }
-//            }
-//            Rectangle{
-//                color: "#3EC6AA"
-//                height: 30
-//                width: 50
-//                Layout.alignment: Qt.AlignRight
-
-//                Text{
-//                    text: "X"
-//                    //anchors.margins: 5
-//                    anchors.centerIn: parent
-//                }
-//            }
-//        }
-
-
-
 
         ScrollView {
             Layout.fillWidth: true
@@ -120,7 +93,7 @@ Item {
                         map.fitViewportToGeoShape(region,80)
                     }
 
-                    draggedItemParent: mainContent
+                    draggedItemParent: content
 
                     onMoveItemRequested: {
                         wpModel.move(from, to, 1);
@@ -129,22 +102,23 @@ Item {
 
                 }
 
-//                highlightFollowsCurrentItem: false
-//                focus: true
-//                highlight: Component{
-//                    Rectangle{
-//                        width: listView.width
-//                        height:
-//                        color: "#3EC6AA"
-//                        opacity: 0.5
-//                        y: listView.currentItem.y
-//                    }}
+                //                highlightFollowsCurrentItem: false
+                //                focus: true
+                //                highlight: Component{
+                //                    Rectangle{
+                //                        width: listView.width
+                //                        height:
+                //                        color: "#3EC6AA"
+                //                        opacity: 0.5
+                //                        y: listView.currentItem.y
+                //                    }}
 
             }
         }
     }
 
     RoundButton{
+        id: addWpBtn
         anchors{
             bottom: parent.bottom
             right: parent.right
@@ -157,6 +131,18 @@ Item {
         highlighted: map.setWaypoints
         onClicked: map.setWaypoints = !map.setWaypoints
 
+    }
+
+    Button{
+        anchors{
+            bottom: parent.bottom
+            right: addWpBtn.left
+            margins: 5
+        }
+        palette {button: "#3EC6AA"}
+        text: "Edit"
+        width: contentItem.implicitWidth + leftPadding + rightPadding
+        height: 30
     }
 
 }
