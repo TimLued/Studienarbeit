@@ -95,9 +95,9 @@ public:
     Q_INVOKABLE void toggleShowingRoute(const QString & id);
     Q_INVOKABLE void toggleFollow(const QString & id);
     Q_INVOKABLE void setVisibility(const QString & id,bool visibility);
-    Q_INVOKABLE QVariant getInfoNameList(const QString&id);
     Q_INVOKABLE void setSelectedInfoList(const QString&id,QString info);
     Q_INVOKABLE void setUnselectedInfoList(const QString&id,QString info);
+    Q_INVOKABLE QVariant getInfoNameList(const QString&id);
     Q_INVOKABLE QVariant getAllDronePos();
 
 private:

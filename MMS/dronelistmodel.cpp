@@ -131,12 +131,24 @@ void DroneListModel::toggleHistoryTracking(const QString &id){
 }
 
 void DroneListModel::toggleShowingRoute(const QString &id){
+    QModelIndex ix;
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
-    int row = it - mDrones.begin();
-    QModelIndex ix = index(row);
+
+    //unset others
+    for (const Drone &drone:mDrones){
+        if (drone.showingRoute()&&drone.id()!=id){
+            auto oIt = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+                return obj.id() == drone.id();});
+            oIt->setShowRoute();
+            ix = index(oIt - mDrones.begin());
+            emit dataChanged(ix, ix, QVector<int>{ShowingRouteRole});
+        }
+    }
 
     it->setShowRoute();
+
+    ix = index(it - mDrones.begin());
     emit dataChanged(ix, ix, QVector<int>{ShowingRouteRole});
 }
 
@@ -158,16 +170,13 @@ void DroneListModel::setUnselectedInfoList(const QString&id,QString info){
             return obj.id() == id;});
     it->removeSelectedInfo(info);
 }
-//}For Generic List in DronePanel
+//For Generic List in DronePanel}
 
-//For Center on all visible
+//{For Center on all visible
 QVariant DroneListModel::getAllDronePos(){
     QVariantList dronePos_list;
     for (const Drone &drone:mDrones){
-        auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
-                return obj.id() == drone.id();});
-        if (it->visibility()) dronePos_list<<QVariant::fromValue(it->pos());
-
+        if(drone.visibility()) dronePos_list<<QVariant::fromValue(drone.pos());
     }
     return dronePos_list;
 }

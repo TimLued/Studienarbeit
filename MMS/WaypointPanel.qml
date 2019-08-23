@@ -3,11 +3,13 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import QtPositioning 5.13
 import QtLocation 5.13
+import QtQuick.Controls.Styles 1.4
 import "algos.js" as Algos
 
 Item {
     id: content
     property string droneId
+    property bool editing: false
     visible: false
 
     function show(){content.visible = true}
@@ -58,6 +60,7 @@ Item {
                 id: listView
                 clip: true
                 model: wpModel
+
                 delegate: WaypointDraggableItem {
                     id: listItemMechanic
                     Rectangle {
@@ -71,8 +74,24 @@ Item {
                             //anchors.centerIn: parent
                             anchors.verticalCenter: parent.verticalCenter
                             leftPadding: 5
-                            text: (index+1) + ". " + (name? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3))
+                            text: (index+1) + ". " + (name!=""? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3))
                         }
+
+                        TextField{
+                            id: wpTextField
+                            visible: editing
+                            anchors.fill: parent
+                            text: name!=""? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3)
+                            background: Rectangle {
+                                border.width: 0
+                            }
+                            onVisibleChanged: {
+                                if (!wpTextField.visible){
+                                    wpModel.set(index,{"name":wpTextField.text,"lat":lat,"lon":lon})
+                                    onMapWpModel.set(index,{"name":wpTextField.text,"lat":onMapWpModel.get(index).lat,"lon":onMapWpModel.get(index).lon})
+                                }
+                            }
+                         }
 
                         // Bottom line border
                         Rectangle {
@@ -87,9 +106,8 @@ Item {
 
                     }
 
-                    property variant region
                     onMeClicked: {
-                        region = QtPositioning.circle(QtPositioning.coordinate(onMapWpModel.get(index).lat,onMapWpModel.get(index).lon),500)
+                        var region = QtPositioning.circle(QtPositioning.coordinate(onMapWpModel.get(index).lat,onMapWpModel.get(index).lon),500)
                         map.fitViewportToGeoShape(region,80)
                     }
 
@@ -99,35 +117,9 @@ Item {
                         wpModel.move(from, to, 1);
                         onMapWpModel.update()
                     }
-
                 }
             }
         }
-    }
-
-    TextField{
-        id:nameField
-        anchors{
-            left: parent.left
-            leftMargin: 5
-        }
-        y: addWpBtn.y - 30
-        height: 24
-        width: 80
-    }
-
-    Button{
-        id:changeNameBtn
-        anchors{
-            left: nameField.right
-            leftMargin: 5
-        }
-        text: "ok"
-        palette {button: "#3EC6AA"}
-        height: nameField.height
-        width: contentItem.implicitWidth + leftPadding + rightPadding
-        y: nameField.y
-
     }
 
     RoundButton{
@@ -137,7 +129,7 @@ Item {
             right: parent.right
             margins: 5
         }
-        width: 50
+        width: 35
         height: width
         radius: width / 2
         palette {button: "#3EC6AA"}
@@ -148,17 +140,44 @@ Item {
 
     }
 
-    Button{
+    RoundButton{
+        id: editWpBtn
         anchors{
             bottom: parent.bottom
             right: addWpBtn.left
             margins: 5
         }
         palette {button: "#3EC6AA"}
-        text: "Edit"
-        width: contentItem.implicitWidth + leftPadding + rightPadding
-        height: 30
+        text: "\u26ED"
+        font.pixelSize: 16
+        width: 35
+        height: width
+        radius: width / 2
+        highlighted: editing
+        onClicked: editing = !editing
     }
+
+    RoundButton{
+        id: centerWpBtn
+        anchors{
+            bottom: parent.bottom
+            right: editWpBtn.left
+            margins: 5
+        }
+        palette {button: "#3EC6AA"}
+        text: "\u29BF"
+        font.pixelSize: 16
+        width: 35
+        height: width
+        radius: width / 2
+        highlighted: editing
+        onClicked: {
+            var region = centerMapRegion(routeEditPoly.path)
+            map.fitViewportToGeoShape(region,200)
+        }
+
+    }
+
 
 }
 

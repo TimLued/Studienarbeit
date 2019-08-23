@@ -138,15 +138,21 @@ Item{
                         enabled: listItem.height === enlarged ? true : false
                         onClicked:{
                             dronemodel.toggleShowingRoute(idInfo)
+
                             if(showingRouteInfo && wpInfo.length>0) {
+                                wpModel.clear()
                                 for (var i = wpInfo.length-1;i>=0;i--){
-                                    wpModel.append({"name":"","lat":wpInfo[i].lat,"lon":wpInfo[i].lon})
+                                    wpModel.append({"name":wpInfo[i].id,"lat":wpInfo[i].lat,"lon":wpInfo[i].lon})
                                 }
                                 onMapWpModel.update()
 
                                 wpPanel.droneId = idInfo
                                 wpPanel.show()
-                            }else if(wpInfo.length===0){
+
+                                var region = centerMapRegion(routeEditPoly.path)
+                                map.fitViewportToGeoShape(region,200)
+
+                            }else if(!showingRouteInfo && wpInfo.length===0){
                                 wpPanel.droneId = idInfo
                                 wpPanel.show()
                             }else{

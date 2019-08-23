@@ -22,6 +22,8 @@ ApplicationWindow  {
     property int zoomOffset: 0
     property variant droneCorList
 
+    property int movingMarker:-1
+
 
     //MAP SCALE
     property variant scaleLengths: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000]
@@ -75,6 +77,21 @@ ApplicationWindow  {
         var info = calculateScale(scaleImage.sourceSize.width,0)
         scaleText.text = Algos.formatDistance(info[0])
         scaleImage.width = (scaleImage.sourceSize.width * info[1]) - 2 * scaleImageLeft.sourceSize.width
+    }
+
+    function centerMapRegion(markers){
+        var region
+
+        if(markers.length === 1){
+            region = QtPositioning.circle(markers[0],500)
+        }else if(markers.length === 2){
+            var radius = markers[0].distanceTo(markers[1])/2
+            var circleCenter = Algos.getLatLngCenter(markers)
+            region = QtPositioning.circle(QtPositioning.coordinate(circleCenter[0],circleCenter[1]),radius)
+        }else if(markers.length > 2){
+            region = QtPositioning.polygon(markers)
+        }
+        return region
     }
 
     Map{
@@ -143,7 +160,13 @@ ApplicationWindow  {
 
             onPositionChanged: {
                 cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
+                if (movingMarker!=-1){
+                    onMapWpModel.set(movingMarker,{"name":onMapWpModel.get(movingMarker).name,"lat":cor.latitude.toString(),"lon":cor.longitude.toString()})
+                    routeEditPoly.update()
+                    //update coordinate in WP Panel
+                    wpModel.set(movingMarker,{"name":wpModel.get(movingMarker).name,"lat":onMapWpModel.get(movingMarker).lat,"lon":onMapWpModel.get(movingMarker).lon})
 
+                }
                 coorLbl.text = Algos.roundNumber(cor.latitude,3) + ", " +  Algos.roundNumber(cor.longitude,3)
 
                 //rotation
@@ -176,7 +199,11 @@ ApplicationWindow  {
                 }else if(mouse.button === Qt.LeftButton){
                 }
             }
+
+
         }
+
+
 
         Item {
             id: scale
@@ -277,12 +304,15 @@ ApplicationWindow  {
                         }else{
                             if (historyInfo.length > 1) staticPath.mPath = historyInfo
                             k = 50
+
+
                         }
                     }
 
                     property int k: 50
-                    property variant region
                     onCoordinateChanged: {
+
+
                         if (trackingHistory) {
                             var n = dynamicPath.pathLength()
                             if (k == 50){ //every 50th or corner
@@ -306,6 +336,8 @@ ApplicationWindow  {
                             }
                         }
 
+
+
                         if (followInfo){
                             map.center = coordinate
                             map.pan(0,-map.height/2+100)
@@ -319,23 +351,9 @@ ApplicationWindow  {
                         }
 
                         if (map.isCenterOnAll) {
-
-
                             if (followInfo) dronemodel.toggleFollow(idInfo)
-
-                            var drones = dronemodel.getAllDronePos()
-
-                            if(drones.length === 1){
-                                region = QtPositioning.circle(drones[0],500)
-                            }else if(drones.length === 2){
-                                var radius = drones[0].distanceTo(drones[1])/2
-                                var circleCenter = Algos.getLatLngCenter(drones)
-                                region = QtPositioning.circle(QtPositioning.coordinate(circleCenter[0],circleCenter[1]),radius)
-                            }else if(drones.length > 2){
-                                region = QtPositioning.polygon(drones)
-                            }
-
-                            map.fitViewportToGeoShape(region,80)
+                            var region = centerMapRegion(dronemodel.getAllDronePos())
+                            map.fitViewportToGeoShape(region,200)
                         }
                     }
                 }
@@ -456,12 +474,11 @@ ApplicationWindow  {
                     }
                 }
 
+
                 HistoryPoly{//Static
                     id: staticPath
                     visible: trackingHistoryInfo && visibleInfo
                     line.color: colorInfo
-
-
                 }
 
                 MapPolyline{//dynamic
@@ -469,24 +486,29 @@ ApplicationWindow  {
                     visible: trackingHistoryInfo && visibleInfo
                     line.color: colorInfo
                     line.width: 1
+
+                }
+
+                MapPolyline{
+                    id: routePoly
+
                 }
 
             }
+
         }
 
         MapPolyline{
-            id: routePoly
-            line.color: "red"
+            id: routeEditPoly
+            line.color: "black"
             line.width: 1
 
-            property variant lats: [] //because model as strings -> path conversion
-            property variant lons: []
-            onLatsChanged: {
+            function update(){
                 var mPath = []
-                for (var i = 0;i<lats.length;i++){
-                    mPath.push(QtPositioning.coordinate(lats[i],lons[i]))
+
+                for (var i = 0; i<onMapWpModel.count;i++){
+                    mPath.push(QtPositioning.coordinate(onMapWpModel.get(i).lat,onMapWpModel.get(i).lon))
                 }
-                //mPath.push(QtPositioning.coordinate(lats[0],lons[0]))
                 path = mPath
             }
         }
@@ -497,12 +519,11 @@ ApplicationWindow  {
 
             delegate: MapQuickItem {
                 coordinate: QtPositioning.coordinate(lat,lon)
-
                 anchorPoint.x: 10
                 anchorPoint.y: 10
 
                 sourceItem:Rectangle{
-                    color: "#FF2F44"
+                    color: "#3EC6AA"
                     width: 20
                     height: 20
                     radius: width/2
@@ -512,9 +533,22 @@ ApplicationWindow  {
                         anchors.centerIn: parent
                         font.bold: true
                     }
+
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: {
+                            if (mouse.button === Qt.LeftButton) {
+                                if(movingMarker==-1){movingMarker = index}else{movingMarker = -1}
+                            }
+                        }
+
+                    }
+
                 }
+
             }
         }
+
 
         WaypointPanel{
             id: wpPanel
@@ -534,17 +568,13 @@ ApplicationWindow  {
             id: onMapWpModel
             function update(){
                 onMapWpModel.clear()
-                var lats = []
-                var lons = []
                 for (var i = 0; i<wpModel.count;i++){
                     onMapWpModel.append(wpModel.get(i))
-                    lats.push(wpModel.get(i).lat)
-                    lons.push(wpModel.get(i).lon)
                 }
-                routePoly.lons = lons
-                routePoly.lats = lats
+                routeEditPoly.update()
             }
         }
+
 
         DronePanel{id:dronePanel}
         ActionPanel{id:actionPanel}

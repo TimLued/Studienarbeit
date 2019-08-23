@@ -41,24 +41,13 @@ MapPolyline{
 
     function optimize(oPath){
         var nPath = []
-        var step = (21 - Math.round(map.zoomLevel)) * 8 //20-0
+        var step = (21 - Math.round(map.zoomLevel)) * 10 //20-0
         for (var j = 0; j<oPath.length; j++){
-            if(nPath.indexOf(oPath[j])===-1) {//--doubleCheck
-                if(j>9){
-                    if(nPath.indexOf(oPath[j-10])===-1){
-                        if(j<oPath.length-11){
-                            if(nPath.indexOf(oPath[j+10])===-1){
-                                //doubleCheck--
-                                if (j%step === 0){//scaling
-                                    nPath.push(oPath[j])
-                                }else if(j>0 && j<oPath.length-1){//still add if corner
-                                    if (Math.abs(oPath[j-1].azimuthTo(oPath[j])-oPath[j].azimuthTo(oPath[j+1]))>5){
-                                        nPath.push(oPath[j])
-                                    }
-                                }
-                            }
-                        }
-                    }
+            if (j%step === 0){//scaling
+                nPath.push(oPath[j])
+            }else if(j>0 && j<oPath.length-1){//still add if corner
+                if (Math.abs(oPath[j-1].azimuthTo(oPath[j])-oPath[j].azimuthTo(oPath[j+1]))>5){
+                    nPath.push(oPath[j])
                 }
             }
         }

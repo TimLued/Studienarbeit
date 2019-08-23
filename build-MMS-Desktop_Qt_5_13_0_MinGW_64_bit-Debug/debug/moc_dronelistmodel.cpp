@@ -229,10 +229,10 @@ QT_MOC_LITERAL(9, 86, 18), // "toggleShowingRoute"
 QT_MOC_LITERAL(10, 105, 12), // "toggleFollow"
 QT_MOC_LITERAL(11, 118, 13), // "setVisibility"
 QT_MOC_LITERAL(12, 132, 10), // "visibility"
-QT_MOC_LITERAL(13, 143, 15), // "getInfoNameList"
-QT_MOC_LITERAL(14, 159, 19), // "setSelectedInfoList"
-QT_MOC_LITERAL(15, 179, 4), // "info"
-QT_MOC_LITERAL(16, 184, 21), // "setUnselectedInfoList"
+QT_MOC_LITERAL(13, 143, 19), // "setSelectedInfoList"
+QT_MOC_LITERAL(14, 163, 4), // "info"
+QT_MOC_LITERAL(15, 168, 21), // "setUnselectedInfoList"
+QT_MOC_LITERAL(16, 190, 15), // "getInfoNameList"
 QT_MOC_LITERAL(17, 206, 14) // "getAllDronePos"
 
     },
@@ -240,8 +240,8 @@ QT_MOC_LITERAL(17, 206, 14) // "getAllDronePos"
     "createDrone\0id\0setColor\0color\0"
     "toggleHistoryTracking\0toggleShowingRoute\0"
     "toggleFollow\0setVisibility\0visibility\0"
-    "getInfoNameList\0setSelectedInfoList\0"
-    "info\0setUnselectedInfoList\0getAllDronePos"
+    "setSelectedInfoList\0info\0setUnselectedInfoList\0"
+    "getInfoNameList\0getAllDronePos"
 };
 #undef QT_MOC_LITERAL
 
@@ -266,9 +266,9 @@ static const uint qt_meta_data_DroneListModel[] = {
        9,    1,   83,    2, 0x02 /* Public */,
       10,    1,   86,    2, 0x02 /* Public */,
       11,    2,   89,    2, 0x02 /* Public */,
-      13,    1,   94,    2, 0x02 /* Public */,
-      14,    2,   97,    2, 0x02 /* Public */,
-      16,    2,  102,    2, 0x02 /* Public */,
+      13,    2,   94,    2, 0x02 /* Public */,
+      15,    2,   99,    2, 0x02 /* Public */,
+      16,    1,  104,    2, 0x02 /* Public */,
       17,    0,  107,    2, 0x02 /* Public */,
 
  // methods: parameters
@@ -279,9 +279,9 @@ static const uint qt_meta_data_DroneListModel[] = {
     QMetaType::Void, QMetaType::QString,    5,
     QMetaType::Void, QMetaType::QString,    5,
     QMetaType::Void, QMetaType::QString, QMetaType::Bool,    5,   12,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   14,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   14,
     QMetaType::QVariant, QMetaType::QString,    5,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   15,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   15,
     QMetaType::QVariant,
 
        0        // eod
@@ -302,10 +302,10 @@ void DroneListModel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         case 4: _t->toggleShowingRoute((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 5: _t->toggleFollow((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 6: _t->setVisibility((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 7: { QVariant _r = _t->getInfoNameList((*reinterpret_cast< const QString(*)>(_a[1])));
+        case 7: _t->setSelectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 8: _t->setUnselectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 9: { QVariant _r = _t->getInfoNameList((*reinterpret_cast< const QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
-        case 8: _t->setSelectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
-        case 9: _t->setUnselectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
         case 10: { QVariant _r = _t->getAllDronePos();
             if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
         default: ;

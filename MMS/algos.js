@@ -68,4 +68,17 @@ function is_point_on_screen(point,mapX,mapY,mapW,mapH) {
 }
 
 
+function xcoord2xpos(x, xmin, xmax, width) {
+    // Convert X-coordinate to pixel X-position on screen.
+    return Math.round((x - xmin) * (width / (xmax - xmin)));
+}
+
+function ycoord2ypos(y, ymin, ymax, height) {
+    // Convert Y-coordinate to pixel Y-position on screen.
+    ymin = ycoord2ymercator(ymin);
+    ymax = ycoord2ymercator(ymax);
+    return Math.round((ymax - ycoord2ymercator(y)) * (height / (ymax - ymin)));
+}
+
+
 
