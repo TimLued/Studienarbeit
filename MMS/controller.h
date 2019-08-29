@@ -2,43 +2,45 @@
 #define CONTROLLER_H
 
 #include <QObject>
+#include <QString>
 #include <posupdater.h>
 #include <QThread>
 #include <QGeoPositionInfoSource>
 #include <QGeoCoordinate>
 
+#include <tasksender.h>
+#include <iostream>
+
 class Controller: public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString task READ task WRITE setTask NOTIFY taskChanged)
 public:
-    QString currentInfo;
+    explicit Controller(QObject *parent = nullptr);
 
-    Controller(){
-
-        up = new PosUpdater;
-        t = new QThread;
-        up->moveToThread(t);
-        connect(this, SIGNAL(start()), up, SLOT(requestPos()));
-        connect(up, SIGNAL(posUpdated(QString)), this, SLOT(updateCurrent(QString)));
-        connect(t, &QThread::finished, t, &QThread::deleteLater);
-        t->start();
-    }
+    QString currentDroneInfo;
+    QString task();
+    void setTask(const QString &taskInfo);
 
 private slots:
     void updateCurrent(QString droneInfo){
-        currentInfo = droneInfo;
-
-        //json string only
+        currentDroneInfo = droneInfo;
         emit posUpdated();
     }
 
 private:
    PosUpdater* up;
-   QThread* t;
+   QThread* t1;
+
+   TaskSender* taskSender;
+   QThread* t2;
+   QString m_Task;
 
 signals:
-    void start();
+    void startListener();
     void posUpdated();
+
+    void taskChanged(QString taskInfo);
 };
 
 #endif // CONTROLLER_H

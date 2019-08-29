@@ -279,8 +279,8 @@ static const uint qt_meta_data_DroneListModel[] = {
     QMetaType::Void, QMetaType::QString,    5,
     QMetaType::Void, QMetaType::QString,    5,
     QMetaType::Void, QMetaType::QString, QMetaType::Bool,    5,   12,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   14,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   14,
+    QMetaType::Bool, QMetaType::QString, QMetaType::QString,    5,   14,
+    QMetaType::Bool, QMetaType::QString, QMetaType::QString,    5,   14,
     QMetaType::QVariant, QMetaType::QString,    5,
     QMetaType::QVariant,
 
@@ -302,8 +302,10 @@ void DroneListModel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         case 4: _t->toggleShowingRoute((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 5: _t->toggleFollow((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 6: _t->setVisibility((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 7: _t->setSelectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
-        case 8: _t->setUnselectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 7: { bool _r = _t->setSelectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
+        case 8: { bool _r = _t->setUnselectedInfoList((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
         case 9: { QVariant _r = _t->getInfoNameList((*reinterpret_cast< const QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
         case 10: { QVariant _r = _t->getAllDronePos();

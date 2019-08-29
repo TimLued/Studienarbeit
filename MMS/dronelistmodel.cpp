@@ -54,20 +54,21 @@ bool DroneListModel::updateDrone(const QString & jInfo){
         */
 
         //save all data
-        QVariantList infos;
         QVariantList infoNames = it -> getInfoNames(); //load old list (so if later value is not updated)
+        QVariantList infoValues = it -> getInfoValues();
         QRegExp re("[+-]?\\d*\\.?\\d+");
 
         foreach(const QString& key, jDroneInfo.keys()) {
-
             QString val = jDroneInfo.value(key).toString();
+            if (re.exactMatch(val)) val = QString::number(val.toDouble(),'f',2); //round if info is numerical
 
-            if (re.exactMatch(val)) val = QString::number(val.toDouble(),'f',3); //round if info is numerical
-            Info info{key,val};
+            if (!infoNames.contains(key)) {//no double allowed
+                infoNames << key;
+                infoValues << val;
+            }else{//Update value
+                infoValues[infoNames.indexOf(key)] = val;
+            }
 
-            if (it->getSelectedInfoList().indexOf(key) != -1) infos << QVariant::fromValue(info); //add if in selected list
-
-            if (!infoNames.contains(key)) infoNames << key;
         }
 
 
@@ -75,7 +76,7 @@ bool DroneListModel::updateDrone(const QString & jInfo){
         QModelIndex ix = index(row);
 
         QGeoCoordinate c = ix.data(PosRole).value<QGeoCoordinate>();
-        Data data{coord, angle, speed,infos,infoNames};
+        Data data{coord, angle, speed,infoNames,infoValues};
         bool result = setData(ix, QVariant::fromValue(data), PosRole);
         return result;
     }else{
@@ -159,16 +160,33 @@ QVariant DroneListModel::getInfoNameList(const QString&id){
     return it->getInfoNames();
 }
 
-void DroneListModel::setSelectedInfoList(const QString&id,QString info){
+bool DroneListModel::setSelectedInfoList(const QString&id,QString info){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
-    it->addSelectedInfo(info);
+    QModelIndex ix = index(it - mDrones.begin());
+
+
+    //what if not in anymore?
+    it->addSelectedInfoNames(info);
+    int index = it->getInfoNames().indexOf(info);
+    QString val = it->getInfoValues().value(index).toString();
+    it->addSelectedInfoValues(val);
+    emit dataChanged(ix, ix, QVector<int>{InfoSelectedNamesRole,InfoSelectedValuesRole});
+
+    return true;
 }
 
-void DroneListModel::setUnselectedInfoList(const QString&id,QString info){
+bool DroneListModel::setUnselectedInfoList(const QString&id,QString info){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
-            return obj.id() == id;});
-    it->removeSelectedInfo(info);
+            return obj.id() == id;});   
+    QModelIndex ix = index(it - mDrones.begin());
+
+    int index = it->getSelectedInfoNames().indexOf(info);
+    it->removeSelectedInfoNames(info);
+    it->removeSelectedInfoValues(index);
+    emit dataChanged(ix, ix, QVector<int>{InfoSelectedNamesRole,InfoSelectedValuesRole});
+
+    return true;
 }
 //For Generic List in DronePanel}
 
@@ -227,10 +245,14 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.following();
         else if(role == AnimationStateRole)
             return it.extrapolating();
-        else if(role == InfoRole)
-            return it.getInfoList();
         else if(role == InfoNamesRole)
             return it.getInfoNames();
+        else if(role == InfoValuesRole)
+            return it.getInfoValues();
+        else if(role == InfoSelectedNamesRole)
+            return it.getSelectedInfoNames();
+        else if(role == InfoSelectedValuesRole)
+            return it.getSelectedInfoValues();
         else if(role == VisibleRole)
             return it.visibility();
         else if(role == WaypointRole)
@@ -251,8 +273,10 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[HistoryRole] = "historyInfo";
     roles[FollowRole] = "followInfo";
     roles[AnimationStateRole] = "extrapolateInfo";
-    roles[InfoRole] = "infoInfo";
     roles[InfoNamesRole] = "infoNamesInfo";
+    roles[InfoValuesRole] = "infoValuesInfo";
+    roles[InfoSelectedNamesRole] = "infoSelectedNamesRole";
+    roles[InfoSelectedValuesRole] = "InfoSelectedValuesRole";
     roles[VisibleRole] = "visibleInfo";
     roles[WaypointRole] = "wpInfo";
     return roles;
@@ -268,10 +292,10 @@ bool DroneListModel::setData(const QModelIndex &index, const QVariant &value,
             mDrones[index.row()].setPos(data.coord);
             mDrones[index.row()].setAngle(data.angle);
             mDrones[index.row()].setSpeed(data.speed);
-            mDrones[index.row()].setInfos(data.infos);
             mDrones[index.row()].setInfoNames(data.infoNames);
+            mDrones[index.row()].setInfoValues(data.infoValues);
             mDrones[index.row()].setExtrapolate(false);
-            emit dataChanged(index, index, QVector<int>{PosRole,AngleRole,SpeedRole,AnimationStateRole,InfoRole,InfoNamesRole,HistoryRole});
+            emit dataChanged(index, index, QVector<int>{PosRole,AngleRole,SpeedRole,AnimationStateRole,HistoryRole,InfoNamesRole,InfoSelectedValuesRole});
             mDrones[index.row()].setExtrapolate(true);
             emit dataChanged(index, index, QVector<int>{AnimationStateRole});
             return true;

@@ -6,25 +6,12 @@ MapPolyline{
     id: poly
     line.width: 1
     property variant mPath
-    //property variant sPath
     property variant center: map.center
     property int zoom: Math.round(map.zoomLevel)
 
-//    onZoomChanged: if(poly.visible) updatePoly()
-//    onCenterChanged: if(poly.visible) poly.path = onviewPoly(sPath)
-//    onMPathChanged: if(poly.visible) {
-//                        sPath = doublePoly(mPath)
-//                        updatePoly()
-//                    }
-
-//    function updatePoly(){
-//        var nPoly = scalePoly(sPath)
-//        poly.path = onviewPoly(nPoly)
-//    }
-
-    onZoomChanged: if(poly.visible) poly.path = optimize(mPath)
-    onCenterChanged: if(poly.visible) poly.path = optimize(mPath)
-    onMPathChanged: if(poly.visible) poly.path = optimize(mPath)
+    onZoomChanged: if(poly.visible && !map.isCenterOnAll) optimizePath()
+    onCenterChanged: if(poly.visible && !map.isCenterOnAll) optimizePath()
+    onMPathChanged: if(poly.visible) optimizePath()
 
 
     function maxCheck(){
@@ -39,28 +26,70 @@ MapPolyline{
     }
 
 
-    function optimize(oPath){
-        var nPath = []
-        var step = (21 - Math.round(map.zoomLevel)) * 10 //20-0
-        for (var j = 0; j<oPath.length; j++){
-            if (j%step === 0){//scaling
-                nPath.push(oPath[j])
-            }else if(j>0 && j<oPath.length-1){//still add if corner
-                if (Math.abs(oPath[j-1].azimuthTo(oPath[j])-oPath[j].azimuthTo(oPath[j+1]))>5){
-                    nPath.push(oPath[j])
-                }
-            }
-        }
-        if ((oPath.length-1)%(step+1) != 0) nPath.push(oPath[oPath.length-1]) //add last coordinate thus connecting to dynamic
-        return onviewPoly(nPath)
+    function optimizePath(){
+        poly.path = []
+        var nPath = optimizeZoom(onViewPoly(mPath))
+        poly.path = nPath
     }
 
-    function onviewPoly(oPath){ //keep
-        var visiblePath = []
 
+    function optimizeZoom(oPath){
+        var nPath = []
+
+        //azimuth 5 mit zoomlevel
+
+        var indexList = []
+        var step = (21 - Math.round(map.zoomLevel)) * 10 //20-0
+        var tmp
+        for (var i = 0; i<oPath.length; i++){
+            if(i>0 && i<oPath.length-1){
+                if (Math.abs(oPath[i-1].azimuthTo(oPath[i])-oPath[i].azimuthTo(oPath[i+1]))>2){
+                    indexList.push(i)
+
+                    if(indexList.length===2){ //Anfang-Ende Paar
+
+
+                        nPath.push(oPath[indexList[0]])
+
+                        //fill in between with density according zoom level
+//                        for (var j = indexList[0]+1; j < indexList[1];j++){
+//                            if (j%step === 0){
+//                                nPath.push(oPath[j])
+//                            }
+//                        }
+
+                        tmp = indexList[1]
+                        nPath.push(oPath[tmp])
+                        indexList=[]
+                        indexList.push(tmp) //new start
+                    }
+                }
+
+                //Mindestanzahl?
+                //so viele nehmen bis azimouth = 5
+
+            }else{
+                nPath.push(oPath[i])
+            }
+        }
+
+        if (indexList.length === 1){//last corner to actual position
+            nPath.push(oPath[indexList[0]])
+            for (var k = indexList[0]+1; k < indexList[1];k++){
+                if (k%step === 0){
+                    nPath.push(oPath[k])
+                }
+            }
+            nPath.push(oPath[oPath.length-1])
+        }
+
+        return nPath
+    }
+
+    function onViewPoly(oPath){ //keep
+        var visiblePath = []
         var topleft = map.toCoordinate(Qt.point(0,0))
         var bottomright = map.toCoordinate(Qt.point(win.width,win.height))
-
         var rect = QtPositioning.rectangle(topleft,bottomright)
         var counter = 0
         var inside = false
@@ -90,17 +119,4 @@ MapPolyline{
         }
         return doublePath
     }
-
-    function scalePoly(oPath){//Ecken drin behalten!!!
-        var scaledPath = []
-        var step = (21 - Math.round(map.zoomLevel)) * 8 //20-0
-        for (var i = 0; i<oPath.length; i+=step+1){
-            scaledPath.push(oPath[i])
-        }
-        if ((oPath.length-1)%(step+1) != 0) scaledPath.push(oPath[oPath.length-1])
-        return scaledPath
-    }
-
-    //max Beschränkung
-
 }

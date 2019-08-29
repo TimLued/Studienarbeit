@@ -1,10 +1,10 @@
+debug/controller.o
 debug/dronelistmodel.o
 debug/main.o
 debug/posupdater.o
-debug/transsmoother.o
+debug/tasksender.o
 debug/qrc_qml.o
 debug/moc_controller.o
 debug/moc_dronelistmodel.o
-debug/moc_nodemodel.o
 debug/moc_posupdater.o
-debug/moc_transsmoother.o
+debug/moc_tasksender.o

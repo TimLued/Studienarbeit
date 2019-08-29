@@ -14,8 +14,7 @@
 #include <iostream>
 
 #include <QtNetwork>
-#include <qlocalserver.h>
-#include <qlocalsocket.h>
+
 
 static QList<QString> files = {":/jdrone1.txt",
                                ":/jdrone2.txt",
@@ -122,7 +121,6 @@ void ClientApplication::startStopUpdates()
         emit startStop(0,0);
         startBtn->setText("Start");
     }
-
 }
 
 void ClientApplication::loadDrone(){emit startStop(1,1);}
@@ -151,22 +149,25 @@ void ClientApplication::startAllStep()
     }
 }
 
-void ClientApplication::nextPos()
+bool ClientApplication::nextPos()
 {
     try {
-
         statusLbl->setText("connected");
         statusLbl->setStyleSheet("QLabel {color : green; }");
 
         QString line;
-        if (!buffer.isEmpty()){
-            line = buffer.last();
-            buffer.removeLast();
-            bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
-            //emit updateList(line.trimmed());
-        }else{
-            line="-";
+        if (buffer.empty()){
+            QLocalSocket *clientConnection = server->nextPendingConnection();
+            clientConnection->disconnectFromServer();
+            return false;
         }
+        line = buffer.last();
+        buffer.removeLast();
+        bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
+        //emit updateList(line.trimmed());
+        //        }else{
+        //            line="-";
+        //        }
 
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
@@ -180,11 +181,10 @@ void ClientApplication::nextPos()
         clientConnection->flush();
         clientConnection->disconnectFromServer();
 
-
     } catch (const std::exception& ex) {
         std::cerr << "Error: " << ex.what() << std::endl;
     }
-
+    return true;
 }
 
 void ClientApplication::serverError()

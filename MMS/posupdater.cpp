@@ -33,9 +33,8 @@ void PosUpdater::update(){
         timer->stop();
         //keep on connecting
 
-        if (!socket->waitForConnected(3000) || socket->state() == QAbstractSocket::UnconnectedState){
+        if (!socket->waitForConnected(3000) || socket->state() != QAbstractSocket::ConnectedState){
             //connection failed
-            //std::cout << "recon" <<std::endl;
             timer->start(500);
         }
     } catch (...) {
@@ -58,9 +57,7 @@ void PosUpdater::readPos()
         QString newData;
         in >> newData;
 
-        if (newData == "-") return;
-
-        //std::cout << newPos.toUtf8().constData() <<std::endl;
+        //if (newData == "-") return;
 
          emit posUpdated(newData);
     } catch (...) {

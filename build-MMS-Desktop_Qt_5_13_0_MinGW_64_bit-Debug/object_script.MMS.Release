@@ -1,10 +1,10 @@
+release/controller.o
 release/dronelistmodel.o
 release/main.o
 release/posupdater.o
-release/transsmoother.o
+release/tasksender.o
 release/qrc_qml.o
 release/moc_controller.o
 release/moc_dronelistmodel.o
-release/moc_nodemodel.o
 release/moc_posupdater.o
-release/moc_transsmoother.o
+release/moc_tasksender.o

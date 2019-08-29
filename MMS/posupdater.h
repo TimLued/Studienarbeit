@@ -22,7 +22,6 @@ public slots:
     void requestPos();
 
 signals:
-    //void posUpdated(QString droneInfo, QGeoCoordinate pos, QDateTime timestamp);
     void posUpdated(QString droneInfo);
 private:
     QDateTime lastTimestamp;

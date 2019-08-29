@@ -4,7 +4,6 @@
         <file>WaypointMarker.qml</file>
         <file>WaypointDraggableItemDropArea.qml</file>
         <file>WaypointDraggableItem.qml</file>
-        <file>PopUp.qml</file>
         <file>main.qml</file>
         <file>DronePanel.qml</file>
         <file>Drone.qml</file>

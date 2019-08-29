@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtPositioning 5.12
 import QtLocation 5.12
 import "algos.js" as Algos
-import TransSmoother 1.0
 
 MapQuickItem {
     id: drone
@@ -18,20 +17,10 @@ MapQuickItem {
     property bool trackingHistory
     property bool popUp: false
 
-    sourceItem: Rectangle{
+    sourceItem: Item{
         width: droneSize
         height: droneSize
-        radius: droneSize/2
-        color: "white"
-        Text{
-            y: -7
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "\u2B9D"
-            font.pixelSize: 25
-            color: droneColor
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-        } 
+
         transform: Rotation {
             origin.x: droneSize/2
             origin.y: droneSize/2
@@ -46,10 +35,25 @@ MapQuickItem {
                 }
             }
         }
-
         MouseArea{
             anchors.fill: parent
             onClicked: popUp = !popUp
+        }
+        Rectangle{
+            id: droneRect
+            anchors.fill: parent
+            radius: droneSize/2
+            color: "white"
+            opacity: 0.7
+        }
+        Text{
+            y: -7
+            anchors.horizontalCenter: droneRect.horizontalCenter
+            text: "\u2B9D"
+            font.pixelSize: 25
+            color: droneColor
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
         }
     }
 

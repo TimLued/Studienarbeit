@@ -108,14 +108,7 @@ public:
         mVisible = visibility;
     }
 
-    void setInfos(QVariantList infos){
-        mInfos = infos;
-    }
-
-    QVariantList getInfoList() const{
-        return mInfos;
-    }
-
+    //all info names and values (only change on updates)
     void setInfoNames(QVariantList infoNames){
         mInfoNames = infoNames;
     }
@@ -124,17 +117,50 @@ public:
         return mInfoNames;
     }
 
-    QVariantList getSelectedInfoList() const{
-        return selectedInfos;
+    void setInfoValues(QVariantList infoValues){
+        mInfoValues = infoValues;
+        for (int i = 0;i<mSelectedInfoNames.count();i++) {
+
+            int index = mInfoNames.indexOf(mSelectedInfoNames[i]);
+
+            if (index == -1){
+                break;
+            }else{
+                mSelectedInfoValues[i] = mInfoValues[index];
+            }
+
+        }
     }
 
-    void addSelectedInfo(QString key){
-        if (selectedInfos.indexOf(key) == -1) selectedInfos.append(key);
+    QVariantList getInfoValues() const{
+        return mInfoValues;
     }
 
-    void removeSelectedInfo(QString key){
-        if (selectedInfos.indexOf(key) != -1) selectedInfos.removeOne(key);
+    //Selected is to display
+    void addSelectedInfoNames(QString name){
+        if (mSelectedInfoNames.indexOf(name) == -1) mSelectedInfoNames.append(name);
     }
+
+    void removeSelectedInfoNames(QString name){
+        if (mSelectedInfoNames.indexOf(name) != -1) mSelectedInfoNames.removeOne(name);
+    }
+
+    QVariantList getSelectedInfoNames() const{
+        return mSelectedInfoNames;
+    }
+
+    void addSelectedInfoValues(QString value){
+        mSelectedInfoValues.append(value);
+    }
+
+    void removeSelectedInfoValues(int index){
+        mSelectedInfoValues.removeAt(index);
+    }
+
+    QVariantList getSelectedInfoValues() const{
+        return mSelectedInfoValues;
+    }
+
 
 private:
     QString mId;
@@ -145,7 +171,9 @@ private:
     double mSpeed;
     QVariantList mInfos;
     QVariantList mInfoNames;
-    QVariantList selectedInfos;
+    QVariantList mInfoValues;
+    QVariantList mSelectedInfoNames;
+    QVariantList mSelectedInfoValues;
     QVariantList mRoute;
 
 

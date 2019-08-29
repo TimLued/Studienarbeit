@@ -3,15 +3,16 @@ QT  += \
     network \
     positioning \
     concurrent \
-    core
+    core \
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
+        controller.cpp \
         dronelistmodel.cpp \
         main.cpp \
         posupdater.cpp \
-        transsmoother.cpp
+        tasksender.cpp
 
 RESOURCES += \
     qml.qrc
@@ -26,6 +27,6 @@ HEADERS += \
     drone.h \
     dronelistmodel.h \
     posupdater.h \
-    transsmoother.h
+    tasksender.h
 
 DISTFILES +=

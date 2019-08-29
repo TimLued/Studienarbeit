@@ -152,7 +152,7 @@ Item{
                                 var region = centerMapRegion(routeEditPoly.path)
                                 map.fitViewportToGeoShape(region,200)
 
-                            }else if(!showingRouteInfo && wpInfo.length===0){
+                            }else if(showingRouteInfo && wpInfo.length===0){
                                 wpPanel.droneId = idInfo
                                 wpPanel.show()
                             }else{
@@ -245,20 +245,9 @@ Item{
                         height: 20
                         width: 80
                         enabled: listItem.height === enlarged ? true : false
-                        textRole: "name"
                         font.pixelSize: 10
-                        model: ListModel{id: infoNamesModel}
+                        model: infoNamesInfo
 
-                        property variant infoList
-                        onPressedChanged: {
-                            if (pressed){
-                                infoNamesModel.clear()
-                                infoList = dronemodel.getInfoNameList(idInfo)
-                                for (var i = 0; i< infoList.length;i++){
-                                    infoNamesModel.append({"name": infoList[i]})
-                                }
-                            }
-                        }
                     }
 
                     Button{// add info displayed
@@ -266,7 +255,7 @@ Item{
                         width: 20
                         height: 20
                         onClicked: {
-                            if (dataCB.currentIndex!=-1) dronemodel.setSelectedInfoList(idInfo,infoNamesModel.get(dataCB.currentIndex).name)
+                            if (dataCB.currentIndex!=-1) dronemodel.setSelectedInfoList(idInfo,dataCB.currentText)
                         }
                     }
 
@@ -275,7 +264,7 @@ Item{
                         width: 20
                         height: 20
                         onClicked: {
-                            if (dataCB.currentIndex!=-1) dronemodel.setUnselectedInfoList(idInfo,infoNamesModel.get(dataCB.currentIndex).name)
+                            if (dataCB.currentIndex!=-1) dronemodel.setUnselectedInfoList(idInfo,dataCB.currentText)
                         }
                     }
 
@@ -298,10 +287,10 @@ Item{
                         clip: true
                         interactive: false
                         spacing: 3
-                        model: infoInfo
+                        model: infoSelectedNamesRole
 
                         delegate: Text{
-                            text: "<b>" + infoInfo[index].name + "</b>: " + infoInfo[index].value
+                            text: "<b>" + infoSelectedNamesRole[index] + "</b>: " + InfoSelectedValuesRole[index]
                             wrapMode: Text.WrapAnywhere
                             width: dataLV.width
                             renderType: Text.NativeRendering

@@ -5,18 +5,18 @@
 #include <QGeoCoordinate>
 #include <drone.h>
 
-class QQmlContext;
-class NodeModel;
-
-
 #include <iostream>
+
+class QQmlContext;
+
 
 struct Data {
   QGeoCoordinate coord;
   double angle;
   double speed;
-  QVariantList infos;
+  //QVariantList infos;
   QVariantList infoNames;
+  QVariantList infoValues;
 };
 
 struct Info{
@@ -70,7 +70,9 @@ public:
         FollowRole,
         AngleRole,
         InfoNamesRole,
-        InfoRole,
+        InfoValuesRole,
+        InfoSelectedNamesRole,
+        InfoSelectedValuesRole,
         AnimationStateRole,
         VisibleRole,
         WaypointRole
@@ -95,14 +97,13 @@ public:
     Q_INVOKABLE void toggleShowingRoute(const QString & id);
     Q_INVOKABLE void toggleFollow(const QString & id);
     Q_INVOKABLE void setVisibility(const QString & id,bool visibility);
-    Q_INVOKABLE void setSelectedInfoList(const QString&id,QString info);
-    Q_INVOKABLE void setUnselectedInfoList(const QString&id,QString info);
+    Q_INVOKABLE bool setSelectedInfoList(const QString&id,QString info);
+    Q_INVOKABLE bool setUnselectedInfoList(const QString&id,QString info);
     Q_INVOKABLE QVariant getInfoNameList(const QString&id);
     Q_INVOKABLE QVariant getAllDronePos();
 
 private:
     QList<Drone> mDrones;
-    NodeModel *model;
     QList<QString> colors = {"red","blue","green","purple","yellow","cyan","coral","chartreuse","darkorange","darkred","fuchsia"};
     QList<QString> usedColors;
 };

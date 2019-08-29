@@ -92,7 +92,7 @@ static const uint qt_meta_data_ClientApplication[] = {
     QMetaType::Void,
     QMetaType::Void, QMetaType::QString,    2,
     QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Bool,
 
        0        // eod
 };
@@ -112,7 +112,8 @@ void ClientApplication::qt_static_metacall(QObject *_o, QMetaObject::Call _c, in
         case 6: _t->loadDrone(); break;
         case 7: _t->loadToBuffer((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 8: _t->resetBuffer(); break;
-        case 9: _t->nextPos(); break;
+        case 9: { bool _r = _t->nextPos();
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {

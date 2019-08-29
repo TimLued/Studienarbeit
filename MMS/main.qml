@@ -298,36 +298,33 @@ ApplicationWindow  {
                     }
 
                     onTrackingHistoryChanged: {
-                        if (!trackingHistory){
-                            dynamicPath.path = []
-                            staticPath.path = []
-                        }else{
+                        dynamicPath.path = []
+                        staticPath.path = []
+                        if (trackingHistory){
+                            staticPath.mPath = []
                             if (historyInfo.length > 1) staticPath.mPath = historyInfo
                             k = 50
-
-
                         }
                     }
 
                     property int k: 50
                     onCoordinateChanged: {
-
-
                         if (trackingHistory) {
                             var n = dynamicPath.pathLength()
-                            if (k == 50){ //every 50th or corner
+
+                            if (k == 50){//every 50th or corner
                                 if(n <= 100){
                                     dynamicPath.addCoordinate(posInfo)
                                     k = 0
-                                }else{
+                                }else{//max pathLength
                                     dynamicPath.path = []
                                     staticPath.mPath = historyInfo
                                     k = 50
                                 }
                             }else if(n>1){
-                                if (Math.abs(dynamicPath.path[n-2].azimuthTo(dynamicPath.path[n-1])-dynamicPath.path[n-1].azimuthTo(posInfo))>5){
+                                if (Math.abs(dynamicPath.path[n-2].azimuthTo(dynamicPath.path[n-1])-dynamicPath.path[n-1].azimuthTo(posInfo))>2){
                                     dynamicPath.addCoordinate(posInfo)
-                                    k=50
+                                    k=0
                                 }else{
                                     k+=1
                                 }
@@ -335,7 +332,6 @@ ApplicationWindow  {
                                 k+=1
                             }
                         }
-
 
 
                         if (followInfo){
@@ -457,10 +453,10 @@ ApplicationWindow  {
                                     clip: true
                                     interactive: false
                                     spacing: 2
-                                    model: infoInfo
+                                    model: infoSelectedNamesRole
 
                                     delegate: Text{
-                                        text: dataLV.model[index].name + ": " + dataLV.model[index].value
+                                        text: infoSelectedNamesRole[index] + ": " + InfoSelectedValuesRole[index]
                                         wrapMode: Text.WrapAnywhere
                                         width: dataLV.width
                                     }

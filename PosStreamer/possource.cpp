@@ -33,9 +33,7 @@ void PosSource::setupSource(QString file,int i){
         QJsonDocument doc(obj);
         QString strJson(doc.toJson((QJsonDocument::Compact)));
         droneInfo.append(strJson);
-
     }
-
 }
 
 //JSON

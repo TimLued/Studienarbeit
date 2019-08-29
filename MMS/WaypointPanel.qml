@@ -5,6 +5,7 @@ import QtPositioning 5.13
 import QtLocation 5.13
 import QtQuick.Controls.Styles 1.4
 import "algos.js" as Algos
+import Controller 1.0
 
 Item {
     id: content
@@ -93,6 +94,26 @@ Item {
                             }
                          }
 
+                        Text{
+                            text: "X"
+                            color: "#FF5733"
+                            visible: editing
+                            anchors{
+                                right: parent.right
+                                verticalCenter: parent.verticalCenter
+                                rightMargin: 20
+                            }
+                            height: parent.height
+                            verticalAlignment: Text.AlignVCenter
+                            MouseArea{
+                                anchors.fill:parent
+                                onClicked: {
+                                    wpModel.remove(index)
+                                    onMapWpModel.update()
+                                }
+                            }
+                        }
+
                         // Bottom line border
                         Rectangle {
                             anchors {
@@ -170,11 +191,36 @@ Item {
         width: 35
         height: width
         radius: width / 2
-        highlighted: editing
         onClicked: {
             var region = centerMapRegion(routeEditPoly.path)
             map.fitViewportToGeoShape(region,200)
         }
+    }
+    Button{
+        id: applyChangesBtn
+        anchors{
+            bottom: parent.bottom
+            left: parent.left
+            margins: 5
+        }
+        palette {button: "#3EC6AA"}
+        text: "Apply"
+        font.pixelSize: 16
+        height: contentItem.implicitHeight + topPadding + bottomPadding
+        width: contentItem.implicitWidth + leftPadding + rightPadding
+        onClicked: {
+            var jString = '{"drone": ['
+            for (var i=0;i<wpModel.count;i++){
+                jString+='{"id":"'+wpModel.get(i).name+'","lat":"'+wpModel.get(i).lat + '","lon":"'+wpModel.get(i).lon+ '","drone":"'+droneId+'"}'
+                if(i<wpModel.count-1) jString += ','
+            }
+            jString+=']}'
+            controller.task = jString
+        }
+    }
+
+    Controller{
+        id: controller
 
     }
 

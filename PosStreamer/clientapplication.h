@@ -47,7 +47,7 @@ private slots:
 
     void loadToBuffer(QString);
     void resetBuffer();
-    void nextPos();
+    bool nextPos();
 
 
 signals:
