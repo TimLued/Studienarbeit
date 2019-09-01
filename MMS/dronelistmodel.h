@@ -14,7 +14,6 @@ struct Data {
   QGeoCoordinate coord;
   double angle;
   double speed;
-  //QVariantList infos;
   QVariantList infoNames;
   QVariantList infoValues;
 };
@@ -75,7 +74,8 @@ public:
         InfoSelectedValuesRole,
         AnimationStateRole,
         VisibleRole,
-        WaypointRole
+        WaypointRole,
+        RouteRole
     };
 
     void register_object(const QString &droneId,
@@ -101,10 +101,11 @@ public:
     Q_INVOKABLE bool setUnselectedInfoList(const QString&id,QString info);
     Q_INVOKABLE QVariant getInfoNameList(const QString&id);
     Q_INVOKABLE QVariant getAllDronePos();
+    Q_INVOKABLE QVariant getRoute(const QString&id);
 
 private:
     QList<Drone> mDrones;
-    QList<QString> colors = {"red","blue","green","purple","yellow","cyan","coral","chartreuse","darkorange","darkred","fuchsia"};
+    QList<QString> colors = {"red","blue","green","purple","darkorange","darkred","fuchsia"};
     QList<QString> usedColors;
 };
 

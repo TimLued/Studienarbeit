@@ -306,11 +306,20 @@ ApplicationWindow  {
                             k = 50
                         }
                     }
-
                     property int k: 50
                     onCoordinateChanged: {
+                        var n,first, second
+
+//                        if(n>1){
+//                            first = dynamicPath.path[n-2].azimuthTo(dynamicPath.path[n-1])
+//                            second = dynamicPath.path[n-1].azimuthTo(posInfo)
+//                            if (Math.abs(first-second)>2&&first!==0&&second!==0){
+//                                console.log(posInfo.latitude + "," + posInfo.longitude)
+//                            }
+//                        }
+
                         if (trackingHistory) {
-                            var n = dynamicPath.pathLength()
+                            n = dynamicPath.pathLength()
 
                             if (k == 50){//every 50th or corner
                                 if(n <= 100){
@@ -322,7 +331,9 @@ ApplicationWindow  {
                                     k = 50
                                 }
                             }else if(n>1){
-                                if (Math.abs(dynamicPath.path[n-2].azimuthTo(dynamicPath.path[n-1])-dynamicPath.path[n-1].azimuthTo(posInfo))>2){
+                                first = dynamicPath.path[n-2].azimuthTo(dynamicPath.path[n-1])
+                                second = dynamicPath.path[n-1].azimuthTo(posInfo)
+                                if (Math.abs(first-second)>2 && first!==0 && second!==0){
                                     dynamicPath.addCoordinate(posInfo)
                                     k=0
                                 }else{
@@ -487,7 +498,10 @@ ApplicationWindow  {
 
                 MapPolyline{
                     id: routePoly
-
+                    visible: showingRouteInfo
+                    path: routeInfo
+                    line.color: colorInfo
+                    line.width: 1
                 }
 
             }
@@ -498,6 +512,8 @@ ApplicationWindow  {
             id: routeEditPoly
             line.color: "black"
             line.width: 1
+
+
 
             function update(){
                 var mPath = []

@@ -39,8 +39,8 @@ void ClientSocket::nextPos()
 
     QString line;
     if (!buffer.isEmpty()){
-        line = buffer.last();
-        buffer.removeLast();
+        line = buffer.first();
+        buffer.removeFirst();
         emit updateBuffer(buffer.count());
         //emit updateList(line.trimmed());
     }else{

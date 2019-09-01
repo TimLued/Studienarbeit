@@ -1,11 +1,5 @@
 #include "posupdater.h"
-#include <QGeoPositionInfo>
-#include <QGeoCoordinate>
 #include <QtCore>
-
-#include <QThread>
-#include <qtconcurrentrun.h>
-
 #include <iostream>
 
 PosUpdater::PosUpdater(QObject *parent):
@@ -57,9 +51,7 @@ void PosUpdater::readPos()
         QString newData;
         in >> newData;
 
-        //if (newData == "-") return;
-
-         emit posUpdated(newData);
+        emit posUpdated(newData);
     } catch (...) {
     }
 }

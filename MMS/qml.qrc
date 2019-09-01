@@ -12,5 +12,6 @@
         <file>img/scale.png</file>
         <file>img/scale_end.png</file>
         <file>HistoryPoly.qml</file>
+        <file>NotificationPanel.qml</file>
     </qresource>
 </RCC>

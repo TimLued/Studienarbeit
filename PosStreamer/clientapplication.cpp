@@ -21,7 +21,7 @@ static QList<QString> files = {":/jdrone1.txt",
                                ":/jdrone3.txt",
                                ":/jdrone4.txt",
                                ":/jdroneV1.txt",
-                               ":/jwp2.txt"};
+                               ":/jwp.txt"};
 
 ClientApplication::ClientApplication(QWidget *parent)
     : QDialog(parent),
@@ -161,8 +161,8 @@ bool ClientApplication::nextPos()
             clientConnection->disconnectFromServer();
             return false;
         }
-        line = buffer.last();
-        buffer.removeLast();
+        line = buffer.first();
+        buffer.removeFirst();
         bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
         //emit updateList(line.trimmed());
         //        }else{

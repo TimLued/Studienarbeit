@@ -19,6 +19,8 @@ Item {
     width: 200
     height: 400
 
+    onDroneIdChanged: routeEditPoly.update(droneId)
+
     Rectangle{
         anchors.fill:parent
         color:"white"
@@ -47,7 +49,11 @@ Item {
                 verticalAlignment: Text.AlignVCenter
                 MouseArea{
                     anchors.fill:parent
-                    onClicked: {hide()}
+                    onClicked: {
+                        wpModel.clear()
+                        onMapWpModel.update()
+                        hide()
+                    }
                 }
             }
 

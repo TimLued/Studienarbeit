@@ -32,15 +32,18 @@ bool DroneListModel::updateDrone(const QString & jInfo){
                 return obj.id() == jDroneInfo["drone"].toString();});
 
         Waypoint wp{jDroneInfo["id"].toString(),jDroneInfo["lat"].toString(),jDroneInfo["lon"].toString()};
-
         if(it_wp != mDrones.end()){
+            if(jDroneInfo.keys().contains("reset")) it_wp->resetRoute();
             it_wp->appendRoute(QVariant::fromValue(wp));
+            it_wp->appendRoutePath(coord);
         }else{//should occur just once per drone
             createDrone(jDroneInfo["drone"].toString());
+            mDrones.last().appendRoute(QVariant::fromValue(wp));
+            mDrones.last().appendRoutePath(coord);
         }
 
         QModelIndex ix = index(it_wp - mDrones.begin());
-        emit dataChanged(ix, ix, QVector<int>{WaypointRole});
+        emit dataChanged(ix, ix, QVector<int>{WaypointRole,RouteRole});
         return true;
     }
 
@@ -137,15 +140,15 @@ void DroneListModel::toggleShowingRoute(const QString &id){
             return obj.id() == id;});
 
     //unset others
-    for (const Drone &drone:mDrones){
-        if (drone.showingRoute()&&drone.id()!=id){
-            auto oIt = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
-                return obj.id() == drone.id();});
-            oIt->setShowRoute();
-            ix = index(oIt - mDrones.begin());
-            emit dataChanged(ix, ix, QVector<int>{ShowingRouteRole});
-        }
-    }
+//    for (const Drone &drone:mDrones){
+//        if (drone.showingRoute()&&drone.id()!=id){
+//            auto oIt = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+//                return obj.id() == drone.id();});
+//            oIt->setShowRoute();
+//            ix = index(oIt - mDrones.begin());
+//            emit dataChanged(ix, ix, QVector<int>{ShowingRouteRole});
+//        }
+//    }
 
     it->setShowRoute();
 
@@ -197,6 +200,13 @@ QVariant DroneListModel::getAllDronePos(){
         if(drone.visibility()) dronePos_list<<QVariant::fromValue(drone.pos());
     }
     return dronePos_list;
+}
+
+QVariant DroneListModel::getRoute(const QString &id)
+{
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+            return obj.id() == id;});
+    return it->getRoutePath();
 }
 
 void DroneListModel::setColor(const QString &id, QString color){
@@ -257,6 +267,8 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.visibility();
         else if(role == WaypointRole)
             return it.getRoute();
+        else if(role == RouteRole)
+            return it.getRoutePath();
     }
     return QVariant();
 }
@@ -279,6 +291,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[InfoSelectedValuesRole] = "InfoSelectedValuesRole";
     roles[VisibleRole] = "visibleInfo";
     roles[WaypointRole] = "wpInfo";
+    roles[RouteRole] = "routeInfo";
     return roles;
 }
 

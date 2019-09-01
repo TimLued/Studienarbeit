@@ -10,7 +10,7 @@ Item{
     id: dronePanel
     property bool shown: true
     width: shown ? 150 : 0
-    property variant colors: ["red","blue","green","purple","yellow","cyan","coral","chartreuse","darkorange","darkred","fuchsia"]
+    property variant colors: ["red","blue","green","purple","darkorange","darkred","fuchsia"]
     function noMark(){list.currentIndex = -1}
 
     anchors{
@@ -91,7 +91,7 @@ Item{
 
             Column{
                 id: mainColumn
-                spacing: 5
+                spacing: 2
                 layer.enabled: true
 
                 anchors{
@@ -102,107 +102,179 @@ Item{
                     bottomMargin: 5
                 }
 
-                Label{
-                    id: lbl1
-                    text: idInfo
-                    color: if(visibleInfo) {colorInfo}else{"grey"}
-                    font.pixelSize: txtSize
-                    wrapMode: Text.WrapAnywhere
-                    width: 150 -parent.anchors.leftMargin
-                    renderType: Text.NativeRendering
+                Row{
+                    id: row0
+                    Label{
+                        id: lbl1
+                        text: idInfo
+                        color: if(visibleInfo) {colorInfo}else{"grey"}
+                        font.pixelSize: txtSize
+                        wrapMode: Text.WrapAnywhere
+                        width: 150 -parent.anchors.leftMargin
+                        renderType: Text.NativeRendering
+                    }
                 }
+
+
 
                 Row{
                     id: row1
                     //visible: if(listItem.height === enlarged){true}else{false}
-                    spacing: 5
+                    spacing: 2
 
                     Button{//History
-                        text: "H"
-                        height: 20
-                        width: contentItem.implicitWidth + leftPadding + rightPadding
-                        font.pixelSize: 12
+                        id:historyBtn
                         highlighted: trackingHistoryInfo
                         enabled: listItem.height === enlarged ? true : false
                         onClicked:{
                             dronemodel.toggleHistoryTracking(idInfo)
                         }
+                        contentItem: Text {
+                            text: "History"
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: 12
+                            color: historyBtn.down||historyBtn.highlighted ? "#3EC6AA" : "black" + historyBtn.leftPadding + historyBtn.rightPadding
+                            elide: Text.ElideRight
+                        }
+
+                        background: Rectangle {
+                            implicitWidth: contentItem.implicitWidth
+                            implicitHeight: 20
+                            border.color: historyBtn.down||historyBtn.highlighted ? "#3EC6AA" : "black"
+                            border.width: 1
+                            radius: 2
+                        }
+
                     }
 
                     Button{//Route
-                        text: "R"
-                        height: 20
-                        width: contentItem.implicitWidth + leftPadding + rightPadding
-                        font.pixelSize: 12
+                        id:routeBtn
                         highlighted: showingRouteInfo
                         enabled: listItem.height === enlarged ? true : false
                         onClicked:{
                             dronemodel.toggleShowingRoute(idInfo)
+                        }
 
-                            if(showingRouteInfo && wpInfo.length>0) {
-                                wpModel.clear()
-                                for (var i = wpInfo.length-1;i>=0;i--){
-                                    wpModel.append({"name":wpInfo[i].id,"lat":wpInfo[i].lat,"lon":wpInfo[i].lon})
-                                }
-                                onMapWpModel.update()
+                        contentItem: Text {
+                            text: "Route"
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: 12
+                            color: routeBtn.down||routeBtn.highlighted ? "#3EC6AA" : "black"
+                            elide: Text.ElideRight
+                        }
 
-                                wpPanel.droneId = idInfo
-                                wpPanel.show()
+                        background: Rectangle {
+                            implicitWidth: contentItem.implicitWidth
+                            height: historyBtn.height
+                            border.color: routeBtn.down||routeBtn.highlighted ? "#3EC6AA" : "black"
+                            border.width: 1
+                            radius: 2
+                        }
+                    }
 
-                                var region = centerMapRegion(routeEditPoly.path)
-                                map.fitViewportToGeoShape(region,200)
+                }
 
-                            }else if(showingRouteInfo && wpInfo.length===0){
-                                wpPanel.droneId = idInfo
-                                wpPanel.show()
-                            }else{
-                                wpModel.clear()
-                                onMapWpModel.update()
-                                wpPanel.hide()
+                Row{
+                    id: row2
+                    spacing: 2
+
+                    Button{//Edit Route
+                        id: editBtn
+                        enabled: listItem.height === enlarged ? true : false
+                        onClicked:{
+                            if(showingRouteInfo) dronemodel.toggleShowingRoute(idInfo)
+                            wpModel.clear()
+                            for (var i = 0;i<wpInfo.length;i++){
+                                wpModel.append({"name":wpInfo[i].id,"lat":wpInfo[i].lat,"lon":wpInfo[i].lon})
                             }
+                            onMapWpModel.update()
+
+                            wpPanel.droneId = idInfo
+                            wpPanel.show()
+                        }
+                        contentItem: Text {
+                            font.pixelSize: 12
+                            text: "\u26ED"
+                            horizontalAlignment: Text.AlignHCenter
+                            color: editBtn.down||editBtn.highlighted ? "#3EC6AA" : "black"
+                            elide: Text.ElideRight
+                        }
+
+                        background: Rectangle {
+                            width: contentItem.implicitWidth
+                            height: historyBtn.height
+                            border.color: (editBtn.down||editBtn.highlighted)? "#3EC6AA" : "black"
+                            border.width: 1
+                            radius: 2
                         }
                     }
 
                     Button{//Follow
-                        text: "\u29BF"
-                        height: 20
-                        width: contentItem.implicitWidth + leftPadding + rightPadding
-                        font.pixelSize: 12
+                        id: followBtn
                         highlighted: followInfo
+
                         enabled: listItem.height === enlarged ? true : false
+
                         onClicked:{
                             if (!map.isCenterOnAll) {
                                 dronemodel.toggleFollow(idInfo)
                                 if (!followInfo) map.bearing=0
                             }
                         }
+                        contentItem: Text {
+                            font.pixelSize: 12
+                            text: "\u29BF"
+                            horizontalAlignment: Text.AlignHCenter
+                            color: followBtn.down||followBtn.highlighted ? "#3EC6AA" : "black"
+                            elide: Text.ElideRight
+                        }
+
+                        background: Rectangle {
+                            implicitWidth: contentItem.implicitWidth
+                            height: historyBtn.height
+                            border.color: (followBtn.down||followBtn.highlighted)? "#3EC6AA" : "black"
+                            border.width: 1
+                            radius: 2
+                        }
                     }
 
                     Button{//Visible
-                        text: "\u20E0"
-                        height: 20
-                        width: contentItem.implicitWidth + leftPadding + rightPadding
-                        font.pixelSize: 12
+                        id: visibleBtn
                         highlighted: !visibleInfo
                         enabled: listItem.height === enlarged ? true : false
                         onClicked:{
                             if (visibleInfo) {dronemodel.setVisibility(idInfo,false)}else{dronemodel.setVisibility(idInfo,true)}
                         }
+                        contentItem: Text {
+                            text: "\u20E0"
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: 12
+                            color: visibleBtn.down||visibleBtn.highlighted ? "#3EC6AA" : "black"
+                            elide: Text.ElideRight
+                        }
+
+                        background: Rectangle {
+                            implicitWidth: contentItem.implicitWidth + visibleBtn.leftPadding + visibleBtn.rightPadding
+                            height: historyBtn.height
+                            border.color: visibleBtn.down||visibleBtn.highlighted ? "#3EC6AA" : "black"
+                            border.width: 1
+                            radius: 2
+                        }
                     }
 
                     ComboBox{
                         id: cbColor
-                        height: 20
-                        width: 20
                         enabled: listItem.height === enlarged ? true : false
-                        font.pixelSize: 10
+
                         background: Rectangle{
                             id: cbBG
-                            anchors.fill: parent
+                            implicitWidth: 30
+                            implicitHeight: historyBtn.implicitHeight
+                            radius: 2
+                            border.width: 1
                         }
 
                         delegate: ItemDelegate {
-                            width: 60
                             contentItem: Rectangle {
                                 anchors.fill: parent
                                 color: modelData
@@ -231,40 +303,70 @@ Item{
                                 cbBG.color = colorModel.get(currentIndex).color
                             }
                         }
-                    }
 
+                    }
 
                 }
 
                 Row{
-                    id: row2
-                    spacing: 5
+                    id: row3
+                    spacing: 2
 
                     ComboBox{ //available data to display
                         id: dataCB
-                        height: 20
-                        width: 80
                         enabled: listItem.height === enlarged ? true : false
                         font.pixelSize: 10
                         model: infoNamesInfo
 
+                        background: Rectangle {
+                            implicitWidth: 80
+                            height: historyBtn.height
+                            border.color: dataCB.pressed ? "#3EC6AA" : "black"
+                            radius: 2
+                            border.width: 1
+                        }
+
                     }
 
                     Button{// add info displayed
-                        text: "+"
-                        width: 20
-                        height: 20
+                        id:plusBtn
                         onClicked: {
                             if (dataCB.currentIndex!=-1) dronemodel.setSelectedInfoList(idInfo,dataCB.currentText)
+                        }
+                        contentItem: Text {
+                            text: "+"
+                            horizontalAlignment: Text.AlignHCenter
+                            color: plusBtn.down ? "#3EC6AA" : "black"
+                            elide: Text.ElideRight
+                        }
+
+                        background: Rectangle {
+                            implicitWidth: contentItem.implicitWidth + plusBtn.leftPadding + plusBtn.rightPadding
+                            implicitHeight: historyBtn.height
+                            border.color: plusBtn.down ? "#3EC6AA" : "black"
+                            border.width: 1
+                            radius: 2
                         }
                     }
 
                     Button{// delete info displayed
-                        text: "-"
-                        width: 20
-                        height: 20
+                        id:minusBtn
                         onClicked: {
                             if (dataCB.currentIndex!=-1) dronemodel.setUnselectedInfoList(idInfo,dataCB.currentText)
+                        }
+                        contentItem: Text {
+                            text: "-"
+                            horizontalAlignment: Text.AlignHCenter
+                            color: minusBtn.down ? "#3EC6AA" : "black"
+                            elide: Text.ElideRight
+                        }
+
+                        background: Rectangle {
+                            implicitWidth: contentItem.implicitWidth + minusBtn.leftPadding + minusBtn.rightPadding
+                            implicitHeight: historyBtn.height
+                            border.color: minusBtn.down ? "#3EC6AA" : "black"
+                            border.width: 1
+                            radius: 2
                         }
                     }
 
@@ -273,7 +375,7 @@ Item{
 
                 Flickable  {
                     id: fparent
-                    height: parent.height - lbl1.height - row1.height - row2.height - 3* mainColumn.spacing - 5
+                    height: parent.height - row0.height- row1.height- row2.height- row3.height -4*2
                     width: 150
                     interactive: true
                     clip: true

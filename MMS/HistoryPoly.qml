@@ -40,10 +40,12 @@ MapPolyline{
 
         var indexList = []
         var step = (21 - Math.round(map.zoomLevel)) * 10 //20-0
-        var tmp
+        var tmp,first,second
         for (var i = 0; i<oPath.length; i++){
             if(i>0 && i<oPath.length-1){
-                if (Math.abs(oPath[i-1].azimuthTo(oPath[i])-oPath[i].azimuthTo(oPath[i+1]))>2){
+                first = oPath[i-1].azimuthTo(oPath[i])
+                second = oPath[i].azimuthTo(oPath[i+1])
+                if (Math.abs(first-second)>2 && first!==0 && second!==0){
                     indexList.push(i)
 
                     if(indexList.length===2){ //Anfang-Ende Paar

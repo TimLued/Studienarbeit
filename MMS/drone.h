@@ -35,7 +35,6 @@ public:
           history_list << QVariant::fromValue(coord);
         }
         history_list << QVariant::fromValue(mPos);
-
         return history_list;
     }
 
@@ -43,8 +42,25 @@ public:
         mRoute << waypoint;
     }
 
+    void resetRoute (){
+        mRoute.clear();
+        mRoutePath.clear();
+    }
+
     QVariantList getRoute() const{
         return mRoute;
+    }
+
+    void appendRoutePath (const QGeoCoordinate &waypoint){
+        mRoutePath << waypoint;
+    }
+
+    QVariantList getRoutePath() const{
+        QVariantList route_list;
+        for (const QGeoCoordinate &coord : mRoutePath) {
+          route_list << QVariant::fromValue(coord);
+        }
+        return route_list;
     }
 
     QString getColor() const{
@@ -175,6 +191,7 @@ private:
     QVariantList mSelectedInfoNames;
     QVariantList mSelectedInfoValues;
     QVariantList mRoute;
+    QList<QGeoCoordinate> mRoutePath;
 
 
     bool follow=false;
