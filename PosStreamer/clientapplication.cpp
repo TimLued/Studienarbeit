@@ -102,6 +102,9 @@ void ClientApplication::loadToBuffer(QString info){
 void ClientApplication::resetBuffer(){
      buffer.clear();
      bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
+     for (int i = 0; i<droneLW->count();++i){
+         droneLW->item(i)->setCheckState(Qt::CheckState::Unchecked);
+     }
 }
 
 
@@ -135,7 +138,7 @@ void ClientApplication::startAll()
 
 void ClientApplication::startAllStep()
 {
-    for (int k = 0; k<droneLW->count();++k){
+    for (int k = 0; k<droneLW->count()-1;++k){
         if (droneLW->item(k)->checkState() == Qt::CheckState::Unchecked){
             startBtn->setChecked(0);
             startStopUpdates();
@@ -143,7 +146,7 @@ void ClientApplication::startAllStep()
             startBtn->setChecked(1);
             startStopUpdates();
 
-            if (k==droneLW->count()-1)timer->stop();
+            if (k==droneLW->count()-2)timer->stop();
             break;
         }
     }

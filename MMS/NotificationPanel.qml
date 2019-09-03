@@ -2,58 +2,102 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 
 Item {
-Rectangle{
-    id: background
-}
-DelayButton {
-    id: control
-    checked: true
-    text: qsTr("Delay\nButton")
+    id:notify
+    width: 250
+    height: 80
 
-    contentItem: Text {
-        text: control.text
-        font: control.font
-        opacity: enabled ? 1.0 : 0.3
-        color: "white"
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        elide: Text.ElideRight
+    anchors{
+        top: parent.top
+        horizontalCenter: parent.horizontalCenter
+        topMargin: 5
     }
 
-    background: Rectangle {
-        implicitWidth: 100
-        implicitHeight: 100
-        opacity: enabled ? 1 : 0.3
-        color: control.down ? "#17a81a" : "#21be2b"
-        radius: size / 2
+    Rectangle{
+        id: background
+        anchors.fill: parent
+        color: "#3EC6AA"
+        radius: 2
+        opacity: 0.8
+    }
+    ScrollView{
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        anchors{
+            margins: 5
+            left: parent.left
+            right: closeBtn.left
+            top: parent.top
+            bottom: pBar.top
+        }
 
-        readonly property real size: Math.min(control.width, control.height)
-        width: size
-        height: size
-        anchors.centerIn: parent
+        TextArea{
+            id: notifyText
+            font.pixelSize: 12
+            wrapMode: Text.WrapAnywhere
+            text:"Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text"
 
-        Canvas {
-            id: canvas
-            anchors.fill: parent
+            //        background: Rectangle {
+            //            border.color: "transparent"
+            //        }
+        }
+    }
 
-            Connections {
-                target: control
-                onProgressChanged: canvas.requestPaint()
-            }
 
-            onPaint: {
-                var ctx = getContext("2d")
-                ctx.clearRect(0, 0, width, height)
-                ctx.strokeStyle = "white"
-                ctx.lineWidth = parent.size / 20
-                ctx.beginPath()
-                var startAngle = Math.PI / 5 * 3
-                var endAngle = startAngle + control.progress * Math.PI / 5 * 9
-                ctx.arc(width / 2, height / 2, width / 2 - ctx.lineWidth / 2 - 2, startAngle, endAngle)
-                ctx.stroke()
+    ProgressBar {
+        id: pBar
+        value: 0.5
+        padding: 2
+        anchors{
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+            bottomMargin: 4
+        }
+
+        background: Rectangle {
+            implicitWidth: 200
+            implicitHeight: 6
+            color: "transparent"
+        }
+
+        contentItem: Item {
+            implicitWidth: 200
+            implicitHeight: 6
+
+            Rectangle {
+                width: pBar.visualPosition * parent.width
+                height: parent.height
+                color: "white"
             }
         }
     }
-}
+
+    Button{
+        id: closeBtn
+        anchors{
+            right: parent.right
+            rightMargin: 10
+            verticalCenter: parent.verticalCenter
+        }
+        onClicked: {
+            notify.visible = false
+        }
+        background: Rectangle {
+            implicitWidth: 40
+            implicitHeight: implicitWidth
+            radius: implicitWidth / 2
+            color: "transparent"
+            border.color: closeBtn.down ? "black" : "white"
+            border.width: 1
+        }
+        contentItem: Text {
+            text: "X"
+            font.pixelSize: 20
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            color: closeBtn.down ? "black" : "white"
+            elide: Text.ElideRight
+        }
+    }
+
 
 }

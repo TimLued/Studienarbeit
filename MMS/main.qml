@@ -278,6 +278,7 @@ ApplicationWindow  {
 
                 Drone{
                     id: droneBody
+                    z:2
                     droneColor: colorInfo
                     extrapolating: extrapolateInfo
                     droneId: idInfo
@@ -285,10 +286,11 @@ ApplicationWindow  {
                     visible: visibleInfo
                     trackingHistory: trackingHistoryInfo
 
+                    property double dist
                     onExtrapolatingChanged: {
                         if (extrapolating){
                             extrapolatingAnimation = true
-                            var dist = extrapolationTime/1000*speedInfo
+                            dist = extrapolationTime/1000*speedInfo
                             coordinate = posInfo.atDistanceAndAzimuth(dist,angleInfo)
                         }else{
                             extrapolatingAnimation = false
@@ -309,14 +311,6 @@ ApplicationWindow  {
                     property int k: 50
                     onCoordinateChanged: {
                         var n,first, second
-
-//                        if(n>1){
-//                            first = dynamicPath.path[n-2].azimuthTo(dynamicPath.path[n-1])
-//                            second = dynamicPath.path[n-1].azimuthTo(posInfo)
-//                            if (Math.abs(first-second)>2&&first!==0&&second!==0){
-//                                console.log(posInfo.latitude + "," + posInfo.longitude)
-//                            }
-//                        }
 
                         if (trackingHistory) {
                             n = dynamicPath.pathLength()
@@ -344,7 +338,6 @@ ApplicationWindow  {
                             }
                         }
 
-
                         if (followInfo){
                             map.center = coordinate
                             map.pan(0,-map.height/2+100)
@@ -368,6 +361,7 @@ ApplicationWindow  {
 
                 MapQuickItem{
                     id:circleRuler
+                    z:1
                     visible: map.circleRulerVisible && visibleInfo
                     coordinate: droneBody.coordinate
                     anchorPoint.x: zoomCircle
@@ -399,7 +393,7 @@ ApplicationWindow  {
                 MapQuickItem {//PopUp
                     visible: droneBody.popUp
                     coordinate: droneBody.coordinate
-
+                    z:2
                     anchorPoint.x: if (!followInfo) {-10}else{-droneBody.width / 2}
                     anchorPoint.y: if (!followInfo) {-10}else{popItem.height / 2}
 
@@ -408,7 +402,7 @@ ApplicationWindow  {
                         width: 100
                         height: 100
 
-                        Rectangle{anchors.fill: parent; color: "white"; opacity: 0.8}
+                        Rectangle{anchors.fill: parent; color: "white"; opacity: 1}
                         Column{
                             anchors.fill: parent
                             anchors.margins: 5
@@ -436,10 +430,26 @@ ApplicationWindow  {
                                     width: childrenRect.width
                                     Layout.alignment: Qt.AlignRight
                                     Button{
-                                        width: 20
-                                        height:20
-                                        text: "X"
+                                        id:closeBtn
+//                                        width: 20
+//                                        height:20
                                         onClicked: droneBody.popUp = !droneBody.popUp
+
+                                        background: Rectangle {
+                                            implicitWidth: 20
+                                            implicitHeight: 20
+                                            border.color: closeBtn.down ? "#3EC6AA" : "black"
+                                            border.width: 1
+                                            radius: 2
+                                        }
+
+                                        contentItem: Text {
+                                            text: "X"
+                                            horizontalAlignment: Text.AlignHCenter
+                                            color: closeBtn.down ? "#3EC6AA" : "black"
+                                            elide: Text.ElideRight
+                                        }
+
                                     }
                                 }
 
@@ -484,13 +494,13 @@ ApplicationWindow  {
 
                 HistoryPoly{//Static
                     id: staticPath
-                    visible: trackingHistoryInfo && visibleInfo
+                    visible: trackingHistoryInfo
                     line.color: colorInfo
                 }
 
                 MapPolyline{//dynamic
                     id: dynamicPath
-                    visible: trackingHistoryInfo && visibleInfo
+                    visible: trackingHistoryInfo
                     line.color: colorInfo
                     line.width: 1
 
@@ -504,6 +514,14 @@ ApplicationWindow  {
                     line.width: 1
                 }
 
+                MapPolyline{
+                    id: hotLegPoly
+                    visible: showingRouteInfo
+                    path: legInfo
+                    line.color: colorInfo
+                    line.width: 3
+                }
+
             }
 
         }
@@ -513,17 +531,16 @@ ApplicationWindow  {
             line.color: "black"
             line.width: 1
 
-
-
             function update(){
                 var mPath = []
-
                 for (var i = 0; i<onMapWpModel.count;i++){
                     mPath.push(QtPositioning.coordinate(onMapWpModel.get(i).lat,onMapWpModel.get(i).lon))
                 }
                 path = mPath
             }
         }
+
+
 
         MapItemView {
             id: wpMarker
@@ -590,6 +607,7 @@ ApplicationWindow  {
 
         DronePanel{id:dronePanel}
         ActionPanel{id:actionPanel}
+        NotificationPanel{id:notifyPanel}
 
     }
 

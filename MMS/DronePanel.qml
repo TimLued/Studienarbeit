@@ -32,7 +32,7 @@ Item{
     Rectangle{
         id:panelBG
         anchors.fill: parent
-        opacity: 1.0
+        opacity: 0.8
         color: "#3EC6AA"
         MouseArea {
             hoverEnabled: true
@@ -51,11 +51,13 @@ Item{
         color: panelBG.color
         Text{
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment: Text.AlignHCenter
+            width: contentItem.implicitWidth
             font.pixelSize: 25
             font.bold: true
             text: shown? "\u25C1" : "\u25B7"
-            horizontalAlignment: Text.AlignHCenter
+
         }
         MouseArea{
             anchors.fill:parent
@@ -218,7 +220,7 @@ Item{
                         onClicked:{
                             if (!map.isCenterOnAll) {
                                 dronemodel.toggleFollow(idInfo)
-                                if (!followInfo) map.bearing=0
+//                                if (!followInfo) map.bearing=0
                             }
                         }
                         contentItem: Text {
@@ -249,14 +251,14 @@ Item{
                             text: "\u20E0"
                             horizontalAlignment: Text.AlignHCenter
                             font.pixelSize: 12
-                            color: visibleBtn.down||visibleBtn.highlighted ? "#3EC6AA" : "black"
+                            color: visibleBtn.down||visibleBtn.highlighted ? "#FF5733" : "black"
                             elide: Text.ElideRight
                         }
 
                         background: Rectangle {
                             implicitWidth: contentItem.implicitWidth + visibleBtn.leftPadding + visibleBtn.rightPadding
                             height: historyBtn.height
-                            border.color: visibleBtn.down||visibleBtn.highlighted ? "#3EC6AA" : "black"
+                            border.color: visibleBtn.down||visibleBtn.highlighted ? "#FF5733" : "black"
                             border.width: 1
                             radius: 2
                         }
@@ -341,7 +343,7 @@ Item{
                         }
 
                         background: Rectangle {
-                            implicitWidth: contentItem.implicitWidth + plusBtn.leftPadding + plusBtn.rightPadding
+                            implicitWidth: contentItem.implicitWidth+plusBtn.leftPadding+plusBtn.rightPadding
                             implicitHeight: historyBtn.height
                             border.color: plusBtn.down ? "#3EC6AA" : "black"
                             border.width: 1
@@ -362,7 +364,7 @@ Item{
                         }
 
                         background: Rectangle {
-                            implicitWidth: contentItem.implicitWidth + minusBtn.leftPadding + minusBtn.rightPadding
+                            implicitWidth: contentItem.implicitWidth+minusBtn.leftPadding+minusBtn.rightPadding
                             implicitHeight: historyBtn.height
                             border.color: minusBtn.down ? "#3EC6AA" : "black"
                             border.width: 1

@@ -31,7 +31,8 @@ void PosUpdater::update(){
             //connection failed
             timer->start(500);
         }
-    } catch (...) {
+    } catch (const std::exception& ex) {
+        std::cerr << "Error: " << ex.what() << std::endl;
     }
 }
 
@@ -52,6 +53,7 @@ void PosUpdater::readPos()
         in >> newData;
 
         emit posUpdated(newData);
-    } catch (...) {
+    } catch (const std::exception& ex) {
+        std::cerr << "Error: " << ex.what() << std::endl;
     }
 }

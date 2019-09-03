@@ -11,38 +11,39 @@ Item {
     id: content
     property string droneId
     property bool editing: false
+    property int mHeight: listView.contentHeight + header.height + centerWpBtn.height + centerWpBtn.anchors.margins * 2
     visible: false
 
     function show(){content.visible = true}
     function hide(){content.visible = false}
 
     width: 200
-    height: 400
+    height: mHeight < (win.height*0.7)?  mHeight:win.height*0.7
 
     onDroneIdChanged: routeEditPoly.update(droneId)
 
     Rectangle{
         anchors.fill:parent
         color:"white"
+        opacity: 0.8
     }
 
-    ColumnLayout {
-        anchors.fill: parent
-        spacing: 0
-
         Rectangle {
+            id: header
             color: "#3EC6AA"
             height: 30
-            Layout.fillWidth: true
+            width:parent.width
 
             Text {
                 anchors.centerIn: parent
                 text: droneId
+                font.pixelSize: 14
                 font.letterSpacing: 2
             }
 
             Text{
                 text: "X"
+                font.pixelSize: 16
                 anchors.right: parent.right
                 anchors.rightMargin: 20
                 height: parent.height
@@ -52,6 +53,7 @@ Item {
                     onClicked: {
                         wpModel.clear()
                         onMapWpModel.update()
+                        map.setWaypoints = false
                         hide()
                     }
                 }
@@ -60,8 +62,11 @@ Item {
         }
 
         ScrollView {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+//            Layout.fillWidth: true
+//            Layout.fillHeight: true
+            width: parent.width
+            anchors.top: header.bottom
+            anchors.bottom: centerWpBtn.top
 
             ListView {
                 id: listView
@@ -78,7 +83,6 @@ Item {
 
                         Text {
                             id: textLabel
-                            //anchors.centerIn: parent
                             anchors.verticalCenter: parent.verticalCenter
                             leftPadding: 5
                             text: (index+1) + ". " + (name!=""? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3))
@@ -89,6 +93,7 @@ Item {
                             visible: editing
                             anchors.fill: parent
                             text: name!=""? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3)
+                            selectByMouse: true
                             background: Rectangle {
                                 border.width: 0
                             }
@@ -147,7 +152,9 @@ Item {
                 }
             }
         }
-    }
+
+
+
 
     RoundButton{
         id: addWpBtn

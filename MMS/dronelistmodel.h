@@ -75,7 +75,8 @@ public:
         AnimationStateRole,
         VisibleRole,
         WaypointRole,
-        RouteRole
+        RouteRole,
+        HotLegRole
     };
 
     void register_object(const QString &droneId,

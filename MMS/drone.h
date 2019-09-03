@@ -63,6 +63,11 @@ public:
         return route_list;
     }
 
+    QList<QGeoCoordinate> getRoutePathInCoordinates() const{
+        return mRoutePath;
+    }
+
+
     QString getColor() const{
         return mColor;
     }
@@ -94,6 +99,27 @@ public:
     bool showingRoute() const{
         return showRoute;
     }
+
+    void setLeg(QList<QGeoCoordinate> leg){
+        mHotLeg = leg;
+    }
+
+    QVariantList getLeg() const{
+        QVariantList leg_list;
+        for (const QGeoCoordinate &coord : mHotLeg) {
+          leg_list << QVariant::fromValue(coord);
+        }
+        return leg_list;
+    }
+
+    int getLastLeg() const{
+        return lastLegIndex;
+    }
+
+    void setLastLeg(int i){
+        lastLegIndex = i;
+    }
+
 
     double getAngle() const{
         return mAngle;
@@ -192,7 +218,8 @@ private:
     QVariantList mSelectedInfoValues;
     QVariantList mRoute;
     QList<QGeoCoordinate> mRoutePath;
-
+    QList<QGeoCoordinate> mHotLeg;
+    int lastLegIndex = 0;
 
     bool follow=false;
     bool trackHistory=false;

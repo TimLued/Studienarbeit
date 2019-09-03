@@ -9,8 +9,8 @@ MapPolyline{
     property variant center: map.center
     property int zoom: Math.round(map.zoomLevel)
 
-    onZoomChanged: if(poly.visible && !map.isCenterOnAll) optimizePath()
-    onCenterChanged: if(poly.visible && !map.isCenterOnAll) optimizePath()
+    onZoomChanged: if(poly.visible && !map.isCenterOnAll&& !map.centerFollowing) optimizePath()
+    onCenterChanged: if(poly.visible && !map.isCenterOnAll && !map.centerFollowing) optimizePath()
     onMPathChanged: if(poly.visible) optimizePath()
 
 
@@ -46,25 +46,23 @@ MapPolyline{
                 first = oPath[i-1].azimuthTo(oPath[i])
                 second = oPath[i].azimuthTo(oPath[i+1])
                 if (Math.abs(first-second)>2 && first!==0 && second!==0){
-                    indexList.push(i)
+                    nPath.push(oPath[i])
 
-                    if(indexList.length===2){ //Anfang-Ende Paar
-
-
-                        nPath.push(oPath[indexList[0]])
-
-                        //fill in between with density according zoom level
+//                    indexList.push(i)
+//                    if(indexList.length===2){ //Anfang-Ende Paar
+//                        nPath.push(oPath[indexList[0]])
+//                        //fill in between with density according zoom level
 //                        for (var j = indexList[0]+1; j < indexList[1];j++){
 //                            if (j%step === 0){
 //                                nPath.push(oPath[j])
 //                            }
 //                        }
+//                        tmp = indexList[1]
+//                        nPath.push(oPath[tmp])
+//                        indexList=[]
+//                        indexList.push(tmp) //new start
+//                    }
 
-                        tmp = indexList[1]
-                        nPath.push(oPath[tmp])
-                        indexList=[]
-                        indexList.push(tmp) //new start
-                    }
                 }
 
                 //Mindestanzahl?

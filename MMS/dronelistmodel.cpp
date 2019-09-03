@@ -3,6 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QQmlContext>
+#include <cmath>
 
 #include <iostream>
 
@@ -71,17 +72,47 @@ bool DroneListModel::updateDrone(const QString & jInfo){
             }else{//Update value
                 infoValues[infoNames.indexOf(key)] = val;
             }
-
         }
 
+        QModelIndex ix = index(it - mDrones.begin());
 
-        int row = it - mDrones.begin();
-        QModelIndex ix = index(row);
+        //hot leg
+        QList<QGeoCoordinate> wpList = it->getRoutePathInCoordinates();
+        double bearCheck,wpAzi,projectedAzi,distToLastWp;
+        if (wpList.length()>2){
+            for(int i=(it->getLastLeg()!=-1?it->getLastLeg():0);i<wpList.length()-1;i++){
 
-        QGeoCoordinate c = ix.data(PosRole).value<QGeoCoordinate>();
+                wpAzi = wpList[i].azimuthTo(wpList[i+1]);
+                distToLastWp = it->pos().distanceTo(wpList[i]);
+                projectedAzi = it->pos().atDistanceAndAzimuth(-distToLastWp,angle).azimuthTo(wpList[i+1]);
+
+                bearCheck = abs(wpAzi-projectedAzi);
+                if (bearCheck<1&&(i+2)<wpList.length()){
+                    if(it->pos().distanceTo(wpList[i+1])<200){
+                        //next leg
+                        it->setLeg({wpList[i+1],wpList[i+2]});
+                        it->setLastLeg(i);
+                    }else{
+                        it->setLeg({wpList[i],wpList[i+1]});
+                        it->setLastLeg(i);
+                    }
+                    break;
+                }else if((bearCheck<1&&(i+1)<wpList.length())){
+                    it->setLeg({wpList[i],wpList[i+1]});
+                    it->setLastLeg(i);
+                    break;
+                }
+                if(i==wpList.length()-2){
+                    //no leg
+                    it->setLeg({});
+                    it->setLastLeg(-1);
+                }
+            }
+        }else{it->setLeg({});}
+        emit dataChanged(ix, ix, QVector<int>{HotLegRole});
+
         Data data{coord, angle, speed,infoNames,infoValues};
-        bool result = setData(ix, QVariant::fromValue(data), PosRole);
-        return result;
+        return setData(ix, QVariant::fromValue(data), PosRole);
     }else{
         //create
         return createDrone(id);
@@ -269,6 +300,8 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getRoute();
         else if(role == RouteRole)
             return it.getRoutePath();
+        else if(role == HotLegRole)
+            return it.getLeg();
     }
     return QVariant();
 }
@@ -292,6 +325,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[VisibleRole] = "visibleInfo";
     roles[WaypointRole] = "wpInfo";
     roles[RouteRole] = "routeInfo";
+    roles[HotLegRole] = "legInfo";
     return roles;
 }
 
