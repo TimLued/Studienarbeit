@@ -378,7 +378,7 @@ Item{
                 Flickable  {
                     id: fparent
                     height: parent.height - row0.height- row1.height- row2.height- row3.height -4*2
-                    width: 150
+                    width: 130
                     interactive: true
                     clip: true
                     flickableDirection: Flickable.VerticalFlick
@@ -386,25 +386,55 @@ Item{
 
                     ListView{
                         id: dataLV
-                        width: fparent.width - 2
+                        width: fparent.width
                         height: childrenRect.height
                         clip: true
                         interactive: false
-                        spacing: 3
-                        model: infoSelectedNamesRole
+                        model: infoSelectedNamesInfo
+                        property variant columnWidths: Algos.calcColumnWidths(model, dataLV)
 
-                        delegate: Text{
-                            text: "<b>" + infoSelectedNamesRole[index] + "</b>: " + InfoSelectedValuesRole[index]
-                            wrapMode: Text.WrapAnywhere
-                            width: dataLV.width
-                            renderType: Text.NativeRendering
+                        delegate: Component{
+                            Item{
+                                id: body
+                                width: parent.width
+                                height: row.height
+
+
+                                Row{
+                                    id: row
+                                    width: parent.width
+                                    spacing: 2
+
+                                    Text{
+                                        text: infoSelectedNamesInfo[index]
+                                        wrapMode: Text.WrapAnywhere
+                                        width: dataLV.columnWidths
+                                        renderType: Text.NativeRendering
+                                    }
+                                    Loader { sourceComponent: columnSeparator; height: parent.height }
+                                    Text{
+                                        text: infoSelectedValuesInfo[index]
+                                        wrapMode: Text.WrapAnywhere
+                                        width: parent.width - dataLV.columnWidths
+                                        renderType: Text.NativeRendering
+                                    }
+                                    Component {
+                                        id: columnSeparator
+                                        Rectangle {
+                                            width: 1
+                                            color: "black"
+                                            opacity: 0.3
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         onCountChanged: {
                             fparent.returnToBounds();
                         }
-
                     }
+
                 }
 
             }

@@ -60,11 +60,14 @@ bool DroneListModel::updateDrone(const QString & jInfo){
         //save all data
         QVariantList infoNames = it -> getInfoNames(); //load old list (so if later value is not updated)
         QVariantList infoValues = it -> getInfoValues();
+
         QRegExp re("[+-]?\\d*\\.?\\d+");
 
         foreach(const QString& key, jDroneInfo.keys()) {
             QString val = jDroneInfo.value(key).toString();
             if (re.exactMatch(val)) val = QString::number(val.toDouble(),'f',2); //round if info is numerical
+
+
 
             if (!infoNames.contains(key)) {//no double allowed
                 infoNames << key;
@@ -170,17 +173,6 @@ void DroneListModel::toggleShowingRoute(const QString &id){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
 
-    //unset others
-//    for (const Drone &drone:mDrones){
-//        if (drone.showingRoute()&&drone.id()!=id){
-//            auto oIt = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
-//                return obj.id() == drone.id();});
-//            oIt->setShowRoute();
-//            ix = index(oIt - mDrones.begin());
-//            emit dataChanged(ix, ix, QVector<int>{ShowingRouteRole});
-//        }
-//    }
-
     it->setShowRoute();
 
     ix = index(it - mDrones.begin());
@@ -216,8 +208,10 @@ bool DroneListModel::setUnselectedInfoList(const QString&id,QString info){
     QModelIndex ix = index(it - mDrones.begin());
 
     int index = it->getSelectedInfoNames().indexOf(info);
+    if(index == -1) return false;
     it->removeSelectedInfoNames(info);
     it->removeSelectedInfoValues(index);
+
     emit dataChanged(ix, ix, QVector<int>{InfoSelectedNamesRole,InfoSelectedValuesRole});
 
     return true;
@@ -266,42 +260,48 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
         return QVariant();
     if (index.row() >= 0 && index.row() < rowCount()) {
         const Drone &it = mDrones[index.row()];
-        if (role == IdRole)
+
+        switch (role) {
+        case IdRole:
             return it.id();
-        else if (role == PosRole)
+        case PosRole:
             return QVariant::fromValue(it.pos());
-        else if (role == ColorRole)
+        case ColorRole:
             return it.getColor();
-        else if (role == AngleRole)
+        case AngleRole:
             return it.getAngle();
-        else if (role == SpeedRole)
+        case SpeedRole:
             return it.getSpeed();
-        else if(role == TrackingRole)
+        case TrackingRole:
             return it.trackingHistory();
-        else if(role == ShowingRouteRole)
-            return it.showingRoute();
-        else if(role == HistoryRole)
+        case ShowingRouteRole:
+             return it.showingRoute();
+        case HistoryRole:
             return it.getHistory();
-        else if(role == FollowRole)
+        case FollowRole:
             return it.following();
-        else if(role == AnimationStateRole)
+        case AnimationStateRole:
             return it.extrapolating();
-        else if(role == InfoNamesRole)
+        case InfoNamesRole:
             return it.getInfoNames();
-        else if(role == InfoValuesRole)
+        case InfoValuesRole:
             return it.getInfoValues();
-        else if(role == InfoSelectedNamesRole)
+        case InfoSelectedNamesRole:
             return it.getSelectedInfoNames();
-        else if(role == InfoSelectedValuesRole)
+        case InfoSelectedValuesRole:
             return it.getSelectedInfoValues();
-        else if(role == VisibleRole)
+        case VisibleRole:
             return it.visibility();
-        else if(role == WaypointRole)
+        case WaypointRole:
             return it.getRoute();
-        else if(role == RouteRole)
+        case RouteRole:
             return it.getRoutePath();
-        else if(role == HotLegRole)
+        case HotLegRole:
             return it.getLeg();
+        default:
+            break;
+        }
+
     }
     return QVariant();
 }
@@ -320,8 +320,8 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[AnimationStateRole] = "extrapolateInfo";
     roles[InfoNamesRole] = "infoNamesInfo";
     roles[InfoValuesRole] = "infoValuesInfo";
-    roles[InfoSelectedNamesRole] = "infoSelectedNamesRole";
-    roles[InfoSelectedValuesRole] = "InfoSelectedValuesRole";
+    roles[InfoSelectedNamesRole] = "infoSelectedNamesInfo";
+    roles[InfoSelectedValuesRole] = "infoSelectedValuesInfo";
     roles[VisibleRole] = "visibleInfo";
     roles[WaypointRole] = "wpInfo";
     roles[RouteRole] = "routeInfo";

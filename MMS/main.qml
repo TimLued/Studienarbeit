@@ -6,13 +6,13 @@ import QtPositioning 5.13
 import QtLocation 5.13
 import "algos.js" as Algos
 
+
 ApplicationWindow  {
     id: win
     visible: true
     title: "MMS GUI"
     width: 800
     height: 500
-
     property int txtSize: 14
     property int enlarged: 200
     property int small: txtSize + 15
@@ -97,7 +97,12 @@ ApplicationWindow  {
     Map{
         id: map
         anchors.fill:parent
-        plugin: Plugin{name:"mapboxgl"}
+        plugin: Plugin{
+            name:"mapboxgl"
+            PluginParameter{name:"mapboxgl.access_token";value:"pk.eyJ1IjoidGltb3RoeWx1ZWQiLCJhIjoiY2swNTd4N3pyMDQ1djNjcWk3YWk1Mmw4aiJ9.peN9sLC_oLX5m-KOT5RTlA"}
+            PluginParameter{name:"mapboxgl.mapping.additional_style_urls"; value:"mapbox://styles/timothylued/ck058xmm809nc1co4193k21g0"} //outdoors
+        }
+        activeMapType: supportedMapTypes[0]
         center: QtPositioning.coordinate(54.3107,10.1291)
         zoomLevel: 14
 
@@ -393,7 +398,7 @@ ApplicationWindow  {
                 MapQuickItem {//PopUp
                     visible: droneBody.popUp
                     coordinate: droneBody.coordinate
-                    z:2
+                    z: 2
                     anchorPoint.x: if (!followInfo) {-10}else{-droneBody.width / 2}
                     anchorPoint.y: if (!followInfo) {-10}else{popItem.height / 2}
 
@@ -403,20 +408,23 @@ ApplicationWindow  {
                         height: 100
 
                         Rectangle{anchors.fill: parent; color: "white"; opacity: 1}
-                        Column{
+
+
+                        Rectangle{
                             anchors.fill: parent
                             anchors.margins: 5
-                            anchors.bottomMargin: 0
-                            spacing: 4
-                            layer.enabled: true
 
                             RowLayout {
+                                id: popHeader
+                                anchors.margins: 2
                                 width: parent.width
+
                                 Rectangle{
                                     color: "transparent"
                                     height: childrenRect.height
                                     width: childrenRect.width
                                     Layout.alignment: Qt.AlignLeft
+
                                     Text{text: idInfo
                                         font.bold: true
                                         font.pixelSize: txtSize
@@ -429,22 +437,22 @@ ApplicationWindow  {
                                     height: childrenRect.height
                                     width: childrenRect.width
                                     Layout.alignment: Qt.AlignRight
+
                                     Button{
                                         id:closeBtn
-//                                        width: 20
-//                                        height:20
                                         onClicked: droneBody.popUp = !droneBody.popUp
 
                                         background: Rectangle {
-                                            implicitWidth: 20
-                                            implicitHeight: 20
+                                            implicitWidth: contentItem.implicitWidth
+                                            implicitHeight: contentItem.implicitHeight
                                             border.color: closeBtn.down ? "#3EC6AA" : "black"
                                             border.width: 1
                                             radius: 2
                                         }
 
                                         contentItem: Text {
-                                            text: "X"
+                                            text: "x"
+                                            font.pixelSize: 10
                                             horizontalAlignment: Text.AlignHCenter
                                             color: closeBtn.down ? "#3EC6AA" : "black"
                                             elide: Text.ElideRight
@@ -452,34 +460,69 @@ ApplicationWindow  {
 
                                     }
                                 }
-
-
                             }
 
                             Flickable {
                                 id: fparent
-                                height:70
-                                width: parent.width
+                                anchors{
+                                    bottom: parent.bottom
+                                    top: popHeader.bottom
+                                }
 
+                                width: parent.width
                                 interactive: true
                                 clip: true
                                 flickableDirection: Flickable.VerticalFlick
                                 contentHeight: dataLV.height
 
-
                                 ListView{
                                     id: dataLV
-                                    width: fparent.width
+                                    anchors{
+                                        left: parent.left
+                                        right: parent.right
+                                    }
+
                                     height: childrenRect.height
                                     clip: true
                                     interactive: false
-                                    spacing: 2
-                                    model: infoSelectedNamesRole
+                                    model: infoSelectedNamesInfo
+                                    property variant columnWidths: Algos.calcColumnWidths(model, dataLV)
 
-                                    delegate: Text{
-                                        text: infoSelectedNamesRole[index] + ": " + InfoSelectedValuesRole[index]
-                                        wrapMode: Text.WrapAnywhere
-                                        width: dataLV.width
+                                    delegate: Component{
+                                        Item{
+                                            id: body
+                                            width: parent.width
+                                            height: row.height
+
+
+                                            Row{
+                                                id: row
+                                                width: parent.width
+                                                spacing: 2
+
+                                                Text{
+                                                    text: infoSelectedNamesInfo[index]
+                                                    wrapMode: Text.WrapAnywhere
+                                                    width: dataLV.columnWidths
+                                                    renderType: Text.NativeRendering
+                                                }
+                                                Loader { sourceComponent: columnSeparator; height: parent.height }
+                                                Text{
+                                                    text: infoSelectedValuesInfo[index]
+                                                    wrapMode: Text.WrapAnywhere
+                                                    width: parent.width - dataLV.columnWidths-row.spacing*2
+                                                    renderType: Text.NativeRendering
+                                                }
+                                                Component {
+                                                    id: columnSeparator
+                                                    Rectangle {
+                                                        width: 1
+                                                        color: "black"
+                                                        opacity: 0.3
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
 
                                     onCountChanged: {
@@ -487,6 +530,8 @@ ApplicationWindow  {
                                     }
                                 }
                             }
+
+
                         }
                     }
                 }
@@ -607,7 +652,7 @@ ApplicationWindow  {
 
         DronePanel{id:dronePanel}
         ActionPanel{id:actionPanel}
-        NotificationPanel{id:notifyPanel}
+        NotificationPanel{id:notifyPanel;Component.onCompleted: show()}
 
     }
 

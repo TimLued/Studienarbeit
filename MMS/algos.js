@@ -81,4 +81,23 @@ function ycoord2ypos(y, ymin, ymax, height) {
 }
 
 
+function calcColumnWidths(model, parent)
+{
+    var maxWidth = 0
+    for (var i = 0; i < model.length; ++i)
+    {
+        var key = model[i]
+        var textElement = Qt.createQmlObject(
+                    'import QtQuick 2.12;'
+                    + 'Text {'
+                    + ' text: "' + key+ '" '
+                    + '}',
+                    parent, "calcColumnWidths")
+        maxWidth = Math.max(textElement.width-1, maxWidth)
+        textElement.destroy()
+    }
+
+    return maxWidth
+}
+
 

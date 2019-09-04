@@ -204,6 +204,7 @@ public:
     }
 
 
+
 private:
     QString mId;
     QGeoCoordinate mPos;

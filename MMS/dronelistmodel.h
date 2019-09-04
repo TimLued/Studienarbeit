@@ -86,11 +86,8 @@ public:
     Q_INVOKABLE bool createDrone(const QString & id);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-
     QHash<int, QByteArray> roleNames() const override;
-
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
     Q_INVOKABLE void setColor(const QString &id,QString color);
