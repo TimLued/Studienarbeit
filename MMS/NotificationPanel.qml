@@ -7,7 +7,11 @@ Item {
     width: 250
     height: showing? 80:0
 
-    function hide(){showing = false}
+    function hide(){
+        showing = false
+        pAnimation.stop()
+        pBar.value = 0
+    }
     function show(){
         notifyText.text = "Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text"
         showing = true
@@ -25,13 +29,14 @@ Item {
     anchors{
         top: parent.top
         horizontalCenter: parent.horizontalCenter
-        topMargin: 5
     }
 
     Rectangle{
         id: background
         anchors.fill: parent
         color: "#3EC6AA"
+        border.color: "white"
+        border.width: 3
         radius: 2
         opacity: 0.8
         layer.enabled: true
@@ -40,12 +45,12 @@ Item {
             ScrollBar.vertical.policy: ScrollBar.AlwaysOn
 
             anchors{
-                margins: 5
+                margins: 2
                 left: parent.left
                 right: closeBtn.left
-                top: parent.top
+                bottom: pBar.top
             }
-            height: 65
+            height: 60
 
             TextArea{
                 id: notifyText
@@ -90,9 +95,8 @@ Item {
             anchors{
                 right: parent.right
                 rightMargin: 10
-                verticalCenter: parent.verticalCenter
                 bottom: parent.bottom
-                bottomMargin: parent.height / 4
+                bottomMargin: 20
             }
             onClicked: {
                 hide()
@@ -125,10 +129,7 @@ Item {
         property: "value"
         to:1
         duration: 10000
-        onFinished: {
-            hide()
-            pBar.value = 1
-        }
+        onFinished: hide()
     }
 
 

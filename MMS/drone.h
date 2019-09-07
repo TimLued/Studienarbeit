@@ -5,6 +5,7 @@
 #include <QGeoCoordinate>
 #include <iostream>
 #include <QQmlContext>
+#include <QDateTime>
 
 class Drone
 {
@@ -135,6 +136,13 @@ public:
         mSpeed = speed;
     }
 
+    QDateTime getTimeStamp() const{
+        return mTimeStamp;
+    }
+    void setTimeStamp(QDateTime ts){
+        mTimeStamp = ts;
+    }
+
     bool extrapolating() const{
         return extrapolate;
     }
@@ -212,6 +220,7 @@ private:
     QString mColor;
     double mAngle;
     double mSpeed;
+    QDateTime mTimeStamp;
     QVariantList mInfos;
     QVariantList mInfoNames;
     QVariantList mInfoValues;

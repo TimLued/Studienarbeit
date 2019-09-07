@@ -1,9 +1,11 @@
 #ifndef POSSOURCE_H
 #define POSSOURCE_H
 #include <QObject>
+#include <QDateTime>
 
-class QTimer;
+//class QTimer;
 class QFile;
+class QTimer;
 
 class PosSource: public QObject
 {
@@ -14,21 +16,21 @@ public:
 
 public slots:
     void startStop(bool, bool);
-    void setupSource(QString,int);
-    void setRunning(bool,int);
+    void loadFile(QString file);
+    void setRunning(bool);
 
 private slots:
-    void readNextPos();
+    //void readNextPos();
+    void uavTick();
 
 signals:
     void posUpdated(QString);
 
 private:
-    QTimer *timer;
-    QString lastInfo;
-    int lvIndex;
     QList<QString> droneInfo;
-    int currentInfoIndex;
+    QTimer *uavTimer;
+    QDateTime currentTimeStamp;
+    int currentIndex;
 
 };
 

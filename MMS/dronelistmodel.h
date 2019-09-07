@@ -14,6 +14,7 @@ struct Data {
   QGeoCoordinate coord;
   double angle;
   double speed;
+  QDateTime timestamp;
   QVariantList infoNames;
   QVariantList infoValues;
 };
@@ -61,13 +62,13 @@ public:
     enum Roles{
         IdRole = Qt::UserRole + 1,
         PosRole,
-        SpeedRole,
         ColorRole,
         TrackingRole,
         ShowingRouteRole,
         HistoryRole,
         FollowRole,
         AngleRole,
+        SpeedRole,
         InfoNamesRole,
         InfoValuesRole,
         InfoSelectedNamesRole,
@@ -105,6 +106,19 @@ private:
     QList<Drone> mDrones;
     QList<QString> colors = {"red","blue","green","purple","darkorange","darkred","fuchsia"};
     QList<QString> usedColors;
+
+    bool isInteger(const QVariant &variant)
+    {
+        switch (variant.userType())
+        {
+            case QMetaType::Int:
+            case QMetaType::UInt:
+            case QMetaType::LongLong:
+            case QMetaType::ULongLong:
+                return true;
+        }
+        return false;
+    }
 };
 
 #endif // DRONELISTMODEL_H

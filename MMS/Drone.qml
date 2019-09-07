@@ -67,7 +67,6 @@ MapQuickItem {
         }
     }
 
-
     anchorPoint.x: droneSize/2
     anchorPoint.y: droneSize/2
 }

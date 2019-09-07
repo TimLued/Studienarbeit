@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <QQmlContext>
 #include <cmath>
-
+#include <QDateTime>
 #include <iostream>
 
 DroneListModel::DroneListModel(QObject *parent):QAbstractListModel(parent) {}
@@ -17,12 +17,11 @@ void DroneListModel::register_object(const QString &droneId,
 bool DroneListModel::updateDrone(const QString & jInfo){
 
     QJsonObject jDroneInfo = QJsonDocument::fromJson(jInfo.toUtf8()).object();
-    const QString id = jDroneInfo["id"].toString();
+    QString id = jDroneInfo["id"].toString();
     QGeoCoordinate coord = QGeoCoordinate(jDroneInfo["lat"].toString().toDouble(),jDroneInfo["lon"].toString().toDouble());
+    QDateTime timestamp = QDateTime::fromString(jDroneInfo["timestamp"].toString(),Qt::ISODate);
 
     double angle = jDroneInfo["bearing"].toString().toDouble();
-    double speed = jDroneInfo["speed"].toString().toDouble();
-
 
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
@@ -67,8 +66,6 @@ bool DroneListModel::updateDrone(const QString & jInfo){
             QString val = jDroneInfo.value(key).toString();
             if (re.exactMatch(val)) val = QString::number(val.toDouble(),'f',2); //round if info is numerical
 
-
-
             if (!infoNames.contains(key)) {//no double allowed
                 infoNames << key;
                 infoValues << val;
@@ -76,6 +73,8 @@ bool DroneListModel::updateDrone(const QString & jInfo){
                 infoValues[infoNames.indexOf(key)] = val;
             }
         }
+
+
 
         QModelIndex ix = index(it - mDrones.begin());
 
@@ -112,9 +111,24 @@ bool DroneListModel::updateDrone(const QString & jInfo){
                 }
             }
         }else{it->setLeg({});}
+
+        //speed
+        double distance = it->pos().distanceTo(coord);
+        double time =it->getTimeStamp().time().msecsTo(timestamp.time());
+        double speed = distance / time * 1000;
+        if (speed < 0) speed = it->getSpeed();
+        QString mSpeed = QString::number(speed,'f',2);
+
+        if (!infoNames.contains("speed")) {//save to infos
+            infoNames << "speed";
+            infoValues << mSpeed;
+        }else{//Update value
+            infoValues[infoNames.indexOf("speed")] = mSpeed;
+        }
+
         emit dataChanged(ix, ix, QVector<int>{HotLegRole});
 
-        Data data{coord, angle, speed,infoNames,infoValues};
+        Data data{coord, angle, speed,timestamp, infoNames,infoValues};
         return setData(ix, QVariant::fromValue(data), PosRole);
     }else{
         //create
@@ -222,7 +236,7 @@ bool DroneListModel::setUnselectedInfoList(const QString&id,QString info){
 QVariant DroneListModel::getAllDronePos(){
     QVariantList dronePos_list;
     for (const Drone &drone:mDrones){
-        if(drone.visibility()) dronePos_list<<QVariant::fromValue(drone.pos());
+        if(drone.visibility()&drone.pos().isValid()) dronePos_list<<QVariant::fromValue(drone.pos());
     }
     return dronePos_list;
 }
@@ -270,8 +284,6 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getColor();
         case AngleRole:
             return it.getAngle();
-        case SpeedRole:
-            return it.getSpeed();
         case TrackingRole:
             return it.trackingHistory();
         case ShowingRouteRole:
@@ -298,6 +310,8 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getRoutePath();
         case HotLegRole:
             return it.getLeg();
+        case SpeedRole:
+            return it.getSpeed();
         default:
             break;
         }
@@ -339,6 +353,7 @@ bool DroneListModel::setData(const QModelIndex &index, const QVariant &value,
             mDrones[index.row()].setPos(data.coord);
             mDrones[index.row()].setAngle(data.angle);
             mDrones[index.row()].setSpeed(data.speed);
+            mDrones[index.row()].setTimeStamp(data.timestamp);
             mDrones[index.row()].setInfoNames(data.infoNames);
             mDrones[index.row()].setInfoValues(data.infoValues);
             mDrones[index.row()].setExtrapolate(false);

@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QListWidgetItem>
+#include <QDateTime>
 
 #include <possource.h>
 
@@ -21,6 +22,12 @@ static QList<QString> files = {":/jdrone1.txt",
                                ":/jdrone3.txt",
                                ":/jdrone4.txt",
                                ":/jdroneV1.txt",
+                               ":/trajectory1.txt",
+                               ":/trajectory2.txt",
+                               ":/trajectory3.txt",
+                               ":/trajectory4.txt",
+                               ":/trajectory5.txt",
+                               ":/trajectory6.txt",
                                ":/jwp.txt"};
 
 ClientApplication::ClientApplication(QWidget *parent)
@@ -32,13 +39,12 @@ ClientApplication::ClientApplication(QWidget *parent)
     connect(server, &QLocalServer::newConnection, this, &ClientApplication::nextPos);
 
     //Layout
-    //this->setFixedSize(600,450);
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint);
     QGridLayout *mainLayout = new QGridLayout(this);
     QDialogButtonBox *buttonBox = new QDialogButtonBox;
 
     bufferLbl = new QLabel(this);
-    bufferLbl->setText("Buffer: 0");
+    updateBufferLabel();
     statusLbl = new QLabel(this);
     statusLbl->setText("disconnected");
     statusLbl->setStyleSheet("QLabel {color : red; }");
@@ -64,23 +70,19 @@ ClientApplication::ClientApplication(QWidget *parent)
     mainLayout->addWidget(statusLbl,1,0);
     mainLayout->addWidget(buttonBox,3,0,1,1);
     mainLayout->addWidget(droneLW,2,0);
-
-    //t->start();
-
     //load txt
     QListWidgetItem* droneItem;
 
     for (int i=0;i<files.count();i++){
         source = new PosSource;
-        source->setupSource(files[i],i);
         sources.append(source);
         t = new QThread;
         connect(this, SIGNAL(startStop(bool,bool)),source,SLOT(startStop(bool,bool)));
-        connect(this, SIGNAL(setRunning(bool,int)),source,SLOT(setRunning(bool,int)));
-        connect(source, SIGNAL(posUpdated(QString)),this,SLOT(loadToBuffer(QString))); //Buffer of ClientSocket
+        connect(source, SIGNAL(posUpdated(QString)),this,SLOT(loadToBuffer(QString)));
         source->moveToThread(t);
-
         t->start();
+        source->loadFile(files[i]);
+
 
         //ListView
         droneItem = new QListWidgetItem;
@@ -90,40 +92,38 @@ ClientApplication::ClientApplication(QWidget *parent)
     }
 
     server->listen("dronespos");
-
     connect(timer,SIGNAL(timeout()),this,SLOT(startAllStep()));
 }
 
 void ClientApplication::loadToBuffer(QString info){
     buffer.append(info);
+    updateBufferLabel();
+}
+
+void ClientApplication::updateBufferLabel()
+{
     bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
 }
 
+
 void ClientApplication::resetBuffer(){
-     buffer.clear();
-     bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
-     for (int i = 0; i<droneLW->count();++i){
-         droneLW->item(i)->setCheckState(Qt::CheckState::Unchecked);
-     }
-}
-
-
-void ClientApplication::itemChanged()
-{
+    buffer.clear();
+    updateBufferLabel();
     for (int i = 0; i<droneLW->count();++i){
-         emit setRunning(droneLW->item(i)->checkState(),i);
+        droneLW->item(i)->setCheckState(Qt::CheckState::Unchecked);
     }
 }
+
 
 void ClientApplication::startStopUpdates()
 {
     if (startBtn->isChecked()){
-        emit startStop(1,0);
-        startBtn->setText("Stop");
-    }else{
-        emit startStop(0,0);
-        startBtn->setText("Start");
-    }
+           emit startStop(1,0);
+           startBtn->setText("Stop");
+       }else{
+           emit startStop(0,0);
+           startBtn->setText("Start");
+       }
 }
 
 void ClientApplication::loadDrone(){emit startStop(1,1);}
@@ -138,7 +138,7 @@ void ClientApplication::startAll()
 
 void ClientApplication::startAllStep()
 {
-    for (int k = 0; k<droneLW->count()-1;++k){
+    for (int k = 0; k<droneLW->count();++k){
         if (droneLW->item(k)->checkState() == Qt::CheckState::Unchecked){
             startBtn->setChecked(0);
             startStopUpdates();
@@ -146,11 +146,19 @@ void ClientApplication::startAllStep()
             startBtn->setChecked(1);
             startStopUpdates();
 
-            if (k==droneLW->count()-2)timer->stop();
+            if (k==droneLW->count()-1)timer->stop();
             break;
         }
     }
 }
+
+void ClientApplication::itemChanged()
+{
+    for (int i = 0; i<droneLW->count();++i){
+         sources[i]->setRunning(droneLW->item(i)->checkState());
+    }
+}
+
 
 bool ClientApplication::nextPos()
 {
@@ -166,11 +174,7 @@ bool ClientApplication::nextPos()
         }
         line = buffer.first();
         buffer.removeFirst();
-        bufferLbl->setText("Buffer: " + QString::number(buffer.count()));
-        //emit updateList(line.trimmed());
-        //        }else{
-        //            line="-";
-        //        }
+        updateBufferLabel();
 
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);

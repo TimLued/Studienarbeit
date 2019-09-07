@@ -5,19 +5,18 @@
 
 PosSource::PosSource(QObject *parent):
     QObject (parent),
-    timer(new QTimer(this))
+    uavTimer(new QTimer(this))
 {
+    currentIndex = 0;
     running = false;
-    timer->setInterval(20); //interval == gps frequency
-    connect(timer, SIGNAL(timeout()),this,SLOT(readNextPos()));
+    uavTimer->setInterval(1);
+    connect(uavTimer, SIGNAL(timeout()),this,SLOT(uavTick()));
+
 }
 
-void PosSource::setupSource(QString file,int i){
-    lvIndex = i;
-    currentInfoIndex = 0;
 
+void PosSource::loadFile(QString file){
     QFile logFile;
-
     logFile.setFileName(file);
     logFile.open(QIODevice::ReadOnly);
 
@@ -33,14 +32,21 @@ void PosSource::setupSource(QString file,int i){
         QJsonDocument doc(obj);
         QString strJson(doc.toJson((QJsonDocument::Compact)));
         droneInfo.append(strJson);
-    }
+    };
 }
 
-//JSON
-void PosSource::readNextPos(){
-    emit posUpdated(droneInfo[currentInfoIndex]);
-    if (currentInfoIndex<droneInfo.count()-1){ currentInfoIndex+=1;}else{currentInfoIndex=0;}
+void PosSource::uavTick()
+{
+    QJsonObject jDroneInfo = QJsonDocument::fromJson(droneInfo[currentIndex].toUtf8()).object();
+    if(currentIndex > 0){
+        QDateTime tStamp = QDateTime::fromString(jDroneInfo["timestamp"].toString(),Qt::ISODate);
+        int timediff = currentTimeStamp.time().msecsTo(tStamp.time());
+        if(timediff > 0) uavTimer->setInterval(timediff);
+        currentTimeStamp = tStamp;
+    }
 
+    emit posUpdated(droneInfo[currentIndex]);
+    if (currentIndex<droneInfo.count()-1){ currentIndex+=1;}else{currentIndex=0;}
 }
 
 void PosSource::startStop(bool start,bool load){
@@ -51,16 +57,17 @@ void PosSource::startStop(bool start,bool load){
         }
     }else{
         if (start&&running){
-            timer->start();
+            uavTimer->start();
         }else{
-            timer->stop();
+            uavTimer->stop();
         }
     }
-
 }
 
-void PosSource::setRunning(bool status,int i){
-    if (i==lvIndex) running = status;
+void PosSource::setRunning(bool status){
+    running = status;
 }
+
+
 
 

@@ -66,6 +66,20 @@ Item{
     }
 
 
+    ListView{
+        id: list
+        anchors.fill: parent
+        clip:true
+        model: dronemodel
+        delegate: listDelegate
+        highlightFollowsCurrentItem: true
+        highlightMoveVelocity: -1
+        highlightResizeVelocity: -1
+        Component.onCompleted: currentIndex = -1
+        spacing: 2
+    }
+
+
     Component{
         id: listDelegate
         Item{
@@ -203,7 +217,7 @@ Item{
                         }
 
                         background: Rectangle {
-                            width: contentItem.implicitWidth
+                            implicitWidth: 15
                             height: historyBtn.height
                             border.color: (editBtn.down||editBtn.highlighted)? "#3EC6AA" : "black"
                             border.width: 1
@@ -225,16 +239,44 @@ Item{
                         }
                         contentItem: Text {
                             font.pixelSize: 12
-                            text: "\u29BF"
+                            text: "\u2B9D"
                             horizontalAlignment: Text.AlignHCenter
                             color: followBtn.down||followBtn.highlighted ? "#3EC6AA" : "black"
                             elide: Text.ElideRight
                         }
 
                         background: Rectangle {
-                            implicitWidth: contentItem.implicitWidth
+                            implicitWidth: 15
                             height: historyBtn.height
                             border.color: (followBtn.down||followBtn.highlighted)? "#3EC6AA" : "black"
+                            border.width: 1
+                            radius: 2
+                        }
+                    }
+
+                    Button{//Center
+                        id: centerBtn
+
+                        enabled: listItem.height === enlarged ? true : false
+
+                        onClicked:{
+                            if (!map.isCenterOnAll) {
+                                var region = centerMapRegion([posInfo])
+                                map.fitViewportToGeoShape(region,200)
+                            }
+                        }
+                        contentItem: Text {
+                            font.pixelSize: 12
+                            text: "\u29BF"
+                            horizontalAlignment: Text.AlignHCenter
+                            color: centerBtn.down||centerBtn.highlighted ? "#3EC6AA" : "black"
+                            elide: Text.ElideRight
+                        }
+
+                        background: Rectangle {
+                            implicitWidth: 15
+                            height: historyBtn.height
+                            border.color: (centerBtn.down||centerBtn.highlighted)? "#3EC6AA" : "black"
                             border.width: 1
                             radius: 2
                         }
@@ -256,7 +298,7 @@ Item{
                         }
 
                         background: Rectangle {
-                            implicitWidth: contentItem.implicitWidth + visibleBtn.leftPadding + visibleBtn.rightPadding
+                            implicitWidth: 15
                             height: historyBtn.height
                             border.color: visibleBtn.down||visibleBtn.highlighted ? "#FF5733" : "black"
                             border.width: 1
@@ -270,8 +312,8 @@ Item{
 
                         background: Rectangle{
                             id: cbBG
-                            implicitWidth: 30
-                            implicitHeight: historyBtn.implicitHeight
+                            implicitWidth: 15
+                            implicitHeight: historyBtn.height
                             radius: 2
                             border.width: 1
                         }
@@ -343,7 +385,7 @@ Item{
                         }
 
                         background: Rectangle {
-                            implicitWidth: contentItem.implicitWidth+plusBtn.leftPadding+plusBtn.rightPadding
+                            implicitWidth: 20
                             implicitHeight: historyBtn.height
                             border.color: plusBtn.down ? "#3EC6AA" : "black"
                             border.width: 1
@@ -364,7 +406,7 @@ Item{
                         }
 
                         background: Rectangle {
-                            implicitWidth: contentItem.implicitWidth+minusBtn.leftPadding+minusBtn.rightPadding
+                            implicitWidth: 20
                             implicitHeight: historyBtn.height
                             border.color: minusBtn.down ? "#3EC6AA" : "black"
                             border.width: 1
@@ -403,16 +445,18 @@ Item{
                                 Row{
                                     id: row
                                     width: parent.width
-                                    spacing: 2
+                                    spacing: 3
 
                                     Text{
+                                        id: keyText
                                         text: infoSelectedNamesInfo[index]
                                         wrapMode: Text.WrapAnywhere
                                         width: dataLV.columnWidths
                                         renderType: Text.NativeRendering
                                     }
-                                    Loader { sourceComponent: columnSeparator; height: parent.height }
+                                    Loader { sourceComponent: columnSeparator; height: keyText.height>valueText.height?keyText.height:valueText.height}
                                     Text{
+                                        id: valueText
                                         text: infoSelectedValuesInfo[index]
                                         wrapMode: Text.WrapAnywhere
                                         width: parent.width - dataLV.columnWidths
@@ -439,30 +483,6 @@ Item{
 
             }
         }
-    }
-
-    //Highlight on hover
-    Component{
-        id: mark
-        Rectangle {
-            opacity: 0.4
-            color: "grey"
-            visible: (list.currentIndex  !== -1)
-        }
-    }
-
-    ListView{
-        id: list
-        anchors.fill: parent
-        clip:true
-        model: dronemodel
-        delegate: listDelegate
-        //highlight: mark
-        highlightFollowsCurrentItem: true
-        highlightMoveVelocity: -1
-        highlightResizeVelocity: -1
-        Component.onCompleted: currentIndex = -1
-        spacing: 2
     }
 
 

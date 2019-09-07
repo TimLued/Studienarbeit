@@ -14,5 +14,6 @@
         <file>HistoryPoly.qml</file>
         <file>NotificationPanel.qml</file>
         <file>TimeSlider.qml</file>
+        <file>Compass.qml</file>
     </qresource>
 </RCC>

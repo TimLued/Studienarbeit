@@ -12,6 +12,7 @@
 #include <possource.h>
 
 class QLocalServer;
+class QTimer;
 
 class ClientApplication : public QDialog
 {
@@ -32,7 +33,6 @@ private:
 
     PosSource* source;
     QThread* t;
-    //ClientSocket* mySocket;
     QLocalServer *server;
     void serverError();
     QList<QString> buffer;
@@ -49,10 +49,11 @@ private slots:
     void resetBuffer();
     bool nextPos();
 
+    void updateBufferLabel();
+
 
 signals:
     void startStop(bool,bool);
-    void setRunning(bool,int);
 };
 
 #endif // CLIENTAPPLICATION_H

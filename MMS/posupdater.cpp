@@ -16,19 +16,19 @@ PosUpdater::PosUpdater(QObject *parent):
 
 void PosUpdater::requestPos()
 {
-    timer->start(2);
+    timer->start(1);
 }
 
 void PosUpdater::update(){
-    blockSize = 0;
     try {
+        blockSize = 0;
+        timer->stop();
         socket->abort();
         socket->connectToServer("dronespos");
-        timer->stop();
+
         //keep on connecting
 
-        if (!socket->waitForConnected(3000) || socket->state() != QAbstractSocket::ConnectedState){
-            //connection failed
+        if (!socket->waitForConnected(3000) || socket->state() != QLocalSocket::ConnectedState){
             timer->start(500);
         }
     } catch (const std::exception& ex) {
@@ -40,8 +40,6 @@ void PosUpdater::readPos()
 {
     try {
         if (blockSize == 0) {
-            // Relies on the fact that QDataStream serializes a quint32 into
-            // sizeof(quint32) bytes
             if (socket->bytesAvailable() < (int)sizeof(quint32))
                 return;
             in >> blockSize;

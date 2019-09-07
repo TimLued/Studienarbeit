@@ -100,7 +100,9 @@ ApplicationWindow  {
         plugin: Plugin{
             name:"mapboxgl"
             PluginParameter{name:"mapboxgl.access_token";value:"pk.eyJ1IjoidGltb3RoeWx1ZWQiLCJhIjoiY2swNTd4N3pyMDQ1djNjcWk3YWk1Mmw4aiJ9.peN9sLC_oLX5m-KOT5RTlA"}
-            PluginParameter{name:"mapboxgl.mapping.additional_style_urls"; value:"mapbox://styles/timothylued/ck058xmm809nc1co4193k21g0"} //outdoors
+            PluginParameter{name:"mapboxgl.mapping.additional_style_urls"; value:"mapbox://styles/timothylued/ck06pdqf709ea1do535fgthp6"} //outdoors
+            //mapbox://styles/timothylued/ck058xmm809nc1co4193k21g0
+
         }
         activeMapType: supportedMapTypes[0]
         center: QtPositioning.coordinate(54.3107,10.1291)
@@ -214,9 +216,12 @@ ApplicationWindow  {
             id: scale
             z: map.z + 3
             visible: scaleText.text != "0 m"
-            anchors.bottom: parent.bottom;
-            anchors.right: parent.right
-            anchors.margins: 20
+            anchors{
+                bottom: parent.bottom;
+                right: parent.right
+                margins: 10
+            }
+
             height: scaleText.height * 2
             width: scaleImage.width
 
@@ -252,9 +257,11 @@ ApplicationWindow  {
         Item{
             id: infobar
             z: 3
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.margins: 20
+            anchors{
+                top: parent.top
+                right: parent.right
+                margins: 10
+            }
             height: zoomLbl.height * 2
             width: 72
 
@@ -272,6 +279,41 @@ ApplicationWindow  {
                 color: "#004EAE"
                 anchors.top:zoomLbl.bottom
                 anchors.left: parent.left
+            }
+        }
+
+        Item {
+            width:txt.implicitWidth
+            height:txt.implicitHeight
+
+            anchors{
+                margins: 10
+                right: infobar.left
+                verticalCenter: infobar.verticalCenter
+            }
+
+            Text{
+                id: txt
+                text: "\u29BD"
+                font.pixelSize: 25
+                color: "#004EAE"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                anchors.fill: parent
+            }
+
+            transform: Rotation {
+                origin.x: txt.implicitWidth/2
+                origin.y: txt.implicitHeight/2
+                angle: 360 - map.bearing
+                Behavior on angle {
+                    RotationAnimation{
+                        id:rotAni
+                        duration: 100
+                        direction: RotationAnimation.Shortest
+                        easing.type: Easing.Linear
+                    }
+                }
             }
         }
 
@@ -295,11 +337,12 @@ ApplicationWindow  {
                     onExtrapolatingChanged: {
                         if (extrapolating){
                             extrapolatingAnimation = true
-                            dist = extrapolationTime/1000*speedInfo
+                            dist = speedInfo? extrapolationTime/1000*speedInfo : 0 //seconds * m/s
                             coordinate = posInfo.atDistanceAndAzimuth(dist,angleInfo)
                         }else{
                             extrapolatingAnimation = false
                             coordinate = posInfo
+
                         }
 
                     }
@@ -332,7 +375,7 @@ ApplicationWindow  {
                             }else if(n>1){
                                 first = dynamicPath.path[n-2].azimuthTo(dynamicPath.path[n-1])
                                 second = dynamicPath.path[n-1].azimuthTo(posInfo)
-                                if (Math.abs(first-second)>2 && first!==0 && second!==0){
+                                if (Math.abs(first-second)>1 && first!==0 && second!==0){
                                     dynamicPath.addCoordinate(posInfo)
                                     k=0
                                 }else{
@@ -387,6 +430,7 @@ ApplicationWindow  {
 
                         Text {
                             text: zoomRadius
+                            font.bold: true
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.bottom: parent.top
                             renderType: Text.NativeRendering
@@ -396,7 +440,7 @@ ApplicationWindow  {
                 }
 
                 MapQuickItem {//PopUp
-                    visible: droneBody.popUp
+                    visible: droneBody.popUp && visibleInfo
                     coordinate: droneBody.coordinate
                     z: 2
                     anchorPoint.x: if (!followInfo) {-10}else{-droneBody.width / 2}
@@ -501,13 +545,15 @@ ApplicationWindow  {
                                                 spacing: 2
 
                                                 Text{
+                                                    id: keyText
                                                     text: infoSelectedNamesInfo[index]
                                                     wrapMode: Text.WrapAnywhere
                                                     width: dataLV.columnWidths
                                                     renderType: Text.NativeRendering
                                                 }
-                                                Loader { sourceComponent: columnSeparator; height: parent.height }
+                                                Loader { sourceComponent: columnSeparator; height:keyText.height>valueText.height?keyText.height:valueText.height }
                                                 Text{
+                                                    id: valueText
                                                     text: infoSelectedValuesInfo[index]
                                                     wrapMode: Text.WrapAnywhere
                                                     width: parent.width - dataLV.columnWidths-row.spacing*2
@@ -539,21 +585,21 @@ ApplicationWindow  {
 
                 HistoryPoly{//Static
                     id: staticPath
-                    visible: trackingHistoryInfo
+                    visible: trackingHistoryInfo&& visibleInfo
                     line.color: colorInfo
+                    line.width: 1
                 }
 
                 MapPolyline{//dynamic
                     id: dynamicPath
-                    visible: trackingHistoryInfo
+                    visible: trackingHistoryInfo&& visibleInfo
                     line.color: colorInfo
                     line.width: 1
-
                 }
 
                 MapPolyline{
                     id: routePoly
-                    visible: showingRouteInfo
+                    visible: showingRouteInfo&& visibleInfo
                     path: routeInfo
                     line.color: colorInfo
                     line.width: 1
@@ -561,7 +607,7 @@ ApplicationWindow  {
 
                 MapPolyline{
                     id: hotLegPoly
-                    visible: showingRouteInfo
+                    visible: showingRouteInfo&& visibleInfo
                     path: legInfo
                     line.color: colorInfo
                     line.width: 3
