@@ -182,8 +182,6 @@ ApplicationWindow  {
 
             }
 
-            onEntered: dronePanel.noMark()
-
             onClicked: {
                 if (mouse.button === Qt.MiddleButton && !map.centerFollowing){
                     map.rotating = !map.rotating
@@ -283,8 +281,8 @@ ApplicationWindow  {
         }
 
         Item {
-            width:txt.implicitWidth
-            height:txt.implicitHeight
+            width:compass.implicitWidth
+            height:compass.implicitHeight
 
             anchors{
                 margins: 10
@@ -293,7 +291,7 @@ ApplicationWindow  {
             }
 
             Text{
-                id: txt
+                id: compass
                 text: "\u29BD"
                 font.pixelSize: 25
                 color: "#004EAE"
@@ -303,8 +301,8 @@ ApplicationWindow  {
             }
 
             transform: Rotation {
-                origin.x: txt.implicitWidth/2
-                origin.y: txt.implicitHeight/2
+                origin.x: compass.implicitWidth/2
+                origin.y: compass.implicitHeight/2
                 angle: 360 - map.bearing
                 Behavior on angle {
                     RotationAnimation{
@@ -351,8 +349,7 @@ ApplicationWindow  {
                         dynamicPath.path = []
                         staticPath.path = []
                         if (trackingHistory){
-                            staticPath.mPath = []
-                            if (historyInfo.length > 1) staticPath.mPath = historyInfo
+                            if (historyInfo.length > 1) staticPath.updatePath(historyInfo)
                             k = 50
                         }
                     }
@@ -363,14 +360,15 @@ ApplicationWindow  {
                         if (trackingHistory) {
                             n = dynamicPath.pathLength()
 
-                            if (k == 50){//every 50th or corner
+                            if (k >= 50){//every 50th or corner
                                 if(n <= 100){
                                     dynamicPath.addCoordinate(posInfo)
                                     k = 0
-                                }else{//max pathLength
+                                }else if (staticPath.updatePath(historyInfo)){//max pathLength reached
                                     dynamicPath.path = []
-                                    staticPath.mPath = historyInfo
                                     k = 50
+                                }else{//add to dynamic if problem with algo
+                                    dynamicPath.addCoordinate(posInfo)
                                 }
                             }else if(n>1){
                                 first = dynamicPath.path[n-2].azimuthTo(dynamicPath.path[n-1])
@@ -477,31 +475,28 @@ ApplicationWindow  {
                                     }
                                 }
                                 Rectangle{
-                                    color: "transparent"
-                                    height: childrenRect.height
-                                    width: childrenRect.width
+
                                     Layout.alignment: Qt.AlignRight
-
-                                    Button{
-                                        id:closeBtn
-                                        onClicked: droneBody.popUp = !droneBody.popUp
-
-                                        background: Rectangle {
-                                            implicitWidth: contentItem.implicitWidth
-                                            implicitHeight: contentItem.implicitHeight
-                                            border.color: closeBtn.down ? "#3EC6AA" : "black"
-                                            border.width: 1
-                                            radius: 2
+                                    width: 20
+                                    height: 20
+                                    border.color: closeBtnText.color
+                                    border.width: 1
+                                    color: "transparent"
+                                    Text {
+                                        id:closeBtnText
+                                        text: "x"
+                                        anchors.fill:parent
+                                        font.pixelSize: 16
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                        color: "black"
+                                        elide: Text.ElideRight
+                                    }
+                                    MouseArea{
+                                        anchors.fill:parent
+                                        onClicked: {
+                                            droneBody.popUp = !droneBody.popUp
                                         }
-
-                                        contentItem: Text {
-                                            text: "x"
-                                            font.pixelSize: 10
-                                            horizontalAlignment: Text.AlignHCenter
-                                            color: closeBtn.down ? "#3EC6AA" : "black"
-                                            elide: Text.ElideRight
-                                        }
-
                                     }
                                 }
                             }
@@ -583,11 +578,26 @@ ApplicationWindow  {
                 }
 
 
-                HistoryPoly{//Static
+                MapPolyline{//Static
                     id: staticPath
                     visible: trackingHistoryInfo&& visibleInfo
                     line.color: colorInfo
                     line.width: 1
+
+                    function updatePath(path){
+                        var simplePath = Algos.simplifyPath(path)
+                        var nPath = []
+                        for (var i = 0; i<simplePath.length;i++){
+                            if(simplePath[i]){
+                                nPath.push(QtPositioning.coordinate(simplePath[i][0],simplePath[i][1]))
+                            }
+                        }
+                        if(nPath.length>0){
+                            staticPath.path = nPath
+                            return true
+                        }
+                        return false
+                    }
                 }
 
                 MapPolyline{//dynamic
@@ -698,7 +708,7 @@ ApplicationWindow  {
 
         DronePanel{id:dronePanel}
         ActionPanel{id:actionPanel}
-        NotificationPanel{id:notifyPanel;Component.onCompleted: show()}
+        NotificationPanel{id:notifyPanel;Component.onCompleted: show("Guten Flug")}
 
     }
 

@@ -10,6 +10,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         controller.cpp \
         dronelistmodel.cpp \
+        grouplistmodel.cpp \
         main.cpp \
         posupdater.cpp \
         tasksender.cpp
@@ -26,6 +27,8 @@ HEADERS += \
     controller.h \
     drone.h \
     dronelistmodel.h \
+    group.h \
+    grouplistmodel.h \
     posupdater.h \
     tasksender.h
 

@@ -12,8 +12,8 @@ Item {
         pAnimation.stop()
         pBar.value = 0
     }
-    function show(){
-        notifyText.text = "Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text Some Text"
+    function show(info){
+        notifyText.text = info
         showing = true
     }
 
@@ -55,6 +55,7 @@ Item {
             TextArea{
                 id: notifyText
                 text: ""
+                color: "black"
                 font.pixelSize: 12
                 wrapMode: Text.WrapAnywhere
             }

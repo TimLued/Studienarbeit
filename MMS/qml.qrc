@@ -4,6 +4,8 @@
         <file>WaypointMarker.qml</file>
         <file>WaypointDraggableItemDropArea.qml</file>
         <file>WaypointDraggableItem.qml</file>
+        <file>TimeSlider.qml</file>
+        <file>NotificationPanel.qml</file>
         <file>main.qml</file>
         <file>DronePanel.qml</file>
         <file>Drone.qml</file>
@@ -11,9 +13,5 @@
         <file>algos.js</file>
         <file>img/scale.png</file>
         <file>img/scale_end.png</file>
-        <file>HistoryPoly.qml</file>
-        <file>NotificationPanel.qml</file>
-        <file>TimeSlider.qml</file>
-        <file>Compass.qml</file>
     </qresource>
 </RCC>

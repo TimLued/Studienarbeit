@@ -11,7 +11,6 @@ Item{
     property bool shown: true
     width: shown ? 150 : 0
     property variant colors: ["red","blue","green","purple","darkorange","darkred","fuchsia"]
-    function noMark(){list.currentIndex = -1}
 
     anchors{
         top: parent.top
@@ -26,18 +25,6 @@ Item{
         PropertyAnimation{
             duration: 500
             easing.type: Easing.Linear
-        }
-    }
-
-    Rectangle{
-        id:panelBG
-        anchors.fill: parent
-        opacity: 0.8
-        color: "#3EC6AA"
-        MouseArea {
-            hoverEnabled: true
-            anchors.fill: parent
-            onEntered: list.currentIndex = -1
         }
     }
 
@@ -65,23 +52,240 @@ Item{
         }
     }
 
-
-    ListView{
-        id: list
+    Rectangle{
+        id:panelBG
         anchors.fill: parent
-        clip:true
-        model: dronemodel
-        delegate: listDelegate
-        highlightFollowsCurrentItem: true
-        highlightMoveVelocity: -1
-        highlightResizeVelocity: -1
-        Component.onCompleted: currentIndex = -1
-        spacing: 2
+        opacity: 0.8
+        color: "#3EC6AA"
+        layer.enabled: true
+        property bool uavExtended: true
+        property bool groupExtended: true
+
+        Rectangle{
+            id: dronesHeader
+
+            property int space: 10
+            width: 150
+            height: extendBtn.height
+            anchors{
+                left: parent.left
+                top: parent.top
+                topMargin: 4
+            }
+            color:"transparent"
+
+            Rectangle{
+                id: extendBtn
+                anchors{
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                    rightMargin: 4
+                }
+                width: 20
+                height: 20
+                border.color: "white"
+                border.width: 1
+                color: "transparent"
+                radius: 2
+
+                MouseArea{
+                    anchors.fill:parent
+                    onClicked: {
+                        panelBG.uavExtended = !panelBG.uavExtended
+                    }
+                }
+                Text {
+                    anchors.fill:parent
+                    text: panelBG.uavExtended? "-":"+"
+                    font.pixelSize: 16
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    color: "black"
+                    elide: Text.ElideRight
+                }
+            }
+
+            Text{
+                id:headerText
+                text: "UAV"
+                font.pixelSize: 12
+                color:"white"
+                anchors{
+                    left: parent.left
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                }
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+            Rectangle{
+                id: leftLine
+                height: 1
+                width: parent.width / 2 - Algos.calcTxtWidth(headerText.text,headerText) / 2 - parent.space
+                color:"white"
+                anchors{
+                    left: parent.left
+                    verticalCenter: parent.verticalCenter
+                }
+            }
+            Rectangle{
+                height: 1
+                width: leftLine.width-extendBtn.width - extendBtn.anchors.rightMargin
+                color:"white"
+                anchors{
+                    right: extendBtn.left
+                    verticalCenter: parent.verticalCenter
+                }
+            }
+        }
+
+        Rectangle{
+            id: uavContainer
+            layer.enabled: true
+            color:"transparent"
+            anchors{
+                top: dronesHeader.bottom
+                left:parent.left
+                right:parent.right
+                topMargin: 4
+            }
+            height: panelBG.uavExtended? droneLV.contentHeight:0
+
+            Behavior on height{
+                PropertyAnimation{
+                    duration: 200
+                    easing.type: Easing.Linear
+                }
+            }
+
+            ListView{
+                id: droneLV
+                anchors.fill: parent
+                clip:true
+                model: dronemodel
+                delegate: droneLvDelegate
+                spacing: 2
+            }
+        }
+
+
+        Rectangle{
+            id: groupHeader
+
+            property int space: 10
+            width: 150
+            height: extendGroupBtn.height
+            anchors{
+                left: parent.left
+                top: uavContainer.bottom
+                topMargin: 4
+            }
+            color:"transparent"
+
+
+
+            Rectangle{
+                id: extendGroupBtn
+                anchors{
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                    rightMargin: 4
+                }
+                width: 20
+                height: 20
+                border.color: "white"
+                border.width: 1
+                color: "transparent"
+                radius: 2
+
+                MouseArea{
+                    anchors.fill:parent
+                    onClicked: {
+                        panelBG.groupExtended = !panelBG.groupExtended
+                    }
+                }
+                Text {
+                    anchors.fill:parent
+                    text: panelBG.groupExtended? "-":"+"
+                    font.pixelSize: 16
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    color: "black"
+                    elide: Text.ElideRight
+                }
+            }
+
+            Text{
+                id:headerGroupText
+                text: "Groups"
+                font.pixelSize: 12
+                color:"white"
+                anchors{
+                    left: parent.left
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                }
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+            Rectangle{
+                id: leftGroupLine
+                height: 1
+                width: parent.width / 2 - Algos.calcTxtWidth(headerGroupText.text,headerGroupText) / 2 - parent.space
+                color:"white"
+                anchors{
+                    left: parent.left
+                    verticalCenter: parent.verticalCenter
+                }
+            }
+            Rectangle{
+                height: 1
+                width: leftGroupLine.width-extendGroupBtn.width - extendGroupBtn.anchors.rightMargin
+                color:"white"
+                anchors{
+                    right: extendGroupBtn.left
+                    verticalCenter: parent.verticalCenter
+                }
+            }
+        }
+
+
+        Rectangle{
+            id: groupContainer
+            layer.enabled: true
+            color:"transparent"
+            anchors{
+                top: groupHeader.bottom
+                left:parent.left
+                right:parent.right
+                topMargin: 4
+            }
+            height: panelBG.groupExtended? groupLV.contentHeight:0
+
+            Behavior on height{
+                PropertyAnimation{
+                    duration: 200
+                    easing.type: Easing.Linear
+                }
+            }
+
+            ListView{
+                id: groupLV
+                anchors.fill: parent
+                clip:true
+                //model: dronemodel
+                //delegate: droneLvDelegate
+                spacing: 2
+            }
+        }
+
+
+
     }
 
 
     Component{
-        id: listDelegate
+        id: droneLvDelegate
         Item{
             id: listItem
             width: parent.width
@@ -100,8 +304,6 @@ Item{
                         if(listItem.height === small){listItem.height = enlarged
                         }else{listItem.height = small}
                     }
-
-                    onEntered: list.currentIndex = index
                 }
             }
 
@@ -135,176 +337,181 @@ Item{
 
                 Row{
                     id: row1
-                    //visible: if(listItem.height === enlarged){true}else{false}
                     spacing: 2
 
-                    Button{//History
-                        id:historyBtn
-                        highlighted: trackingHistoryInfo
-                        enabled: listItem.height === enlarged ? true : false
-                        onClicked:{
-                            dronemodel.toggleHistoryTracking(idInfo)
+                    Rectangle{
+                        id: historyBtn
+                        width: Algos.calcTxtWidth(historyText.text,historyText) + 10
+
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                dronemodel.toggleHistoryTracking(idInfo)
+                            }
                         }
-                        contentItem: Text {
+                        height: 20
+                        border.color: historyText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:historyText
                             text: "History"
-                            horizontalAlignment: Text.AlignHCenter
+                            anchors.fill:parent
                             font.pixelSize: 12
-                            color: historyBtn.down||historyBtn.highlighted ? "#3EC6AA" : "black" + historyBtn.leftPadding + historyBtn.rightPadding
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: trackingHistoryInfo? "#3EC6AA" : "black"
                             elide: Text.ElideRight
                         }
-
-                        background: Rectangle {
-                            implicitWidth: contentItem.implicitWidth
-                            implicitHeight: 20
-                            border.color: historyBtn.down||historyBtn.highlighted ? "#3EC6AA" : "black"
-                            border.width: 1
-                            radius: 2
-                        }
-
                     }
 
-                    Button{//Route
-                        id:routeBtn
-                        highlighted: showingRouteInfo
-                        enabled: listItem.height === enlarged ? true : false
-                        onClicked:{
-                            dronemodel.toggleShowingRoute(idInfo)
-                        }
+                    Rectangle{
+                        id: routeBtn
+                        width: Algos.calcTxtWidth(routeText.text,routeText) + 10
 
-                        contentItem: Text {
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                dronemodel.toggleShowingRoute(idInfo)
+                            }
+                        }
+                        height: 20
+                        border.color: routeText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:routeText
                             text: "Route"
-                            horizontalAlignment: Text.AlignHCenter
+                            anchors.fill:parent
                             font.pixelSize: 12
-                            color: routeBtn.down||routeBtn.highlighted ? "#3EC6AA" : "black"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: showingRouteInfo? "#3EC6AA" : "black"
                             elide: Text.ElideRight
                         }
-
-                        background: Rectangle {
-                            implicitWidth: contentItem.implicitWidth
-                            height: historyBtn.height
-                            border.color: routeBtn.down||routeBtn.highlighted ? "#3EC6AA" : "black"
-                            border.width: 1
-                            radius: 2
-                        }
                     }
-
                 }
 
                 Row{
                     id: row2
                     spacing: 2
 
-                    Button{//Edit Route
+                    Rectangle{
                         id: editBtn
-                        enabled: listItem.height === enlarged ? true : false
-                        onClicked:{
-                            if(showingRouteInfo) dronemodel.toggleShowingRoute(idInfo)
-                            wpModel.clear()
-                            for (var i = 0;i<wpInfo.length;i++){
-                                wpModel.append({"name":wpInfo[i].id,"lat":wpInfo[i].lat,"lon":wpInfo[i].lon})
-                            }
-                            onMapWpModel.update()
+                        width: Algos.calcTxtWidth(editText.text,editText) + 10
 
-                            wpPanel.droneId = idInfo
-                            wpPanel.show()
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                if(showingRouteInfo) dronemodel.toggleShowingRoute(idInfo)
+                                wpModel.clear()
+                                for (var i = 0;i<wpInfo.length;i++){
+                                    wpModel.append({"name":wpInfo[i].id,"lat":wpInfo[i].lat,"lon":wpInfo[i].lon})
+                                }
+                                onMapWpModel.update()
+
+                                wpPanel.droneId = idInfo
+                                wpPanel.show()
+                            }
                         }
-                        contentItem: Text {
-                            font.pixelSize: 12
+                        height: 20
+                        border.color: editText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:editText
                             text: "\u26ED"
+                            anchors.fill:parent
+                            font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
-                            color: editBtn.down||editBtn.highlighted ? "#3EC6AA" : "black"
+                            verticalAlignment: Text.AlignVCenter
+                            color: "black"
                             elide: Text.ElideRight
-                        }
-
-                        background: Rectangle {
-                            implicitWidth: 15
-                            height: historyBtn.height
-                            border.color: (editBtn.down||editBtn.highlighted)? "#3EC6AA" : "black"
-                            border.width: 1
-                            radius: 2
                         }
                     }
 
-                    Button{//Follow
+
+                    Rectangle{
                         id: followBtn
-                        highlighted: followInfo
+                        width: Algos.calcTxtWidth(followText.text,followText) + 10
 
-                        enabled: listItem.height === enlarged ? true : false
-
-                        onClicked:{
-                            if (!map.isCenterOnAll) {
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
                                 dronemodel.toggleFollow(idInfo)
-//                                if (!followInfo) map.bearing=0
                             }
                         }
-                        contentItem: Text {
-                            font.pixelSize: 12
+                        height: 20
+                        border.color: followText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:followText
                             text: "\u2B9D"
+                            anchors.fill:parent
+                            font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
-                            color: followBtn.down||followBtn.highlighted ? "#3EC6AA" : "black"
+                            verticalAlignment: Text.AlignVCenter
+                            color: followInfo? "#3EC6AA" : "black"
                             elide: Text.ElideRight
-                        }
-
-                        background: Rectangle {
-                            implicitWidth: 15
-                            height: historyBtn.height
-                            border.color: (followBtn.down||followBtn.highlighted)? "#3EC6AA" : "black"
-                            border.width: 1
-                            radius: 2
                         }
                     }
 
-                    Button{//Center
+                    Rectangle{
                         id: centerBtn
+                        width: Algos.calcTxtWidth(centerText.text,centerText) + 10
 
-                        enabled: listItem.height === enlarged ? true : false
-
-                        onClicked:{
-                            if (!map.isCenterOnAll) {
-                                var region = centerMapRegion([posInfo])
-                                map.fitViewportToGeoShape(region,200)
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                if (!map.isCenterOnAll) {
+                                    var region = centerMapRegion([posInfo])
+                                    map.fitViewportToGeoShape(region,200)
+                                }
                             }
                         }
-                        contentItem: Text {
-                            font.pixelSize: 12
+                        height: 20
+                        border.color: centerText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:centerText
                             text: "\u29BF"
-                            horizontalAlignment: Text.AlignHCenter
-                            color: centerBtn.down||centerBtn.highlighted ? "#3EC6AA" : "black"
-                            elide: Text.ElideRight
-                        }
-
-                        background: Rectangle {
-                            implicitWidth: 15
-                            height: historyBtn.height
-                            border.color: (centerBtn.down||centerBtn.highlighted)? "#3EC6AA" : "black"
-                            border.width: 1
-                            radius: 2
-                        }
-                    }
-
-                    Button{//Visible
-                        id: visibleBtn
-                        highlighted: !visibleInfo
-                        enabled: listItem.height === enlarged ? true : false
-                        onClicked:{
-                            if (visibleInfo) {dronemodel.setVisibility(idInfo,false)}else{dronemodel.setVisibility(idInfo,true)}
-                        }
-                        contentItem: Text {
-                            text: "\u20E0"
-                            horizontalAlignment: Text.AlignHCenter
+                            anchors.fill:parent
                             font.pixelSize: 12
-                            color: visibleBtn.down||visibleBtn.highlighted ? "#FF5733" : "black"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: "black"
                             elide: Text.ElideRight
                         }
+                    }
 
-                        background: Rectangle {
-                            implicitWidth: 15
-                            height: historyBtn.height
-                            border.color: visibleBtn.down||visibleBtn.highlighted ? "#FF5733" : "black"
-                            border.width: 1
-                            radius: 2
+                    Rectangle{
+                        id: visibleBtn
+                        width: Algos.calcTxtWidth(visibleText.text,visibleText) + 20
+
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                if (visibleInfo) {dronemodel.setVisibility(idInfo,false)}else{dronemodel.setVisibility(idInfo,true)}
+                            }
+                        }
+                        height: 20
+                        border.color: visibleText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:visibleText
+                            text: "\u20E0"
+                            anchors.fill:parent
+                            font.pixelSize: 12
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: !visibleInfo? "#FF5733" : "black"
+                            elide: Text.ElideRight
                         }
                     }
+
 
                     ComboBox{
                         id: cbColor
@@ -312,7 +519,7 @@ Item{
 
                         background: Rectangle{
                             id: cbBG
-                            implicitWidth: 15
+                            implicitWidth: 30
                             implicitHeight: historyBtn.height
                             radius: 2
                             border.width: 1
@@ -358,62 +565,104 @@ Item{
 
                     ComboBox{ //available data to display
                         id: dataCB
-                        enabled: listItem.height === enlarged ? true : false
-                        font.pixelSize: 10
+
+                        //enabled: listItem.height === enlarged ? true : false
                         model: infoNamesInfo
+
+                        indicator: Canvas {
+                            id: canvas
+                            x: dataCB.width - width - dataCB.rightPadding
+                            y: dataCB.topPadding + (dataCB.availableHeight - height) / 2
+                            width: 12
+                            height: 8
+                            contextType: "2d"
+
+                            Connections {
+                                target: dataCB
+                                onPressedChanged: canvas.requestPaint()
+                            }
+
+                            onPaint: {
+                                context.reset();
+                                context.moveTo(0, 0);
+                                context.lineTo(width, 0);
+                                context.lineTo(width / 2, height);
+                                context.closePath();
+                                context.fillStyle = "grey";
+                                context.fill();
+                            }
+                        }
+
+                        contentItem: Text {
+                            leftPadding: 5
+                            rightPadding: dataCB.indicator.width + dataCB.spacing
+                            text: dataCB.displayText
+                            color: "BLACK"
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                        }
 
                         background: Rectangle {
                             implicitWidth: 80
-                            height: historyBtn.height
-                            border.color: dataCB.pressed ? "#3EC6AA" : "black"
-                            radius: 2
+                            implicitHeight: historyBtn.height
+                            border.color: "black"
                             border.width: 1
                         }
 
                     }
 
-                    Button{// add info displayed
-                        id:plusBtn
-                        onClicked: {
-                            if (dataCB.currentIndex!=-1) dronemodel.setSelectedInfoList(idInfo,dataCB.currentText)
+
+                    Rectangle{
+                        id: plusBtn
+                        width: Algos.calcTxtWidth(plusText.text,plusText) + 10
+
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                if (dataCB.currentIndex!=-1) dronemodel.setSelectedInfoList(idInfo,dataCB.currentText)
+                            }
                         }
-                        contentItem: Text {
+                        height: 20
+                        border.color: plusText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:plusText
                             text: "+"
+                            anchors.fill:parent
+                            font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
-                            color: plusBtn.down ? "#3EC6AA" : "black"
+                            verticalAlignment: Text.AlignVCenter
+                            color: "black"
                             elide: Text.ElideRight
-                        }
-
-                        background: Rectangle {
-                            implicitWidth: 20
-                            implicitHeight: historyBtn.height
-                            border.color: plusBtn.down ? "#3EC6AA" : "black"
-                            border.width: 1
-                            radius: 2
                         }
                     }
 
-                    Button{// delete info displayed
-                        id:minusBtn
-                        onClicked: {
-                            if (dataCB.currentIndex!=-1) dronemodel.setUnselectedInfoList(idInfo,dataCB.currentText)
+                    Rectangle{
+                        id: minusBtn
+                        width: plusBtn.width
+
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                if (dataCB.currentIndex!=-1) dronemodel.setUnselectedInfoList(idInfo,dataCB.currentText)
+                            }
                         }
-                        contentItem: Text {
+                        height: 20
+                        border.color: plusText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:minusText
                             text: "-"
+                            anchors.fill:parent
+                            font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
-                            color: minusBtn.down ? "#3EC6AA" : "black"
+                            verticalAlignment: Text.AlignVCenter
+                            color: "black"
                             elide: Text.ElideRight
                         }
-
-                        background: Rectangle {
-                            implicitWidth: 20
-                            implicitHeight: historyBtn.height
-                            border.color: minusBtn.down ? "#3EC6AA" : "black"
-                            border.width: 1
-                            radius: 2
-                        }
                     }
-
                 }
 
 
