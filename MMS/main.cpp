@@ -1,13 +1,13 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-
-
 #include <QQmlContext>
+
 #include <controller.h>
+
 #include <dronelistmodel.h>
+#include <grouplistmodel.h>
 
 #include <iostream>
-#include <QGeoPath>
 
 void update(){
 
@@ -20,16 +20,17 @@ int main(int argc, char *argv[])
 
 
     DroneListModel droneModel;
+    GroupListModel groupModel;
 
     QQmlApplicationEngine  engine;
 
     droneModel.register_object("dronemodel",engine.rootContext());
-    //qmlRegisterType<TransSmoother>("TransSmoother", 1, 0, "TransSmoother");
+    groupModel.register_object("groupmodel",engine.rootContext());
     qmlRegisterType<Controller>("Controller",1,0,"Controller");
 
+
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-    if (engine.rootObjects().isEmpty())
-        return -1;
+    if (engine.rootObjects().isEmpty()) return -1;
 
     Controller c;
     QObject::connect(&c, &Controller::posUpdated, [&droneModel, &c]() {
@@ -37,8 +38,6 @@ int main(int argc, char *argv[])
         droneModel.updateDrone(c.currentDroneInfo);
     });
     c.startListener();
-
-
 
     return app.exec();
 }

@@ -6,7 +6,6 @@ import QtPositioning 5.13
 import QtLocation 5.13
 import "algos.js" as Algos
 
-
 ApplicationWindow  {
     id: win
     visible: true

@@ -2,15 +2,13 @@
 #include <QGeoCoordinate>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QQmlContext>
 #include <cmath>
 #include <QDateTime>
 #include <iostream>
 
 DroneListModel::DroneListModel(QObject *parent):QAbstractListModel(parent) {}
 
-void DroneListModel::register_object(const QString &droneId,
-                                     QQmlContext *context){
+void DroneListModel::register_object(const QString &droneId,QQmlContext *context){
     context->setContextProperty(droneId, this);
 }
 
@@ -241,10 +239,14 @@ QVariant DroneListModel::getAllDronePos(){
     return dronePos_list;
 }
 
+QVariant DroneListModel::getDronePos(const QString&id){
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){return obj.id() == id;});
+    return QVariant::fromValue(it->pos());
+}
+
 QVariant DroneListModel::getRoute(const QString &id)
 {
-    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
-            return obj.id() == id;});
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){return obj.id() == id;});
     return it->getRoutePath();
 }
 
@@ -343,8 +345,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     return roles;
 }
 
-bool DroneListModel::setData(const QModelIndex &index, const QVariant &value,
-                             int role) {
+bool DroneListModel::setData(const QModelIndex &index, const QVariant &value,int role) {
     if (!index.isValid())
         return false;
     if (index.row() >= 0 && index.row() < rowCount()) {

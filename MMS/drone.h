@@ -10,7 +10,6 @@
 class Drone
 {
 public:
-    //Drone();
     QString id() const{
         return mId;
     }

@@ -206,8 +206,8 @@ QT_INIT_METAOBJECT const QMetaObject Waypoint::staticMetaObject = { {
 } };
 
 struct qt_meta_stringdata_DroneListModel_t {
-    QByteArrayData data[19];
-    char stringdata0[230];
+    QByteArrayData data[20];
+    char stringdata0[242];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -234,7 +234,8 @@ QT_MOC_LITERAL(14, 163, 4), // "info"
 QT_MOC_LITERAL(15, 168, 21), // "setUnselectedInfoList"
 QT_MOC_LITERAL(16, 190, 15), // "getInfoNameList"
 QT_MOC_LITERAL(17, 206, 14), // "getAllDronePos"
-QT_MOC_LITERAL(18, 221, 8) // "getRoute"
+QT_MOC_LITERAL(18, 221, 11), // "getDronePos"
+QT_MOC_LITERAL(19, 233, 8) // "getRoute"
 
     },
     "DroneListModel\0updateDrone\0\0jInfo\0"
@@ -242,7 +243,8 @@ QT_MOC_LITERAL(18, 221, 8) // "getRoute"
     "toggleHistoryTracking\0toggleShowingRoute\0"
     "toggleFollow\0setVisibility\0visibility\0"
     "setSelectedInfoList\0info\0setUnselectedInfoList\0"
-    "getInfoNameList\0getAllDronePos\0getRoute"
+    "getInfoNameList\0getAllDronePos\0"
+    "getDronePos\0getRoute"
 };
 #undef QT_MOC_LITERAL
 
@@ -252,7 +254,7 @@ static const uint qt_meta_data_DroneListModel[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      12,   14, // methods
+      13,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -260,18 +262,19 @@ static const uint qt_meta_data_DroneListModel[] = {
        0,       // signalCount
 
  // methods: name, argc, parameters, tag, flags
-       1,    1,   74,    2, 0x02 /* Public */,
-       4,    1,   77,    2, 0x02 /* Public */,
-       6,    2,   80,    2, 0x02 /* Public */,
-       8,    1,   85,    2, 0x02 /* Public */,
-       9,    1,   88,    2, 0x02 /* Public */,
-      10,    1,   91,    2, 0x02 /* Public */,
-      11,    2,   94,    2, 0x02 /* Public */,
-      13,    2,   99,    2, 0x02 /* Public */,
-      15,    2,  104,    2, 0x02 /* Public */,
-      16,    1,  109,    2, 0x02 /* Public */,
-      17,    0,  112,    2, 0x02 /* Public */,
-      18,    1,  113,    2, 0x02 /* Public */,
+       1,    1,   79,    2, 0x02 /* Public */,
+       4,    1,   82,    2, 0x02 /* Public */,
+       6,    2,   85,    2, 0x02 /* Public */,
+       8,    1,   90,    2, 0x02 /* Public */,
+       9,    1,   93,    2, 0x02 /* Public */,
+      10,    1,   96,    2, 0x02 /* Public */,
+      11,    2,   99,    2, 0x02 /* Public */,
+      13,    2,  104,    2, 0x02 /* Public */,
+      15,    2,  109,    2, 0x02 /* Public */,
+      16,    1,  114,    2, 0x02 /* Public */,
+      17,    0,  117,    2, 0x02 /* Public */,
+      18,    1,  118,    2, 0x02 /* Public */,
+      19,    1,  121,    2, 0x02 /* Public */,
 
  // methods: parameters
     QMetaType::Bool, QMetaType::QString,    3,
@@ -285,6 +288,7 @@ static const uint qt_meta_data_DroneListModel[] = {
     QMetaType::Bool, QMetaType::QString, QMetaType::QString,    5,   14,
     QMetaType::QVariant, QMetaType::QString,    5,
     QMetaType::QVariant,
+    QMetaType::QVariant, QMetaType::QString,    5,
     QMetaType::QVariant, QMetaType::QString,    5,
 
        0        // eod
@@ -313,7 +317,9 @@ void DroneListModel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
         case 10: { QVariant _r = _t->getAllDronePos();
             if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
-        case 11: { QVariant _r = _t->getRoute((*reinterpret_cast< const QString(*)>(_a[1])));
+        case 11: { QVariant _r = _t->getDronePos((*reinterpret_cast< const QString(*)>(_a[1])));
+            if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
+        case 12: { QVariant _r = _t->getRoute((*reinterpret_cast< const QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
         default: ;
         }
@@ -349,13 +355,13 @@ int DroneListModel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 12)
+        if (_id < 13)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 12;
+        _id -= 13;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 12)
+        if (_id < 13)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 12;
+        _id -= 13;
     }
     return _id;
 }

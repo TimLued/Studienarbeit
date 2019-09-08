@@ -403,6 +403,16 @@ release/moc_grouplistmodel.cpp: ../MMS/grouplistmodel.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcontiguouscache.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qsharedpointer.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qsharedpointer_impl.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtQml/QQmlContext \
+		C:/Qt/5.13.0/mingw73_64/include/QtQml/qqmlcontext.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qurl.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qurlquery.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtQml/qjsvalue.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtQml/qtqmlglobal.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtQml/qtqml-config.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtNetwork/qtnetworkglobal.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtNetwork/qtnetwork-config.h \
+		../MMS/group.h \
 		release/moc_predefs.h \
 		C:/Qt/5.13.0/mingw73_64/bin/moc.exe
 	C:\Qt\5.13.0\mingw73_64\bin\moc.exe $(DEFINES) --include "D:/Google Drive/Uni/Studienarbeit/github/Studienarbeit/build-MMS-Desktop_Qt_5_13_0_MinGW_64_bit-Debug/release/moc_predefs.h" -IC:/Qt/5.13.0/mingw73_64/mkspecs/win32-g++ -I"D:/Google Drive/Uni/Studienarbeit/github/Studienarbeit/MMS" -IC:/Qt/5.13.0/mingw73_64/include -IC:/Qt/5.13.0/mingw73_64/include/QtQuick -IC:/Qt/5.13.0/mingw73_64/include/QtGui -IC:/Qt/5.13.0/mingw73_64/include/QtANGLE -IC:/Qt/5.13.0/mingw73_64/include/QtQml -IC:/Qt/5.13.0/mingw73_64/include/QtNetwork -IC:/Qt/5.13.0/mingw73_64/include/QtPositioning -IC:/Qt/5.13.0/mingw73_64/include/QtConcurrent -IC:/Qt/5.13.0/mingw73_64/include/QtCore -I. -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++ -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/backward -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include-fixed -IC:/Qt/Tools/mingw730_64/x86_64-w64-mingw32/include ..\MMS\grouplistmodel.h -o release\moc_grouplistmodel.cpp
@@ -820,7 +830,17 @@ release/grouplistmodel.o: ../MMS/grouplistmodel.cpp ../MMS/grouplistmodel.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qset.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcontiguouscache.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qsharedpointer.h \
-		C:/Qt/5.13.0/mingw73_64/include/QtCore/qsharedpointer_impl.h
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qsharedpointer_impl.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtQml/QQmlContext \
+		C:/Qt/5.13.0/mingw73_64/include/QtQml/qqmlcontext.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qurl.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qurlquery.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtQml/qjsvalue.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtQml/qtqmlglobal.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtQml/qtqml-config.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtNetwork/qtnetworkglobal.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtNetwork/qtnetwork-config.h \
+		../MMS/group.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\grouplistmodel.o ..\MMS\grouplistmodel.cpp
 
 release/main.o: ../MMS/main.cpp C:/Qt/5.13.0/mingw73_64/include/QtGui/QGuiApplication \
@@ -948,11 +968,8 @@ release/main.o: ../MMS/main.cpp C:/Qt/5.13.0/mingw73_64/include/QtGui/QGuiApplic
 		C:/Qt/5.13.0/mingw73_64/include/QtGui/qcolor.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtGui/qrgb.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtGui/qrgba64.h \
-		C:/Qt/5.13.0/mingw73_64/include/QtPositioning/QGeoPath \
-		C:/Qt/5.13.0/mingw73_64/include/QtPositioning/qgeopath.h \
-		C:/Qt/5.13.0/mingw73_64/include/QtPositioning/QGeoShape \
-		C:/Qt/5.13.0/mingw73_64/include/QtPositioning/qgeoshape.h \
-		C:/Qt/5.13.0/mingw73_64/include/QtCore/QVariantList
+		../MMS/grouplistmodel.h \
+		../MMS/group.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\main.o ..\MMS\main.cpp
 
 release/posupdater.o: ../MMS/posupdater.cpp ../MMS/posupdater.h \

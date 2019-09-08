@@ -2,6 +2,9 @@
 #define GROUPLISTMODEL_H
 
 #include <QAbstractListModel>
+#include <QQmlContext>
+#include <group.h>
+
 
 class GroupListModel : public QAbstractListModel
 {
@@ -9,19 +12,27 @@ class GroupListModel : public QAbstractListModel
 
 public:
     explicit GroupListModel(QObject *parent = nullptr);
+    void register_object(const QString &groupId,QQmlContext *context);
+    enum {
+        idRole = Qt::UserRole,
+        membersRole,
+        colorRole
+    };
 
-    // Basic functionality:
+    Q_INVOKABLE bool createGroup(const QString & id);
+    Q_INVOKABLE void setGroupColor(const QString & id,QString color);
+    Q_INVOKABLE void addMember(const QString & id,QString member);
+    Q_INVOKABLE void removeMember(const QString & id,QString member);
+    Q_INVOKABLE void setVisibility(const QString & id,bool visibility);
+    Q_INVOKABLE QString getVisibility(const QString & id);
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QHash<int,QByteArray>roleNames()const override;
 
-    // Editable:
-    bool setData(const QModelIndex &index, const QVariant &value,
-                 int role = Qt::EditRole) override;
-
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 private:
+    QList<Group> mGroups;
 };
 
 #endif // GROUPLISTMODEL_H

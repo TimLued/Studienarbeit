@@ -25,7 +25,7 @@ signals:
 
 public slots:
     void appendTask(QString data);
-    void removeFinishedTask();
+    void removeTask(int i);
 
 private:
     QVector<TaskItem> mTasks;

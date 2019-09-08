@@ -5,7 +5,6 @@ import QtQuick.Window 2.12
 import "algos.js" as Algos
 
 
-
 Item{
     id: dronePanel
     property bool shown: true
@@ -260,7 +259,7 @@ Item{
                 right:parent.right
                 topMargin: 4
             }
-            height: panelBG.groupExtended? groupLV.contentHeight:0
+            height: panelBG.groupExtended? groupLV.contentHeight+addBtnContainer.height:0
 
             Behavior on height{
                 PropertyAnimation{
@@ -269,40 +268,261 @@ Item{
                 }
             }
 
-            ListView{
-                id: groupLV
-                anchors.fill: parent
-                clip:true
-                //model: dronemodel
-                //delegate: droneLvDelegate
-                spacing: 2
+
+            Rectangle{
+                id:groupLvContainer
+                color:"transparent"
+                anchors{
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                }
+                height: parent.height - addBtnContainer.height
+
+                ListView{
+                    id: groupLV
+                    anchors.fill: parent
+                    clip:true
+                    model: groupmodel
+
+                    delegate: groupLvDelegate
+                    spacing: 2
+                }
             }
+
+
+            Rectangle{
+                id: addBtnContainer
+                color:"transparent"
+                anchors{
+                    left:parent.left
+                    right:parent.right
+                    top:groupLvContainer.bottom
+                }
+                height: addGroupBtn.height + addGroupBtn.anchors.topMargin
+
+                Rectangle{
+                    id: addGroupBtn
+                    width: 40
+                    anchors{
+                        horizontalCenter: parent.horizontalCenter
+                        top: parent.top
+                        topMargin: 3
+                    }
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: {
+                            groupmodel.createGroup("Test")
+                        }
+                    }
+                    height: 20
+                    border.color: addGroupText.color
+                    border.width: 1
+                    color: "transparent"
+                    Text {
+                        id:addGroupText
+                        text: "+"
+                        anchors.fill:parent
+                        font.pixelSize: 16
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        color: "white"
+                        elide: Text.ElideRight
+                    }
+                }
+
+
+            }
+
         }
 
 
 
-    }
 
+
+
+
+    }
+    Component{
+        id: groupLvDelegate
+        Item{
+            id: groupItem
+            width: parent.width
+            height: small
+            Rectangle{
+                anchors.fill: parent
+                color: "white"
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        if(groupItem.height === small){groupItem.height = enlarged
+                        }else{groupItem.height = small}
+                    }
+                }
+            }
+            Text{
+                id: groupName
+                anchors{
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                    leftMargin: 10
+                }
+                height: small
+                width: 150 - anchors.leftMargin
+                verticalAlignment: Text.AlignVCenter
+                text: idInfo
+                color: "black"
+                font.pixelSize: txtSize
+                wrapMode: Text.WrapAnywhere
+                renderType: Text.NativeRendering
+            }
+
+
+            Column{
+                spacing: 2
+                layer.enabled: true
+
+                anchors{
+                    top: groupName.bottom
+                    bottom: parent.bottom
+                    left: parent.left
+                    right: parent.right
+                    leftMargin: 10
+                    rightMargin: 10
+                    bottomMargin: 5
+                }
+
+                Row{
+                    id: groupBtnRow
+                    spacing: 2
+
+                    Rectangle{
+                        id: centerGroupBtn
+                        width: Algos.calcTxtWidth(centerGroupText.text,centerGroupText) + 10
+
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                if (!map.isCenterOnAll) {
+                                    //each drone in members: get dronemodel.pos() add to list[]
+
+//                                    var region = centerMapRegion([posInfo])
+//                                    map.fitViewportToGeoShape(region,200)
+                                }
+                            }
+                        }
+                        height: 20
+                        border.color: centerGroupText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:centerGroupText
+                            text: "\u29BF"
+                            anchors.fill:parent
+                            font.pixelSize: 12
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: "black"
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    Rectangle{
+                        id: visibleGroupBtn
+                        width: Algos.calcTxtWidth(visibleGroupText.text,visibleGroupText) + 20
+
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                //Group setvisibilty
+                                //for each drone in list: dronemodel.setvisibilty(group getvisibilty
+                                //if (visibleInfo) {dronemodel.setVisibility(idInfo,false)}else{dronemodel.setVisibility(idInfo,true)}
+                            }
+                        }
+                        height: 20
+                        border.color: visibleGroupText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:visibleGroupText
+                            text: "\u20E0"
+                            anchors.fill:parent
+                            font.pixelSize: 12
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: "black"
+                            elide: Text.ElideRight
+                        }
+                    }
+
+
+                    ComboBox{
+                        id: cbGroubColor
+
+                        background: Rectangle{
+                            id: cbGroupBG
+                            implicitWidth: 30
+                            implicitHeight: 20
+                            border.width: 1
+                        }
+
+                        delegate: ItemDelegate {
+                            contentItem: Rectangle {
+                                anchors.fill: parent
+                                color: modelData
+                            }
+                        }
+
+                        indicator: Canvas {}
+                        contentItem: Text {}
+
+                        property bool initial:false
+
+                        model: ListModel{id: colorModel}
+
+                        Component.onCompleted: {
+                            for (var k = 0;k<colors.length;k++){
+                                colorModel.append(({"color": colors[k]}))
+                            }
+                            currentIndex = find(colorInfo)
+                            cbGroupBG.color = colorInfo
+                            initial = true
+                        }
+                        onCurrentIndexChanged: {
+                            if (initial){
+//                                dronemodel.setColor(idInfo,colorModel.get(currentIndex).color)
+//                                cbGroupBG.color = colorModel.get(currentIndex).color
+                            }
+                        }
+
+                    }
+
+
+                }
+            }
+
+
+
+        }
+    }
 
     Component{
         id: droneLvDelegate
         Item{
-            id: listItem
+            id: droneItem
             width: parent.width
             height: small
 
             Rectangle{
-                //opacity: 0.5
                 anchors.fill: parent
                 color: "white"
 
                 MouseArea {
-                    hoverEnabled: true
                     anchors.fill: parent
-
                     onClicked: {
-                        if(listItem.height === small){listItem.height = enlarged
-                        }else{listItem.height = small}
+                        if(droneItem.height === small){droneItem.height = enlarged
+                        }else{droneItem.height = small}
                     }
                 }
             }
@@ -515,13 +735,11 @@ Item{
 
                     ComboBox{
                         id: cbColor
-                        enabled: listItem.height === enlarged ? true : false
 
                         background: Rectangle{
                             id: cbBG
                             implicitWidth: 30
                             implicitHeight: historyBtn.height
-                            radius: 2
                             border.width: 1
                         }
 
@@ -566,7 +784,6 @@ Item{
                     ComboBox{ //available data to display
                         id: dataCB
 
-                        //enabled: listItem.height === enlarged ? true : false
                         model: infoNamesInfo
 
                         indicator: Canvas {

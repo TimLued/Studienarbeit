@@ -34,15 +34,9 @@ void TaskList::appendTask(QString data)
     emit postTaskAppended();
 }
 
-void TaskList::removeFinishedTask()
+void TaskList::removeTask(int i)
 {
-    for (int i = 0;i < mTasks.size();){
-        if (mTasks.at(i).done){
-            emit preTaskRemoved(i);
-            mTasks.removeAt(i);
-            emit postTaskRemoved();
-        }else{
-            ++i;
-        }
-    }
+    emit preTaskRemoved(i);
+    mTasks.removeAt(i);
+    emit postTaskRemoved();
 }
