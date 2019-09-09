@@ -33,10 +33,21 @@ public:
         mMembers.removeOne(id);
     }
 
+    bool visible() const{
+        return mVisible;
+    }
+
+    void setVisible(bool visible){
+        mVisible = visible;
+    }
+
+
+
 private:
     QString mId;
     QString mColor;
     QVariantList mMembers;
+    bool mVisible = true;
 
 };
 

@@ -10,6 +10,7 @@ Item{
     property bool shown: true
     width: shown ? 150 : 0
     property variant colors: ["red","blue","green","purple","darkorange","darkred","fuchsia"]
+    property string addingToGroup
 
     anchors{
         top: parent.top
@@ -311,9 +312,7 @@ Item{
                     }
                     MouseArea{
                         anchors.fill:parent
-                        onClicked: {
-                            groupmodel.createGroup("Test")
-                        }
+                        onClicked: groupmodel.createGroup()
                     }
                     height: 20
                     border.color: addGroupText.color
@@ -330,24 +329,16 @@ Item{
                         elide: Text.ElideRight
                     }
                 }
-
-
             }
 
         }
-
-
-
-
-
-
-
     }
+
     Component{
         id: groupLvDelegate
         Item{
             id: groupItem
-            width: parent.width
+            width: 150
             height: small
             Rectangle{
                 anchors.fill: parent
@@ -355,36 +346,99 @@ Item{
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        if(groupItem.height === small){groupItem.height = enlarged
+                        if(groupItem.height === small){groupItem.height = 180
                         }else{groupItem.height = small}
                     }
                 }
             }
-            Text{
-                id: groupName
+            Rectangle{
+                id: groupHeader
                 anchors{
                     left: parent.left
                     right: parent.right
                     top: parent.top
-                    leftMargin: 10
                 }
                 height: small
-                width: 150 - anchors.leftMargin
-                verticalAlignment: Text.AlignVCenter
-                text: idInfo
-                color: "black"
-                font.pixelSize: txtSize
-                wrapMode: Text.WrapAnywhere
-                renderType: Text.NativeRendering
+
+                Text{
+                    id: groupName
+                    anchors{
+                        left: parent.left
+                        top: parent.top
+                        right: groupNameEditBtn.left
+                        bottom: parent.bottom
+                        leftMargin: 10
+                    }
+                    width: 150 - anchors.leftMargin
+                    verticalAlignment: Text.AlignVCenter
+                    text: idInfo
+                    color: visibleInfo? colorInfo:"grey"
+                    font.pixelSize: txtSize
+                    wrapMode: Text.WrapAnywhere
+                    renderType: Text.NativeRendering
+                }
+
+                TextField{
+                    id: groupTextField
+                    anchors{
+                        fill: groupName
+                    }
+                    leftPadding: 0
+                    font.pixelSize: txtSize
+                    visible: groupNameEditBtn.checked
+                    text: groupName.text
+                    font.italic: true
+                    selectByMouse: true
+                    background: Rectangle {border.width: 0}
+                    onVisibleChanged: {
+                        if (!groupTextField.visible&&groupTextField.text!=idInfo){
+                            groupmodel.setGroupId(idInfo,groupTextField.text)
+                        }
+                    }
+                }
+
+                Rectangle{
+                    id: groupNameEditBtn
+                    property bool checked: false
+                    visible: groupItem.height != small
+                    anchors{
+                        right: parent.right
+                        verticalCenter: groupName.verticalCenter
+                        margins: 5
+                    }
+                    width: 20
+                    height: 20
+                    radius: width / 2
+                    border.color: groupNameEditText.color
+                    border.width: 1
+                    color: "transparent"
+                    Text {
+                        id:groupNameEditText
+                        text: "\u26ED"
+                        anchors.fill:parent
+                        font.pixelSize: 14
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        color: parent.checked? "#3EC6AA":"grey"
+                        elide: Text.ElideRight
+                    }
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: {
+                            parent.checked = !parent.checked
+                            groupTextField.text = groupName.text
+                        }
+                    }
+                }
+
             }
 
-
             Column{
-                spacing: 2
+                spacing: 3
                 layer.enabled: true
 
                 anchors{
-                    top: groupName.bottom
+                    top: groupHeader.bottom
                     bottom: parent.bottom
                     left: parent.left
                     right: parent.right
@@ -405,10 +459,12 @@ Item{
                             anchors.fill:parent
                             onClicked: {
                                 if (!map.isCenterOnAll) {
-                                    //each drone in members: get dronemodel.pos() add to list[]
-
-//                                    var region = centerMapRegion([posInfo])
-//                                    map.fitViewportToGeoShape(region,200)
+                                    var positions = []
+                                    for(var i=0;i<memberInfo.length;i++){
+                                        positions.push(dronemodel.getDronePos(memberInfo[i]))
+                                    }
+                                    var region = centerMapRegion(positions)
+                                    map.fitViewportToGeoShape(region,200)
                                 }
                             }
                         }
@@ -430,14 +486,15 @@ Item{
 
                     Rectangle{
                         id: visibleGroupBtn
-                        width: Algos.calcTxtWidth(visibleGroupText.text,visibleGroupText) + 20
+                        width: Algos.calcTxtWidth(visibleGroupText.text,visibleGroupText) + 15
 
                         MouseArea{
                             anchors.fill:parent
                             onClicked: {
-                                //Group setvisibilty
-                                //for each drone in list: dronemodel.setvisibilty(group getvisibilty
-                                //if (visibleInfo) {dronemodel.setVisibility(idInfo,false)}else{dronemodel.setVisibility(idInfo,true)}
+                                groupmodel.setVisibility(idInfo,!visibleInfo)
+                                for(var i=0;i<memberInfo.length;i++){
+                                    dronemodel.setVisibility(memberInfo[i],visibleInfo)
+                                }
                             }
                         }
                         height: 20
@@ -451,7 +508,7 @@ Item{
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            color: "black"
+                            color: !visibleInfo? "#FF5733" : "black"
                             elide: Text.ElideRight
                         }
                     }
@@ -491,21 +548,132 @@ Item{
                         }
                         onCurrentIndexChanged: {
                             if (initial){
-//                                dronemodel.setColor(idInfo,colorModel.get(currentIndex).color)
-//                                cbGroupBG.color = colorModel.get(currentIndex).color
+                                groupmodel.setGroupColor(idInfo,colorModel.get(currentIndex).color)
+                                cbGroupBG.color = colorModel.get(currentIndex).color
                             }
                         }
 
                     }
-
-
                 }
+
+                Text{
+                    anchors{
+                        left: parent.left
+                        right:parent.right
+                    }
+                    text:"Drohnen:"
+                    font.bold:true
+                }
+
+                Flickable  {
+                    id:groupFlickable
+                    height: contentHeight<50?contentHeight:50
+                    width: 130
+                    interactive: true
+                    clip: true
+                    flickableDirection: Flickable.VerticalFlick
+                    contentHeight: groupMembersLV.height
+
+                    ListView{
+                        id: groupMembersLV
+                        width: parent.width
+                        height: childrenRect.height
+                        clip: true
+                        interactive: false
+                        spacing: 1
+                        model: memberInfo
+
+                        delegate: Component{
+                            Item{
+                                width: parent.width
+                                height: memberText.height
+                                Text{
+                                    id: memberText
+                                    text: memberInfo[index]
+                                    wrapMode: Text.WrapAnywhere
+                                    width: parent.width
+                                    renderType: Text.NativeRendering
+                                }
+
+                                Text{
+                                    text: "X"
+                                    color: "#FF5733"
+                                    anchors{
+                                        right: parent.right
+                                        verticalCenter: parent.verticalCenter
+                                        rightMargin: 20
+                                    }
+                                    height: parent.height
+                                    verticalAlignment: Text.AlignVCenter
+                                    MouseArea{
+                                        anchors.fill:parent
+                                        onClicked: {
+                                            groupmodel.removeMember(idInfo,memberInfo[index])
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                        onCountChanged: groupFlickable.returnToBounds();
+                    }
+                }
+
+
+
+                Rectangle{
+                    property bool checked: false
+                    width: Algos.calcTxtWidth(addDroneToGroupText.text,addDroneToGroupText) + 5
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked:{
+                            parent.checked = !parent.checked
+                            if(parent.checked)
+                                addingToGroup = idInfo
+                            else
+                                addingToGroup = ""
+                        }
+                    }
+                    height: 20
+                    border.color: addDroneToGroupText.color
+                    border.width: 1
+                    color: "transparent"
+                    Text {
+                        id:addDroneToGroupText
+                        text: "Drohne hinzufügen"
+                        anchors.fill:parent
+                        font.pixelSize: 12
+                        verticalAlignment: Text.AlignVCenter
+                        color: parent.checked? "#3EC6AA":"black"
+                        elide: Text.ElideRight
+                    }
+                }
+                Rectangle{
+                    width: Algos.calcTxtWidth(delGroupText.text,delGroupText) + 5
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: groupmodel.deleteGroup(idInfo)
+                    }
+                    height: 20
+                    border.color: delGroupText.color
+                    border.width: 1
+                    color: "transparent"
+                    Text {
+                        id:delGroupText
+                        text: "Gruppe auflösen"
+                        anchors.fill:parent
+                        font.pixelSize: 12
+                        verticalAlignment: Text.AlignVCenter
+                        color: "#FF5733"
+                        elide: Text.ElideRight
+                    }
+                }
+
             }
-
-
-
         }
     }
+
+
 
     Component{
         id: droneLvDelegate
@@ -521,8 +689,12 @@ Item{
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        if(droneItem.height === small){droneItem.height = enlarged
-                        }else{droneItem.height = small}
+                        if (addingToGroup ==""){
+                            if(droneItem.height === small){droneItem.height = 180
+                            }else{droneItem.height = small}
+                        }else{
+                            groupmodel.addMember(addingToGroup,idInfo)
+                        }
                     }
                 }
             }
@@ -708,7 +880,7 @@ Item{
 
                     Rectangle{
                         id: visibleBtn
-                        width: Algos.calcTxtWidth(visibleText.text,visibleText) + 20
+                        width: Algos.calcTxtWidth(visibleText.text,visibleText) + 15
 
                         MouseArea{
                             anchors.fill:parent
@@ -884,7 +1056,7 @@ Item{
 
 
                 Flickable  {
-                    id: fparent
+                    id:droneFlickable
                     height: parent.height - row0.height- row1.height- row2.height- row3.height -4*2
                     width: 130
                     interactive: true
@@ -894,7 +1066,7 @@ Item{
 
                     ListView{
                         id: dataLV
-                        width: fparent.width
+                        width: parent.width
                         height: childrenRect.height
                         clip: true
                         interactive: false
@@ -903,7 +1075,6 @@ Item{
 
                         delegate: Component{
                             Item{
-                                id: body
                                 width: parent.width
                                 height: row.height
 
@@ -911,7 +1082,7 @@ Item{
                                 Row{
                                     id: row
                                     width: parent.width
-                                    spacing: 3
+                                    spacing: 2
 
                                     Text{
                                         id: keyText
@@ -939,15 +1110,12 @@ Item{
                                 }
                             }
                         }
-
-                        onCountChanged: {
-                            fparent.returnToBounds();
-                        }
+                        onCountChanged: droneFlickable.returnToBounds();
                     }
-
                 }
-
             }
+
+
         }
     }
 

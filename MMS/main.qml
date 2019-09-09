@@ -96,6 +96,7 @@ ApplicationWindow  {
     Map{
         id: map
         anchors.fill:parent
+
         plugin: Plugin{
             name:"mapboxgl"
             PluginParameter{name:"mapboxgl.access_token";value:"pk.eyJ1IjoidGltb3RoeWx1ZWQiLCJhIjoiY2swNTd4N3pyMDQ1djNjcWk3YWk1Mmw4aiJ9.peN9sLC_oLX5m-KOT5RTlA"}
@@ -455,47 +456,44 @@ ApplicationWindow  {
                             anchors.fill: parent
                             anchors.margins: 5
 
-                            RowLayout {
+                            Text{
                                 id: popHeader
-                                anchors.margins: 2
-                                width: parent.width
-
-                                Rectangle{
-                                    color: "transparent"
-                                    height: childrenRect.height
-                                    width: childrenRect.width
-                                    Layout.alignment: Qt.AlignLeft
-
-                                    Text{text: idInfo
-                                        font.bold: true
-                                        font.pixelSize: txtSize
-                                        color: colorInfo
-                                        renderType: Text.NativeRendering
-                                    }
+                                text: idInfo
+                                anchors{
+                                    left: parent.left
+                                    top: parent.top
                                 }
-                                Rectangle{
+                                font.bold: true
+                                font.pixelSize: txtSize
+                                color: colorInfo
+                                renderType: Text.NativeRendering
+                            }
 
-                                    Layout.alignment: Qt.AlignRight
-                                    width: 20
-                                    height: 20
-                                    border.color: closeBtnText.color
-                                    border.width: 1
-                                    color: "transparent"
-                                    Text {
-                                        id:closeBtnText
-                                        text: "x"
-                                        anchors.fill:parent
-                                        font.pixelSize: 16
-                                        horizontalAlignment: Text.AlignHCenter
-                                        verticalAlignment: Text.AlignVCenter
-                                        color: "black"
-                                        elide: Text.ElideRight
-                                    }
-                                    MouseArea{
-                                        anchors.fill:parent
-                                        onClicked: {
-                                            droneBody.popUp = !droneBody.popUp
-                                        }
+                            Rectangle{
+                                anchors{
+                                    right: parent.right
+                                    top: parent.rop
+                                }
+
+                                width: 15
+                                height: 15
+                                border.color: closeBtnText.color
+                                border.width: 1
+                                color: "transparent"
+                                Text {
+                                    id:closeBtnText
+                                    text: "X"
+                                    anchors.fill:parent
+                                    font.pixelSize: 12
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                    color: "black"
+                                    elide: Text.ElideRight
+                                }
+                                MouseArea{
+                                    anchors.fill:parent
+                                    onClicked: {
+                                        droneBody.popUp = !droneBody.popUp
                                     }
                                 }
                             }
@@ -505,8 +503,8 @@ ApplicationWindow  {
                                 anchors{
                                     bottom: parent.bottom
                                     top: popHeader.bottom
+                                    left:parent.left
                                 }
-
                                 width: parent.width
                                 interactive: true
                                 clip: true

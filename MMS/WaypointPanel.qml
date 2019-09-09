@@ -10,7 +10,6 @@ import Controller 1.0
 Item {
     id: content
     property string droneId
-    property bool editing: false
     property int mHeight: listView.contentHeight + header.height + centerWpBtn.height + centerWpBtn.anchors.margins * 2
     visible: false
 
@@ -90,7 +89,7 @@ Item {
 
                         TextField{
                             id: wpTextField
-                            visible: editing
+                            visible: editWpBtn.checked
                             anchors.fill: parent
                             text: name!=""? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3)
                             selectByMouse: true
@@ -108,7 +107,7 @@ Item {
                         Text{
                             text: "X"
                             color: "#FF5733"
-                            visible: editing
+                            visible: editWpBtn.checked
                             anchors{
                                 right: parent.right
                                 verticalCenter: parent.verticalCenter
@@ -187,8 +186,8 @@ Item {
         width: 35
         height: width
         radius: width / 2
-        highlighted: editing
-        onClicked: editing = !editing
+        checkable: true
+        highlighted: editWpBtn.checked
     }
 
     RoundButton{

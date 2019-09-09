@@ -105,7 +105,8 @@ function calcTxtWidth(txt,parent){
     var textElement = Qt.createQmlObject(
                 'import QtQuick 2.12;'
                 + 'Text {'
-                + ' text: "' + txt+ '" '
+                + 'text:"' + txt+ '";'
+                + 'font.pixelSize:' + parent.font.pixelSize
                 + '}',
                 parent, "calcTxtWidth")
     mWidth = textElement.width

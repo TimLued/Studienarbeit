@@ -9,19 +9,29 @@ void GroupListModel::register_object(const QString &groupId,QQmlContext *context
     context->setContextProperty(groupId, this);
 }
 
-bool GroupListModel::createGroup(const QString &id)
+void GroupListModel::createGroup()
+{
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    Group group;
+    QString name;
+    for(int i=1;;i++){//new not exiting name
+        name = "Gruppe "+ QString::number(i);
+        auto it = std::find_if(mGroups.begin(), mGroups.end(), [&](Group const& obj){return obj.id() == name;});
+        if(it == mGroups.end()) break;
+    }
+    group.sedId(name);
+    group.setColor("black");
+    mGroups<<group;
+    endInsertRows();
+}
+
+void GroupListModel::deleteGroup(const QString &id)
 {
     auto it = std::find_if(mGroups.begin(), mGroups.end(), [&](Group const& obj){return obj.id() == id;});
-    if(it == mGroups.end()){
-        beginInsertRows(QModelIndex(), rowCount(), rowCount());
-        Group group;
-        group.sedId(id);
-        group.setColor("black");
-        mGroups<<group;
-        endInsertRows();
-        return true;
-    }
-    return false;
+    QModelIndex ix = index(it - mGroups.begin());
+    beginRemoveRows(QModelIndex(),ix.row(),ix.row());
+    mGroups.removeAt(ix.row());
+    endRemoveRows();
 }
 
 void GroupListModel::setGroupColor(const QString &id, QString color)
@@ -32,12 +42,32 @@ void GroupListModel::setGroupColor(const QString &id, QString color)
     emit dataChanged(ix, ix, QVector<int>{colorRole});
 }
 
-void GroupListModel::addMember(const QString &id, QString member)
+void GroupListModel::setGroupId(const QString &id, QString newId)
 {
     auto it = std::find_if(mGroups.begin(), mGroups.end(), [&](Group const& obj){return obj.id() == id;});
     QModelIndex ix = index(it - mGroups.begin());
+    mGroups[ix.row()].sedId(newId);
+    emit dataChanged(ix, ix, QVector<int>{idRole});
+}
+
+bool GroupListModel::addMember(const QString &id, QString member)
+{
+    auto it = std::find_if(mGroups.begin(), mGroups.end(), [&](Group const& obj){return obj.id() == id;});
+    if(it == mGroups.end()) return false;
+    QModelIndex ix = index(it - mGroups.begin());
+    if(mGroups[ix.row()].members().contains(member))return false;
     mGroups[ix.row()].addMember(member);
     emit dataChanged(ix, ix, QVector<int>{membersRole});
+    return true;
+}
+
+bool GroupListModel::containsMember(const QString &id, QString member)
+{
+    auto it = std::find_if(mGroups.begin(), mGroups.end(), [&](Group const& obj){return obj.id() == id;});
+    QModelIndex ix = index(it - mGroups.begin());
+     if(mGroups[ix.row()].members().contains(member))
+         return true;
+     else return false;
 }
 
 void GroupListModel::removeMember(const QString &id, QString member)
@@ -48,15 +78,14 @@ void GroupListModel::removeMember(const QString &id, QString member)
     emit dataChanged(ix, ix, QVector<int>{membersRole});
 }
 
-void GroupListModel::setVisibility(const QString &id, bool visibility)
+void GroupListModel::setVisibility(const QString &id, bool visible)
 {
-
+    auto it = std::find_if(mGroups.begin(), mGroups.end(), [&](Group const& obj){return obj.id() == id;});
+    QModelIndex ix = index(it - mGroups.begin());
+    mGroups[ix.row()].setVisible(visible);
+    emit dataChanged(ix, ix, QVector<int>{visibleRole});
 }
 
-QString GroupListModel::getVisibility(const QString &id)
-{
-
-}
 
 int GroupListModel::rowCount(const QModelIndex &parent) const
 {
@@ -78,6 +107,8 @@ QVariant GroupListModel::data(const QModelIndex &index, int role) const
             return it.color();
         case membersRole:
             return it.members();
+        case visibleRole:
+            return it.visible();
         }
     }
 
@@ -86,11 +117,13 @@ QVariant GroupListModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> GroupListModel::roleNames() const
 {
-    QHash<int,QByteArray>names;
-    names[idRole]="idInfo";
-    names[colorRole]="colorInfo";
-    names[membersRole]="memberInfo";
-    return names;
+    QHash<int,QByteArray>roles;
+    roles[idRole]="idInfo";
+    roles[colorRole]="colorInfo";
+    roles[membersRole]="memberInfo";
+    roles[visibleRole]="visibleInfo";
+
+    return roles;
 }
 
 
