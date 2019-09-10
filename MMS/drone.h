@@ -186,8 +186,10 @@ public:
     }
 
     //Selected is to display
-    void addSelectedInfoNames(QString name){
-        if (mSelectedInfoNames.indexOf(name) == -1) mSelectedInfoNames.append(name);
+    bool addSelectedInfoNames(QString name){
+        if (mSelectedInfoNames.indexOf(name) != -1) return false;
+        mSelectedInfoNames.append(name);
+        return true;
     }
 
     void removeSelectedInfoNames(QString name){
@@ -210,6 +212,14 @@ public:
         return mSelectedInfoValues;
     }
 
+    QString group() const{
+        return mGroup;
+    }
+
+    void setGroup(QString group){
+        mGroup = group;
+    }
+
 
 
 private:
@@ -229,6 +239,7 @@ private:
     QList<QGeoCoordinate> mRoutePath;
     QList<QGeoCoordinate> mHotLeg;
     int lastLegIndex = 0;
+    QString mGroup;
 
     bool follow=false;
     bool trackHistory=false;

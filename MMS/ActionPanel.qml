@@ -94,7 +94,6 @@ Item {
             highlighted: map.isCenterOnAll
             onClicked: {
                 map.isCenterOnAll = !map.isCenterOnAll
-
             }
         }
 

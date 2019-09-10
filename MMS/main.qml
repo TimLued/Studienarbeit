@@ -114,6 +114,7 @@ ApplicationWindow  {
         property bool rotating: false
         property bool centerFollowing: false
         property bool isCenterOnAll: false
+        property string groupfollow: ""
         property bool circleRulerVisible: false
         
         property bool setWaypoints: false
@@ -324,7 +325,7 @@ ApplicationWindow  {
                 Drone{
                     id: droneBody
                     z:2
-                    droneColor: colorInfo
+                    droneColor: groupInfo!=""? groupInfo:colorInfo
                     extrapolating: extrapolateInfo
                     droneId: idInfo
                     extrapolationTime: 1000
@@ -384,6 +385,24 @@ ApplicationWindow  {
                             }
                         }
 
+                        var region
+                        var positions = []
+                        if (map.isCenterOnAll) {
+                            if (followInfo) dronemodel.toggleFollow(idInfo)
+                            positions = dronemodel.getAllDronePos()
+                            region = centerMapRegion(positions)
+                            map.fitViewportToGeoShape(region,200)
+
+                        }else if(map.groupfollow!=""){
+                            if (followInfo) dronemodel.toggleFollow(idInfo)
+                            var groupMembers = groupmodel.getMembers(map.groupfollow)
+                            for(var i=0;i<groupMembers.length;i++){
+                                positions.push(dronemodel.getDronePos(groupMembers[i]))
+                            }
+                            region = centerMapRegion(positions)
+                            map.fitViewportToGeoShape(region,200)
+                        }
+
                         if (followInfo){
                             map.center = coordinate
                             map.pan(0,-map.height/2+100)
@@ -391,16 +410,12 @@ ApplicationWindow  {
                             map.bearing = angleInfo
                             map.centerFollowing = true
                             map.rotating = false
+
                         }else{
                             bearing= angleInfo - map.bearing
                             map.centerFollowing = false
                         }
 
-                        if (map.isCenterOnAll) {
-                            if (followInfo) dronemodel.toggleFollow(idInfo)
-                            var region = centerMapRegion(dronemodel.getAllDronePos())
-                            map.fitViewportToGeoShape(region,200)
-                        }
                     }
                 }
 
@@ -421,7 +436,7 @@ ApplicationWindow  {
                         Rectangle{
                             anchors.fill: parent
                             radius: zoomCircle
-                            border.color: colorInfo
+                            border.color: droneBody.droneColor
                             border.width: 1
                             color: '#00000000'
                         }
@@ -465,7 +480,7 @@ ApplicationWindow  {
                                 }
                                 font.bold: true
                                 font.pixelSize: txtSize
-                                color: colorInfo
+                                color: droneBody.droneColor
                                 renderType: Text.NativeRendering
                             }
 
@@ -578,7 +593,7 @@ ApplicationWindow  {
                 MapPolyline{//Static
                     id: staticPath
                     visible: trackingHistoryInfo&& visibleInfo
-                    line.color: colorInfo
+                    line.color: droneBody.droneColor
                     line.width: 1
 
                     function updatePath(path){
@@ -600,7 +615,7 @@ ApplicationWindow  {
                 MapPolyline{//dynamic
                     id: dynamicPath
                     visible: trackingHistoryInfo&& visibleInfo
-                    line.color: colorInfo
+                    line.color: droneBody.droneColor
                     line.width: 1
                 }
 
@@ -608,7 +623,7 @@ ApplicationWindow  {
                     id: routePoly
                     visible: showingRouteInfo&& visibleInfo
                     path: routeInfo
-                    line.color: colorInfo
+                    line.color: droneBody.droneColor
                     line.width: 1
                 }
 
@@ -616,7 +631,7 @@ ApplicationWindow  {
                     id: hotLegPoly
                     visible: showingRouteInfo&& visibleInfo
                     path: legInfo
-                    line.color: colorInfo
+                    line.color: droneBody.droneColor
                     line.width: 3
                 }
 

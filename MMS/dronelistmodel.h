@@ -77,7 +77,8 @@ public:
         VisibleRole,
         WaypointRole,
         RouteRole,
-        HotLegRole
+        HotLegRole,
+        GroupRole
     };
 
     void register_object(const QString &droneId,QQmlContext *context);
@@ -99,8 +100,9 @@ public:
     Q_INVOKABLE bool setUnselectedInfoList(const QString&id,QString info);
     Q_INVOKABLE QVariant getInfoNameList(const QString&id);
     Q_INVOKABLE QVariant getAllDronePos();
-     Q_INVOKABLE QVariant getDronePos(const QString&id);
+    Q_INVOKABLE QVariant getDronePos(const QString&id);
     Q_INVOKABLE QVariant getRoute(const QString&id);
+    Q_INVOKABLE void setGroup(const QString &id,QString group);
 
 private:
     QList<Drone> mDrones;

@@ -17,7 +17,8 @@ public:
         idRole = Qt::UserRole,
         membersRole,
         colorRole,
-        visibleRole
+        visibleRole,
+        followRole
     };
 
     Q_INVOKABLE void createGroup();
@@ -26,8 +27,11 @@ public:
     Q_INVOKABLE void setGroupId(const QString & id,QString newId);
     Q_INVOKABLE bool addMember(const QString & id,QString member);
     Q_INVOKABLE bool containsMember(const QString & id,QString member);
+    Q_INVOKABLE QVariant getMembers(const QString & id);
     Q_INVOKABLE void removeMember(const QString & id,QString member);
     Q_INVOKABLE void setVisibility(const QString & id,bool visible);
+    Q_INVOKABLE QString getGroupColor(const QString & id);
+    Q_INVOKABLE void setFollow(const QString & id,bool follow);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;

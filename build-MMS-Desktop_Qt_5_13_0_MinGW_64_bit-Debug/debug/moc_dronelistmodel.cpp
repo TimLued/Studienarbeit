@@ -206,8 +206,8 @@ QT_INIT_METAOBJECT const QMetaObject Waypoint::staticMetaObject = { {
 } };
 
 struct qt_meta_stringdata_DroneListModel_t {
-    QByteArrayData data[20];
-    char stringdata0[242];
+    QByteArrayData data[22];
+    char stringdata0[257];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -235,7 +235,9 @@ QT_MOC_LITERAL(15, 168, 21), // "setUnselectedInfoList"
 QT_MOC_LITERAL(16, 190, 15), // "getInfoNameList"
 QT_MOC_LITERAL(17, 206, 14), // "getAllDronePos"
 QT_MOC_LITERAL(18, 221, 11), // "getDronePos"
-QT_MOC_LITERAL(19, 233, 8) // "getRoute"
+QT_MOC_LITERAL(19, 233, 8), // "getRoute"
+QT_MOC_LITERAL(20, 242, 8), // "setGroup"
+QT_MOC_LITERAL(21, 251, 5) // "group"
 
     },
     "DroneListModel\0updateDrone\0\0jInfo\0"
@@ -244,7 +246,7 @@ QT_MOC_LITERAL(19, 233, 8) // "getRoute"
     "toggleFollow\0setVisibility\0visibility\0"
     "setSelectedInfoList\0info\0setUnselectedInfoList\0"
     "getInfoNameList\0getAllDronePos\0"
-    "getDronePos\0getRoute"
+    "getDronePos\0getRoute\0setGroup\0group"
 };
 #undef QT_MOC_LITERAL
 
@@ -254,7 +256,7 @@ static const uint qt_meta_data_DroneListModel[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      13,   14, // methods
+      14,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -262,19 +264,20 @@ static const uint qt_meta_data_DroneListModel[] = {
        0,       // signalCount
 
  // methods: name, argc, parameters, tag, flags
-       1,    1,   79,    2, 0x02 /* Public */,
-       4,    1,   82,    2, 0x02 /* Public */,
-       6,    2,   85,    2, 0x02 /* Public */,
-       8,    1,   90,    2, 0x02 /* Public */,
-       9,    1,   93,    2, 0x02 /* Public */,
-      10,    1,   96,    2, 0x02 /* Public */,
-      11,    2,   99,    2, 0x02 /* Public */,
-      13,    2,  104,    2, 0x02 /* Public */,
-      15,    2,  109,    2, 0x02 /* Public */,
-      16,    1,  114,    2, 0x02 /* Public */,
-      17,    0,  117,    2, 0x02 /* Public */,
-      18,    1,  118,    2, 0x02 /* Public */,
-      19,    1,  121,    2, 0x02 /* Public */,
+       1,    1,   84,    2, 0x02 /* Public */,
+       4,    1,   87,    2, 0x02 /* Public */,
+       6,    2,   90,    2, 0x02 /* Public */,
+       8,    1,   95,    2, 0x02 /* Public */,
+       9,    1,   98,    2, 0x02 /* Public */,
+      10,    1,  101,    2, 0x02 /* Public */,
+      11,    2,  104,    2, 0x02 /* Public */,
+      13,    2,  109,    2, 0x02 /* Public */,
+      15,    2,  114,    2, 0x02 /* Public */,
+      16,    1,  119,    2, 0x02 /* Public */,
+      17,    0,  122,    2, 0x02 /* Public */,
+      18,    1,  123,    2, 0x02 /* Public */,
+      19,    1,  126,    2, 0x02 /* Public */,
+      20,    2,  129,    2, 0x02 /* Public */,
 
  // methods: parameters
     QMetaType::Bool, QMetaType::QString,    3,
@@ -290,6 +293,7 @@ static const uint qt_meta_data_DroneListModel[] = {
     QMetaType::QVariant,
     QMetaType::QVariant, QMetaType::QString,    5,
     QMetaType::QVariant, QMetaType::QString,    5,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString,    5,   21,
 
        0        // eod
 };
@@ -321,6 +325,7 @@ void DroneListModel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
         case 12: { QVariant _r = _t->getRoute((*reinterpret_cast< const QString(*)>(_a[1])));
             if (_a[0]) *reinterpret_cast< QVariant*>(_a[0]) = std::move(_r); }  break;
+        case 13: _t->setGroup((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
         default: ;
         }
     }
@@ -355,13 +360,13 @@ int DroneListModel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 13)
+        if (_id < 14)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 13;
+        _id -= 14;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 13)
+        if (_id < 14)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 13;
+        _id -= 14;
     }
     return _id;
 }

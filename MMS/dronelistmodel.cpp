@@ -112,8 +112,8 @@ bool DroneListModel::updateDrone(const QString & jInfo){
 
         //speed
         double distance = it->pos().distanceTo(coord);
-        double time =it->getTimeStamp().time().msecsTo(timestamp.time());
-        double speed = distance / time * 1000;
+        double time =it->getTimeStamp().time().secsTo(timestamp.time());
+        double speed = distance / time;
         if (speed < 0) speed = it->getSpeed();
         QString mSpeed = QString::number(speed,'f',2);
 
@@ -205,7 +205,8 @@ bool DroneListModel::setSelectedInfoList(const QString&id,QString info){
 
 
     //what if not in anymore?
-    it->addSelectedInfoNames(info);
+    if(!it->addSelectedInfoNames(info)) return false;
+
     int index = it->getInfoNames().indexOf(info);
     QString val = it->getInfoValues().value(index).toString();
     it->addSelectedInfoValues(val);
@@ -248,6 +249,14 @@ QVariant DroneListModel::getRoute(const QString &id)
 {
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){return obj.id() == id;});
     return it->getRoutePath();
+}
+
+void DroneListModel::setGroup(const QString &id, QString group)
+{
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){return obj.id() == id;});
+    it->setGroup(group);
+    QModelIndex ix = index(it - mDrones.begin());
+    emit dataChanged(ix, ix, QVector<int>{GroupRole});
 }
 
 void DroneListModel::setColor(const QString &id, QString color){
@@ -314,6 +323,8 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getLeg();
         case SpeedRole:
             return it.getSpeed();
+        case GroupRole:
+            return it.group();
         default:
             break;
         }
@@ -342,6 +353,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[WaypointRole] = "wpInfo";
     roles[RouteRole] = "routeInfo";
     roles[HotLegRole] = "legInfo";
+    roles[GroupRole] = "groupInfo";
     return roles;
 }
 

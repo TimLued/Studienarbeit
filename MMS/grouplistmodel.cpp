@@ -70,6 +70,13 @@ bool GroupListModel::containsMember(const QString &id, QString member)
      else return false;
 }
 
+QVariant GroupListModel::getMembers(const QString &id)
+{
+    auto it = std::find_if(mGroups.begin(), mGroups.end(), [&](Group const& obj){return obj.id() == id;});
+    QModelIndex ix = index(it - mGroups.begin());
+    return mGroups[ix.row()].members();
+}
+
 void GroupListModel::removeMember(const QString &id, QString member)
 {
     auto it = std::find_if(mGroups.begin(), mGroups.end(), [&](Group const& obj){return obj.id() == id;});
@@ -86,6 +93,30 @@ void GroupListModel::setVisibility(const QString &id, bool visible)
     emit dataChanged(ix, ix, QVector<int>{visibleRole});
 }
 
+QString GroupListModel::getGroupColor(const QString &id)
+{
+    auto it = std::find_if(mGroups.begin(), mGroups.end(), [&](Group const& obj){return obj.id() == id;});
+    QModelIndex ix = index(it - mGroups.begin());
+    return mGroups[ix.row()].color();
+}
+
+void GroupListModel::setFollow(const QString &id, bool follow)
+{
+    auto it = std::find_if(mGroups.begin(), mGroups.end(), [&](Group const& obj){return obj.id() == id;});
+    int row = it - mGroups.begin();
+    QModelIndex ix = index(row);
+    it->setFollow(follow);
+    emit dataChanged(ix, ix, QVector<int>{followRole});
+
+    //others set false
+    for (int i=0;i<mGroups.count();i++){
+        if(i != row && mGroups[i].follow()) {
+            mGroups[i].setFollow(false);
+            emit dataChanged(index(i), index(i), QVector<int>{followRole});
+        }
+    }
+
+}
 
 int GroupListModel::rowCount(const QModelIndex &parent) const
 {
@@ -109,6 +140,8 @@ QVariant GroupListModel::data(const QModelIndex &index, int role) const
             return it.members();
         case visibleRole:
             return it.visible();
+        case followRole:
+            return it.follow();
         }
     }
 
@@ -122,6 +155,7 @@ QHash<int, QByteArray> GroupListModel::roleNames() const
     roles[colorRole]="colorInfo";
     roles[membersRole]="memberInfo";
     roles[visibleRole]="visibleInfo";
+    roles[followRole]="followInfo";
 
     return roles;
 }

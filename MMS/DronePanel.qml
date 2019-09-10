@@ -61,276 +61,299 @@ Item{
         property bool uavExtended: true
         property bool groupExtended: true
 
-        Rectangle{
-            id: dronesHeader
-
-            property int space: 10
-            width: 150
-            height: extendBtn.height
+        ScrollView{
+            ScrollBar.vertical.policy: ScrollBar.AlwaysOff
             anchors{
-                left: parent.left
                 top: parent.top
-                topMargin: 4
-            }
-            color:"transparent"
-
-            Rectangle{
-                id: extendBtn
-                anchors{
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                    rightMargin: 4
-                }
-                width: 20
-                height: 20
-                border.color: "white"
-                border.width: 1
-                color: "transparent"
-                radius: 2
-
-                MouseArea{
-                    anchors.fill:parent
-                    onClicked: {
-                        panelBG.uavExtended = !panelBG.uavExtended
-                    }
-                }
-                Text {
-                    anchors.fill:parent
-                    text: panelBG.uavExtended? "-":"+"
-                    font.pixelSize: 16
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    color: "black"
-                    elide: Text.ElideRight
-                }
-            }
-
-            Text{
-                id:headerText
-                text: "UAV"
-                font.pixelSize: 12
-                color:"white"
-                anchors{
-                    left: parent.left
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                }
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            Rectangle{
-                id: leftLine
-                height: 1
-                width: parent.width / 2 - Algos.calcTxtWidth(headerText.text,headerText) / 2 - parent.space
-                color:"white"
-                anchors{
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                }
-            }
-            Rectangle{
-                height: 1
-                width: leftLine.width-extendBtn.width - extendBtn.anchors.rightMargin
-                color:"white"
-                anchors{
-                    right: extendBtn.left
-                    verticalCenter: parent.verticalCenter
-                }
-            }
-        }
-
-        Rectangle{
-            id: uavContainer
-            layer.enabled: true
-            color:"transparent"
-            anchors{
-                top: dronesHeader.bottom
-                left:parent.left
-                right:parent.right
-                topMargin: 4
-            }
-            height: panelBG.uavExtended? droneLV.contentHeight:0
-
-            Behavior on height{
-                PropertyAnimation{
-                    duration: 200
-                    easing.type: Easing.Linear
-                }
-            }
-
-            ListView{
-                id: droneLV
-                anchors.fill: parent
-                clip:true
-                model: dronemodel
-                delegate: droneLvDelegate
-                spacing: 2
-            }
-        }
-
-
-        Rectangle{
-            id: groupHeader
-
-            property int space: 10
-            width: 150
-            height: extendGroupBtn.height
-            anchors{
+                bottom: parent.bottom
                 left: parent.left
-                top: uavContainer.bottom
-                topMargin: 4
             }
-            color:"transparent"
-
-
+            width: 150
+            contentHeight: frame.height
 
             Rectangle{
-                id: extendGroupBtn
-                anchors{
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                    rightMargin: 4
-                }
-                width: 20
-                height: 20
-                border.color: "white"
-                border.width: 1
-                color: "transparent"
-                radius: 2
-
-                MouseArea{
-                    anchors.fill:parent
-                    onClicked: {
-                        panelBG.groupExtended = !panelBG.groupExtended
-                    }
-                }
-                Text {
-                    anchors.fill:parent
-                    text: panelBG.groupExtended? "-":"+"
-                    font.pixelSize: 16
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    color: "black"
-                    elide: Text.ElideRight
-                }
-            }
-
-            Text{
-                id:headerGroupText
-                text: "Groups"
-                font.pixelSize: 12
-                color:"white"
-                anchors{
-                    left: parent.left
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                }
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            Rectangle{
-                id: leftGroupLine
-                height: 1
-                width: parent.width / 2 - Algos.calcTxtWidth(headerGroupText.text,headerGroupText) / 2 - parent.space
-                color:"white"
-                anchors{
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                }
-            }
-            Rectangle{
-                height: 1
-                width: leftGroupLine.width-extendGroupBtn.width - extendGroupBtn.anchors.rightMargin
-                color:"white"
-                anchors{
-                    right: extendGroupBtn.left
-                    verticalCenter: parent.verticalCenter
-                }
-            }
-        }
-
-
-        Rectangle{
-            id: groupContainer
-            layer.enabled: true
-            color:"transparent"
-            anchors{
-                top: groupHeader.bottom
-                left:parent.left
-                right:parent.right
-                topMargin: 4
-            }
-            height: panelBG.groupExtended? groupLV.contentHeight+addBtnContainer.height:0
-
-            Behavior on height{
-                PropertyAnimation{
-                    duration: 200
-                    easing.type: Easing.Linear
-                }
-            }
-
-
-            Rectangle{
-                id:groupLvContainer
+                id: frame
                 color:"transparent"
+                height: childrenRect.height+10
                 anchors{
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
-                }
-                height: parent.height - addBtnContainer.height
-
-                ListView{
-                    id: groupLV
-                    anchors.fill: parent
-                    clip:true
-                    model: groupmodel
-
-                    delegate: groupLvDelegate
-                    spacing: 2
-                }
-            }
-
-
-            Rectangle{
-                id: addBtnContainer
-                color:"transparent"
-                anchors{
+                    top:parent.top
                     left:parent.left
                     right:parent.right
-                    top:groupLvContainer.bottom
                 }
-                height: addGroupBtn.height + addGroupBtn.anchors.topMargin
+
 
                 Rectangle{
-                    id: addGroupBtn
-                    width: 40
+                    id: dronesHeader
+
+                    property int space: 10
+                    width: parent.width
+                    height: extendBtn.height
                     anchors{
-                        horizontalCenter: parent.horizontalCenter
+                        left: parent.left
                         top: parent.top
-                        topMargin: 3
+                        topMargin: 4
                     }
-                    MouseArea{
-                        anchors.fill:parent
-                        onClicked: groupmodel.createGroup()
+                    color:"transparent"
+
+                    Rectangle{
+                        id: extendBtn
+                        anchors{
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                            rightMargin: 4
+                        }
+                        width: 20
+                        height: 20
+                        border.color: "white"
+                        border.width: 1
+                        color: "transparent"
+                        radius: 2
+
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                panelBG.uavExtended = !panelBG.uavExtended
+                            }
+                        }
+                        Text {
+                            anchors.fill:parent
+                            text: panelBG.uavExtended? "-":"+"
+                            font.pixelSize: 16
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: "black"
+                            elide: Text.ElideRight
+                        }
                     }
-                    height: 20
-                    border.color: addGroupText.color
-                    border.width: 1
-                    color: "transparent"
-                    Text {
-                        id:addGroupText
-                        text: "+"
-                        anchors.fill:parent
-                        font.pixelSize: 16
+
+                    Text{
+                        id:headerText
+                        text: "UAV"
+                        font.pixelSize: 12
+                        color:"white"
+                        anchors{
+                            left: parent.left
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                        }
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        color: "white"
-                        elide: Text.ElideRight
+                    }
+                    Rectangle{
+                        id: leftLine
+                        height: 1
+                        width: parent.width / 2 - Algos.calcTxtWidth(headerText.text,headerText) / 2 - parent.space
+                        color:"white"
+                        anchors{
+                            left: parent.left
+                            verticalCenter: parent.verticalCenter
+                        }
+                    }
+                    Rectangle{
+                        height: 1
+                        width: leftLine.width-extendBtn.width - extendBtn.anchors.rightMargin
+                        color:"white"
+                        anchors{
+                            right: extendBtn.left
+                            verticalCenter: parent.verticalCenter
+                        }
                     }
                 }
-            }
 
+                Rectangle{
+                    id: uavContainer
+                    layer.enabled: true
+                    color:"transparent"
+                    anchors{
+                        top: dronesHeader.bottom
+                        left:parent.left
+                        right:parent.right
+                        topMargin: 4
+                    }
+                    height: panelBG.uavExtended? droneLV.contentHeight:0
+
+                    Behavior on height{
+                        PropertyAnimation{
+                            duration: 200
+                            easing.type: Easing.Linear
+                        }
+                    }
+
+                    ListView{
+                        id: droneLV
+                        anchors.fill: parent
+                        clip:true
+                        model: dronemodel
+                        delegate: droneLvDelegate
+                        spacing: 2
+                    }
+                }
+
+
+                Rectangle{
+                    id: groupHeader
+
+                    property int space: 10
+                    width: 150
+                    height: extendGroupBtn.height
+                    anchors{
+                        left: parent.left
+                        top: uavContainer.bottom
+                        topMargin: 4
+                    }
+                    color:"transparent"
+
+
+
+                    Rectangle{
+                        id: extendGroupBtn
+                        anchors{
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                            rightMargin: 4
+                        }
+                        width: 20
+                        height: 20
+                        border.color: "white"
+                        border.width: 1
+                        color: "transparent"
+                        radius: 2
+
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                panelBG.groupExtended = !panelBG.groupExtended
+                            }
+                        }
+                        Text {
+                            anchors.fill:parent
+                            text: panelBG.groupExtended? "-":"+"
+                            font.pixelSize: 16
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: "black"
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    Text{
+                        id:headerGroupText
+                        text: "Groups"
+                        font.pixelSize: 12
+                        color:"white"
+                        anchors{
+                            left: parent.left
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                        }
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                    Rectangle{
+                        id: leftGroupLine
+                        height: 1
+                        width: parent.width / 2 - Algos.calcTxtWidth(headerGroupText.text,headerGroupText) / 2 - parent.space
+                        color:"white"
+                        anchors{
+                            left: parent.left
+                            verticalCenter: parent.verticalCenter
+                        }
+                    }
+                    Rectangle{
+                        height: 1
+                        width: leftGroupLine.width-extendGroupBtn.width - extendGroupBtn.anchors.rightMargin
+                        color:"white"
+                        anchors{
+                            right: extendGroupBtn.left
+                            verticalCenter: parent.verticalCenter
+                        }
+                    }
+                }
+
+
+                Rectangle{
+                    id: groupContainer
+                    layer.enabled: true
+                    color:"transparent"
+                    anchors{
+                        top: groupHeader.bottom
+                        left:parent.left
+                        right:parent.right
+                        topMargin: 4
+                    }
+                    height: panelBG.groupExtended? groupLV.contentHeight+addBtnContainer.height:0
+
+                    Behavior on height{
+                        PropertyAnimation{
+                            duration: 200
+                            easing.type: Easing.Linear
+                        }
+                    }
+
+
+                    Rectangle{
+                        id:groupLvContainer
+                        color:"transparent"
+                        anchors{
+                            left: parent.left
+                            right: parent.right
+                            top: parent.top
+                        }
+                        height: parent.height - addBtnContainer.height
+
+                        ListView{
+                            id: groupLV
+                            anchors.fill: parent
+                            clip:true
+                            model: groupmodel
+
+                            delegate: groupLvDelegate
+                            spacing: 2
+                        }
+                    }
+
+
+                    Rectangle{
+                        id: addBtnContainer
+                        color:"transparent"
+                        anchors{
+                            left:parent.left
+                            right:parent.right
+                            top:groupLvContainer.bottom
+                        }
+                        height: addGroupBtn.height + addGroupBtn.anchors.topMargin
+
+                        Rectangle{
+                            id: addGroupBtn
+                            width: 40
+                            anchors{
+                                horizontalCenter: parent.horizontalCenter
+                                top: parent.top
+                                topMargin: 3
+                            }
+                            MouseArea{
+                                anchors.fill:parent
+                                onClicked: groupmodel.createGroup()
+                            }
+                            height: 20
+                            border.color: addGroupText.color
+                            border.width: 1
+                            color: "transparent"
+                            Text {
+                                id:addGroupText
+                                text: "+"
+                                anchors.fill:parent
+                                font.pixelSize: 16
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                color: "white"
+                                elide: Text.ElideRight
+                            }
+                        }
+                    }
+
+                }
+            }
         }
     }
 
@@ -451,12 +474,48 @@ Item{
                     id: groupBtnRow
                     spacing: 2
 
+
+                    Rectangle{
+                        id: followGroupBtn
+                        width: Algos.calcTxtWidth(followGroupText.text,followGroupText) + 10
+
+                        MouseArea{
+                            anchors.fill:parent
+                            enabled: groupItem.height !=small
+                            onClicked: {
+                                //set group following, reset other groups
+                                groupmodel.setFollow(idInfo,!followInfo)
+                                if(followInfo)
+                                    map.groupfollow = idInfo
+                                else map.groupfollow = ""
+                            }
+                        }
+                        height: 20
+                        border.color: followGroupText.color
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:followGroupText
+                            text: "\u2B9D"
+                            anchors.fill:parent
+                            font.pixelSize: 12
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: followInfo? "#3EC6AA" : "black"
+                            elide: Text.ElideRight
+                        }
+                    }
+
+
+
+
                     Rectangle{
                         id: centerGroupBtn
                         width: Algos.calcTxtWidth(centerGroupText.text,centerGroupText) + 10
 
                         MouseArea{
                             anchors.fill:parent
+                            enabled: groupItem.height !=small
                             onClicked: {
                                 if (!map.isCenterOnAll) {
                                     var positions = []
@@ -464,7 +523,7 @@ Item{
                                         positions.push(dronemodel.getDronePos(memberInfo[i]))
                                     }
                                     var region = centerMapRegion(positions)
-                                    map.fitViewportToGeoShape(region,200)
+                                    if(region) map.fitViewportToGeoShape(region,200)
                                 }
                             }
                         }
@@ -490,6 +549,7 @@ Item{
 
                         MouseArea{
                             anchors.fill:parent
+                            enabled: groupItem.height !=small
                             onClicked: {
                                 groupmodel.setVisibility(idInfo,!visibleInfo)
                                 for(var i=0;i<memberInfo.length;i++){
@@ -548,8 +608,12 @@ Item{
                         }
                         onCurrentIndexChanged: {
                             if (initial){
-                                groupmodel.setGroupColor(idInfo,colorModel.get(currentIndex).color)
-                                cbGroupBG.color = colorModel.get(currentIndex).color
+                                var color = colorModel.get(currentIndex).color
+                                groupmodel.setGroupColor(idInfo,color)
+                                cbGroupBG.color = color
+                                for(var i=0;i<memberInfo.length;i++){
+                                    dronemodel.setGroup(memberInfo[i],color)
+                                }
                             }
                         }
 
@@ -573,6 +637,7 @@ Item{
                     clip: true
                     flickableDirection: Flickable.VerticalFlick
                     contentHeight: groupMembersLV.height
+                    ScrollBar.vertical: ScrollBar {}
 
                     ListView{
                         id: groupMembersLV
@@ -585,8 +650,10 @@ Item{
 
                         delegate: Component{
                             Item{
+                                id: groupItem
                                 width: parent.width
                                 height: memberText.height
+
                                 Text{
                                     id: memberText
                                     text: memberInfo[index]
@@ -606,13 +673,15 @@ Item{
                                     height: parent.height
                                     verticalAlignment: Text.AlignVCenter
                                     MouseArea{
+                                        enabled: groupItem.height !=small
                                         anchors.fill:parent
                                         onClicked: {
-                                            groupmodel.removeMember(idInfo,memberInfo[index])
+                                            var drone = memberInfo[index]
+                                            dronemodel.setGroup(drone,"")
+                                            groupmodel.removeMember(idInfo,drone)
                                         }
                                     }
                                 }
-
                             }
                         }
                         onCountChanged: groupFlickable.returnToBounds();
@@ -625,6 +694,7 @@ Item{
                     property bool checked: false
                     width: Algos.calcTxtWidth(addDroneToGroupText.text,addDroneToGroupText) + 5
                     MouseArea{
+                        enabled: groupItem.height !=small
                         anchors.fill:parent
                         onClicked:{
                             parent.checked = !parent.checked
@@ -641,6 +711,7 @@ Item{
                     Text {
                         id:addDroneToGroupText
                         text: "Drohne hinzufügen"
+                        leftPadding: 2
                         anchors.fill:parent
                         font.pixelSize: 12
                         verticalAlignment: Text.AlignVCenter
@@ -652,7 +723,13 @@ Item{
                     width: Algos.calcTxtWidth(delGroupText.text,delGroupText) + 5
                     MouseArea{
                         anchors.fill:parent
-                        onClicked: groupmodel.deleteGroup(idInfo)
+                        enabled: groupItem.height !=small
+                        onClicked: {
+                            for(var i=0;i<memberInfo.length;i++){
+                                dronemodel.setGroup(memberInfo[i],"")
+                            }
+                            groupmodel.deleteGroup(idInfo)
+                        }
                     }
                     height: 20
                     border.color: delGroupText.color
@@ -662,6 +739,7 @@ Item{
                         id:delGroupText
                         text: "Gruppe auflösen"
                         anchors.fill:parent
+                        leftPadding: 2
                         font.pixelSize: 12
                         verticalAlignment: Text.AlignVCenter
                         color: "#FF5733"
@@ -683,6 +761,7 @@ Item{
             height: small
 
             Rectangle{
+
                 anchors.fill: parent
                 color: "white"
 
@@ -690,10 +769,12 @@ Item{
                     anchors.fill: parent
                     onClicked: {
                         if (addingToGroup ==""){
-                            if(droneItem.height === small){droneItem.height = 180
+                            if(droneItem.height === small){droneItem.height = 150
                             }else{droneItem.height = small}
                         }else{
                             groupmodel.addMember(addingToGroup,idInfo)
+                            var groupColor = groupmodel.getGroupColor(addingToGroup)
+                            dronemodel.setGroup(idInfo,groupColor)
                         }
                     }
                 }
@@ -717,15 +798,14 @@ Item{
                     Label{
                         id: lbl1
                         text: idInfo
-                        color: if(visibleInfo) {colorInfo}else{"grey"}
+                        color: if(visibleInfo) {groupInfo!=""? groupInfo:colorInfo}else{"grey"}
                         font.pixelSize: txtSize
                         wrapMode: Text.WrapAnywhere
                         width: 150 -parent.anchors.leftMargin
                         renderType: Text.NativeRendering
+                        onColorChanged: if(groupInfo!="") cbBG.color = color
                     }
                 }
-
-
 
                 Row{
                     id: row1
@@ -737,6 +817,7 @@ Item{
 
                         MouseArea{
                             anchors.fill:parent
+                            enabled: droneItem.height !=small
                             onClicked: {
                                 dronemodel.toggleHistoryTracking(idInfo)
                             }
@@ -763,6 +844,7 @@ Item{
 
                         MouseArea{
                             anchors.fill:parent
+                            enabled: droneItem.height !=small
                             onClicked: {
                                 dronemodel.toggleShowingRoute(idInfo)
                             }
@@ -794,6 +876,7 @@ Item{
 
                         MouseArea{
                             anchors.fill:parent
+                            enabled: droneItem.height !=small
                             onClicked: {
                                 if(showingRouteInfo) dronemodel.toggleShowingRoute(idInfo)
                                 wpModel.clear()
@@ -829,6 +912,7 @@ Item{
 
                         MouseArea{
                             anchors.fill:parent
+                            enabled: droneItem.height !=small
                             onClicked: {
                                 dronemodel.toggleFollow(idInfo)
                             }
@@ -855,6 +939,7 @@ Item{
 
                         MouseArea{
                             anchors.fill:parent
+                            enabled: droneItem.height !=small
                             onClicked: {
                                 if (!map.isCenterOnAll) {
                                     var region = centerMapRegion([posInfo])
@@ -884,6 +969,7 @@ Item{
 
                         MouseArea{
                             anchors.fill:parent
+                            enabled: droneItem.height !=small
                             onClicked: {
                                 if (visibleInfo) {dronemodel.setVisibility(idInfo,false)}else{dronemodel.setVisibility(idInfo,true)}
                             }
@@ -939,7 +1025,7 @@ Item{
                             initial = true
                         }
                         onCurrentIndexChanged: {
-                            if (initial){
+                            if (initial&&groupInfo==""){
                                 dronemodel.setColor(idInfo,colorModel.get(currentIndex).color)
                                 cbBG.color = colorModel.get(currentIndex).color
                             }
@@ -1057,12 +1143,13 @@ Item{
 
                 Flickable  {
                     id:droneFlickable
-                    height: parent.height - row0.height- row1.height- row2.height- row3.height -4*2
+                    height: contentHeight<50?contentHeight:50
                     width: 130
                     interactive: true
                     clip: true
                     flickableDirection: Flickable.VerticalFlick
                     contentHeight: dataLV.height
+                    ScrollBar.vertical: ScrollBar {}
 
                     ListView{
                         id: dataLV

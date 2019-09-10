@@ -41,13 +41,20 @@ public:
         mVisible = visible;
     }
 
+    bool follow() const{
+        return mFollow;
+    }
 
+    void setFollow(bool follow){
+        mFollow = follow;
+    }
 
 private:
     QString mId;
     QString mColor;
     QVariantList mMembers;
     bool mVisible = true;
+    bool mFollow = false;
 
 };
 
