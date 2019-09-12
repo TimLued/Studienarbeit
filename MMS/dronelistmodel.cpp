@@ -112,8 +112,8 @@ bool DroneListModel::updateDrone(const QString & jInfo){
 
         //speed
         double distance = it->pos().distanceTo(coord);
-        double time =it->getTimeStamp().time().secsTo(timestamp.time());
-        double speed = distance / time;
+        double time =it->getTimeStamp().time().msecsTo(timestamp.time());
+        double speed = distance / time * 1000;
         if (speed < 0) speed = it->getSpeed();
         QString mSpeed = QString::number(speed,'f',2);
 
@@ -122,6 +122,10 @@ bool DroneListModel::updateDrone(const QString & jInfo){
             infoValues << mSpeed;
         }else{//Update value
             infoValues[infoNames.indexOf("speed")] = mSpeed;
+        }
+        if (!infoNames.contains("ALL")){
+            infoNames << "ALL";
+            infoValues << "ALL";
         }
 
         emit dataChanged(ix, ix, QVector<int>{HotLegRole});
@@ -204,13 +208,27 @@ bool DroneListModel::setSelectedInfoList(const QString&id,QString info){
     QModelIndex ix = index(it - mDrones.begin());
 
 
-    //what if not in anymore?
-    if(!it->addSelectedInfoNames(info)) return false;
+    QList<QVariant> infos;
+    if(info=="ALL"){
+        infos=it->getInfoNames();
+    }else infos.append(info);
 
-    int index = it->getInfoNames().indexOf(info);
-    QString val = it->getInfoValues().value(index).toString();
-    it->addSelectedInfoValues(val);
+    foreach(QVariant data,infos){
+        if(data.toString()!="ALL"&&it->addSelectedInfoNames(data.toString())){
+            int index = it->getInfoNames().indexOf(data.toString());
+            QString val = it->getInfoValues().value(index).toString();
+            it->addSelectedInfoValues(val);
+        }
+    }
+
     emit dataChanged(ix, ix, QVector<int>{InfoSelectedNamesRole,InfoSelectedValuesRole});
+
+
+//    if(!it->addSelectedInfoNames(info)) return false;
+//    int index = it->getInfoNames().indexOf(info);
+//    QString val = it->getInfoValues().value(index).toString();
+//    it->addSelectedInfoValues(val);
+//    emit dataChanged(ix, ix, QVector<int>{InfoSelectedNamesRole,InfoSelectedValuesRole});
 
     return true;
 }
@@ -220,10 +238,25 @@ bool DroneListModel::setUnselectedInfoList(const QString&id,QString info){
             return obj.id() == id;});   
     QModelIndex ix = index(it - mDrones.begin());
 
-    int index = it->getSelectedInfoNames().indexOf(info);
-    if(index == -1) return false;
-    it->removeSelectedInfoNames(info);
-    it->removeSelectedInfoValues(index);
+
+    if(info=="ALL"){
+        int n = it->getSelectedInfoNames().length();
+        for(int i=0;i<n;i++){
+            it->removeSelectedInfoNames(it->getSelectedInfoNames()[0].toString());
+            it->removeSelectedInfoValues(0);
+        }
+
+    }else{
+        int index = it->getSelectedInfoNames().indexOf(info);
+        if(index == -1) return false;
+        it->removeSelectedInfoNames(info);
+        it->removeSelectedInfoValues(index);
+    }
+
+
+
+
+
 
     emit dataChanged(ix, ix, QVector<int>{InfoSelectedNamesRole,InfoSelectedValuesRole});
 
@@ -257,6 +290,14 @@ void DroneListModel::setGroup(const QString &id, QString group)
     it->setGroup(group);
     QModelIndex ix = index(it - mDrones.begin());
     emit dataChanged(ix, ix, QVector<int>{GroupRole});
+}
+
+void DroneListModel::setHistoryRange(const QString &id, int start, int end)
+{
+     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){return obj.id() == id;});
+    it->setHistoryRange(start,end);
+    QModelIndex ix = index(it - mDrones.begin());
+    emit dataChanged(ix, ix, QVector<int>{HistoryRangeRole});
 }
 
 void DroneListModel::setColor(const QString &id, QString color){
@@ -325,6 +366,10 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getSpeed();
         case GroupRole:
             return it.group();
+        case TimestampsRole:
+            return it.getTimestamps();
+        case HistoryRangeRole:
+            return it.getHistoryRange();
         default:
             break;
         }
@@ -343,6 +388,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[TrackingRole] = "trackingHistoryInfo";
     roles[ShowingRouteRole] = "showingRouteInfo";
     roles[HistoryRole] = "historyInfo";
+    roles[TimestampsRole] = "timestampsInfo";
     roles[FollowRole] = "followInfo";
     roles[AnimationStateRole] = "extrapolateInfo";
     roles[InfoNamesRole] = "infoNamesInfo";
@@ -354,6 +400,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[RouteRole] = "routeInfo";
     roles[HotLegRole] = "legInfo";
     roles[GroupRole] = "groupInfo";
+    roles[HistoryRangeRole] = "rangeInfo";
     return roles;
 }
 
@@ -363,14 +410,14 @@ bool DroneListModel::setData(const QModelIndex &index, const QVariant &value,int
     if (index.row() >= 0 && index.row() < rowCount()) {
         if (role == PosRole) {
             const Data &data = value.value<Data>();
-            mDrones[index.row()].setPos(data.coord);
+            mDrones[index.row()].setPos(data.coord,data.timestamp);
             mDrones[index.row()].setAngle(data.angle);
             mDrones[index.row()].setSpeed(data.speed);
             mDrones[index.row()].setTimeStamp(data.timestamp);
             mDrones[index.row()].setInfoNames(data.infoNames);
             mDrones[index.row()].setInfoValues(data.infoValues);
             mDrones[index.row()].setExtrapolate(false);
-            emit dataChanged(index, index, QVector<int>{PosRole,AngleRole,SpeedRole,AnimationStateRole,HistoryRole,InfoNamesRole,InfoSelectedValuesRole});
+            emit dataChanged(index, index, QVector<int>{PosRole,AngleRole,SpeedRole,AnimationStateRole,HistoryRole,InfoNamesRole,InfoSelectedValuesRole,TimestampsRole});
             mDrones[index.row()].setExtrapolate(true);
             emit dataChanged(index, index, QVector<int>{AnimationStateRole});
             return true;

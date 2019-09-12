@@ -331,6 +331,17 @@ ApplicationWindow  {
                     extrapolationTime: 1000
                     visible: visibleInfo
                     trackingHistory: trackingHistoryInfo
+                    property int historyStart: rangeInfo[0]
+                    property int historyEnd: rangeInfo[1]
+
+                    onHistoryStartChanged: updateHistory()
+                    onHistoryEndChanged: updateHistory()
+
+                    function updateHistory(){
+                        dynamicPath.path = []
+                        threadRunning = true
+                        mWorker.sendMessage(historyInfo)
+                    }
 
                     property double dist
                     onExtrapolatingChanged: {
@@ -350,27 +361,33 @@ ApplicationWindow  {
                         dynamicPath.path = []
                         staticPath.path = []
                         if (trackingHistory){
-                            if (historyInfo.length > 1) staticPath.updatePath(historyInfo)
-                            k = 50
+                            //if (historyInfo.length > 1) staticPath.updatePath(historyInfo)
+                            if (historyInfo.length > 1) {
+                                threadRunning = true
+                                mWorker.sendMessage(historyInfo)
+                            }
+                            if(historyEnd===-2) dynamicPath.addCoordinate(posInfo)
+                            k = 0
                         }
                     }
                     property int k: 50
+                    property bool threadRunning: false
+
                     onCoordinateChanged: {
                         var n,first, second
-
-                        if (trackingHistory) {
+                        if (trackingHistory&&historyEnd===-2) {
                             n = dynamicPath.pathLength()
 
                             if (k >= 50){//every 50th or corner
-                                if(n <= 100){
+                                if(n <= 100||threadRunning){
                                     dynamicPath.addCoordinate(posInfo)
                                     k = 0
-                                }else if (staticPath.updatePath(historyInfo)){//max pathLength reached
-                                    dynamicPath.path = []
-                                    k = 50
-                                }else{//add to dynamic if problem with algo
-                                    dynamicPath.addCoordinate(posInfo)
+                                }else{
+                                    threadRunning = true
+                                    mWorker.sendMessage(historyInfo)
                                 }
+
+
                             }else if(n>1){
                                 first = dynamicPath.path[n-2].azimuthTo(dynamicPath.path[n-1])
                                 second = dynamicPath.path[n-1].azimuthTo(posInfo)
@@ -417,6 +434,10 @@ ApplicationWindow  {
                         }
 
                     }
+
+
+
+
                 }
 
 
@@ -469,7 +490,7 @@ ApplicationWindow  {
 
                         Rectangle{
                             anchors.fill: parent
-                            anchors.margins: 5
+                            anchors.margins: 4
 
                             Text{
                                 id: popHeader
@@ -477,6 +498,7 @@ ApplicationWindow  {
                                 anchors{
                                     left: parent.left
                                     top: parent.top
+
                                 }
                                 font.bold: true
                                 font.pixelSize: txtSize
@@ -490,8 +512,8 @@ ApplicationWindow  {
                                     top: parent.rop
                                 }
 
-                                width: 15
-                                height: 15
+                                width: 17
+                                height: 17
                                 border.color: closeBtnText.color
                                 border.width: 1
                                 color: "transparent"
@@ -597,19 +619,25 @@ ApplicationWindow  {
                     line.width: 1
 
                     function updatePath(path){
-                        var simplePath = Algos.simplifyPath(path)
                         var nPath = []
-                        for (var i = 0; i<simplePath.length;i++){
-                            if(simplePath[i]){
-                                nPath.push(QtPositioning.coordinate(simplePath[i][0],simplePath[i][1]))
+                        for (var i = 0; i<path.length;i++){
+                            if(path[i]){
+                                nPath.push(QtPositioning.coordinate(path[i][0],path[i][1]))
                             }
                         }
+                        droneBody.threadRunning = false
                         if(nPath.length>0){
                             staticPath.path = nPath
-                            return true
+                            dynamicPath.path = []
+                            droneBody.k = 50
                         }
-                        return false
                     }
+                }
+
+                WorkerScript{
+                    id:mWorker
+                    source: "qrc:/simplifyPoly.js"
+                    onMessage: staticPath.updatePath(messageObject.reply)
                 }
 
                 MapPolyline{//dynamic
@@ -725,4 +753,5 @@ ApplicationWindow  {
     }
 
 }
+
 

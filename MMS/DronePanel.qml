@@ -1,5 +1,5 @@
 import QtQuick 2.12
-import QtQuick.Controls 2.5
+import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Window 2.12
 import "algos.js" as Algos
@@ -8,10 +8,16 @@ import "algos.js" as Algos
 Item{
     id: dronePanel
     property bool shown: true
-    width: shown ? 150 : 0
     property variant colors: ["red","blue","green","purple","darkorange","darkred","fuchsia"]
     property string addingToGroup
 
+    width: shown ? 150 : 0
+    Behavior on width{
+        PropertyAnimation{
+            duration: 500
+            easing.type: Easing.Linear
+        }
+    }
     anchors{
         top: parent.top
         bottom: parent.bottom
@@ -21,14 +27,9 @@ Item{
         bottomMargin: 20
     }
 
-    Behavior on width{
-        PropertyAnimation{
-            duration: 500
-            easing.type: Easing.Linear
-        }
-    }
 
     Rectangle{//Closer
+        z:100
         anchors{
             verticalCenter: parent.verticalCenter
             left: panelBG.right
@@ -44,7 +45,6 @@ Item{
             font.pixelSize: 25
             font.bold: true
             text: shown? "\u25C1" : "\u25B7"
-
         }
         MouseArea{
             anchors.fill:parent
@@ -357,6 +357,8 @@ Item{
         }
     }
 
+
+
     Component{
         id: groupLvDelegate
         Item{
@@ -637,7 +639,9 @@ Item{
                     clip: true
                     flickableDirection: Flickable.VerticalFlick
                     contentHeight: groupMembersLV.height
-                    ScrollBar.vertical: ScrollBar {}
+                    ScrollBar.vertical: ScrollBar {
+                    policy: (groupFlickable.contentHeight>groupFlickable.height)?ScrollBar.AlwaysOn:ScrollBar.AlwaysOff
+                    }
 
                     ListView{
                         id: groupMembersLV
@@ -759,9 +763,9 @@ Item{
             id: droneItem
             width: parent.width
             height: small
+            opacity: 1
 
             Rectangle{
-
                 anchors.fill: parent
                 color: "white"
 
@@ -769,7 +773,7 @@ Item{
                     anchors.fill: parent
                     onClicked: {
                         if (addingToGroup ==""){
-                            if(droneItem.height === small){droneItem.height = 150
+                            if(droneItem.height === small){droneItem.height = 195
                             }else{droneItem.height = small}
                         }else{
                             groupmodel.addMember(addingToGroup,idInfo)
@@ -793,6 +797,7 @@ Item{
                     bottomMargin: 5
                 }
 
+
                 Row{
                     id: row0
                     Label{
@@ -803,7 +808,7 @@ Item{
                         wrapMode: Text.WrapAnywhere
                         width: 150 -parent.anchors.leftMargin
                         renderType: Text.NativeRendering
-                        onColorChanged: if(groupInfo!="") cbBG.color = color
+                        onColorChanged: cbBG.color = color
                     }
                 }
 
@@ -862,6 +867,90 @@ Item{
                             verticalAlignment: Text.AlignVCenter
                             color: showingRouteInfo? "#3EC6AA" : "black"
                             elide: Text.ElideRight
+                        }
+                    }
+                }
+
+                Row{
+                    id: row1_2
+                    spacing: 1
+
+                    Rectangle{
+                        color:"transparent"
+                        width:mainColumn.width
+                        height:trackingHistoryInfo? timeSlider.height+rangeText.height+5:0
+                        layer.enabled: true
+                        Behavior on height{
+                            PropertyAnimation{
+                                duration: 200
+                                easing.type: Easing.Linear
+                            }
+                        }
+                        onHeightChanged:if(height!=0) timeSlider.reset()
+
+                        Column{
+                            spacing: 1
+
+                            TimeSlider{
+                                id:timeSlider
+                                property int lockVal
+                                width:mainColumn.width
+
+                                enabled:trackingHistoryInfo
+
+                                function reset(){
+                                    //0-now
+                                    dronemodel.setHistoryRange(idInfo,0,-2)
+                                    lockVal = timestampsInfo.length-1
+                                    first.value = 0
+                                    second.value = lockVal
+                                    rangeText.toVal = "now"
+                                    rangeText.fromVal=Qt.formatDateTime(timestampsInfo[0],"hh:mm:ss")
+
+                                }
+
+                                to: lockVal
+
+                                second.onMoved: {
+                                    rangeText.toVal=second.value==lockVal? "now":Qt.formatDateTime(timestampsInfo[Math.round(second.value)],"hh:mm:ss")
+                                }
+                                first.onMoved: {
+                                    rangeText.fromVal=Qt.formatDateTime(timestampsInfo[Math.round(first.value)],"hh:mm:ss")
+                                }
+
+                                first.onPressedChanged: {
+                                    if(second.pressed)
+                                        lockVal = timestampsInfo.length-1
+                                    else{
+                                        //set history left index
+                                        dronemodel.setHistoryRange(idInfo,first.value,-1)
+                                        //draw anew
+                                    }
+                                }
+
+                                second.onPressedChanged: {
+
+                                    if(second.pressed)
+                                        lockVal = timestampsInfo.length-1
+                                    else{
+                                        //set history right index
+                                        //-2 for latest position
+                                        //-1 for no changes
+                                        dronemodel.setHistoryRange(idInfo,-1,second.value==lockVal?-2:second.value)
+
+                                    }
+                                }
+                            }
+
+                            Text{
+                                id:rangeText
+                                enabled:trackingHistoryInfo
+                                width:mainColumn.width
+                                horizontalAlignment: Text.AlignHCenter
+                                property string fromVal
+                                property string toVal
+                                text: fromVal + " - " + toVal
+                            }
                         }
                     }
                 }
@@ -1030,7 +1119,6 @@ Item{
                                 cbBG.color = colorModel.get(currentIndex).color
                             }
                         }
-
                     }
 
                 }
@@ -1143,13 +1231,15 @@ Item{
 
                 Flickable  {
                     id:droneFlickable
-                    height: contentHeight<50?contentHeight:50
+                    height: contentHeight<(!trackingHistoryInfo?95:50)?contentHeight:(!trackingHistoryInfo?95:50)
                     width: 130
                     interactive: true
                     clip: true
                     flickableDirection: Flickable.VerticalFlick
                     contentHeight: dataLV.height
-                    ScrollBar.vertical: ScrollBar {}
+                    ScrollBar.vertical: ScrollBar {
+                        policy: (droneFlickable.contentHeight>droneFlickable.height)?ScrollBar.AlwaysOn:ScrollBar.AlwaysOff
+                    }
 
                     ListView{
                         id: dataLV

@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>WaypointPanel.qml</file>
-        <file>WaypointMarker.qml</file>
         <file>WaypointDraggableItemDropArea.qml</file>
         <file>WaypointDraggableItem.qml</file>
         <file>TimeSlider.qml</file>
@@ -10,6 +9,7 @@
         <file>DronePanel.qml</file>
         <file>Drone.qml</file>
         <file>ActionPanel.qml</file>
+        <file>simplifyPoly.js</file>
         <file>algos.js</file>
         <file>img/scale.png</file>
         <file>img/scale_end.png</file>

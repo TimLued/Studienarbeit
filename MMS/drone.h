@@ -6,6 +6,7 @@
 #include <iostream>
 #include <QQmlContext>
 #include <QDateTime>
+typedef QPair<int,int> RangeType;
 
 class Drone
 {
@@ -20,8 +21,11 @@ public:
     QGeoCoordinate pos() const{
         return mPos;
     }
-    void setPos(const QGeoCoordinate &pos){
-        if(mPos.isValid()) appendHistory(mPos);
+    void setPos(const QGeoCoordinate &pos,QDateTime stamp){
+        if(mPos.isValid()){
+            appendHistory(mPos);
+            timestamps<<stamp;
+        }
         mPos = pos;
     }
 
@@ -31,11 +35,20 @@ public:
 
     QVariantList getHistory() const{
         QVariantList history_list;
-        for (const QGeoCoordinate &coord : history) {
-          history_list << QVariant::fromValue(coord);
+        for (int i=historyRange.first;i<(historyRange.second==-2?history.length():historyRange.second+1);i++){
+          history_list << QVariant::fromValue(history[i]);
         }
-        history_list << QVariant::fromValue(mPos);
+        //history_list << QVariant::fromValue(mPos);
         return history_list;
+    }
+
+    QVariantList getTimestamps() const{
+        QVariantList timestamp_list;
+        for (const QDateTime &stamp : timestamps) {
+          timestamp_list << QVariant::fromValue(stamp);
+        }
+        //timestamp_list << QVariant::fromValue(mTimeStamp);
+        return timestamp_list;
     }
 
     void appendRoute (QVariant waypoint){
@@ -220,12 +233,26 @@ public:
         mGroup = group;
     }
 
+    QVariantList getHistoryRange() const{
+        QVariantList range_list;
+        range_list<<historyRange.first;
+        range_list<<historyRange.second;
+        return  range_list;
 
+    }
+
+    void setHistoryRange(int start,int end){
+        int newStart = start==-1?historyRange.first:start;
+        int newEnd = end==-1?historyRange.second:end;
+        RangeType newRange(newStart,newEnd);
+        historyRange = newRange;
+    }
 
 private:
     QString mId;
     QGeoCoordinate mPos;
     QList<QGeoCoordinate> history;
+    QList<QDateTime> timestamps;
     QString mColor;
     double mAngle;
     double mSpeed;
@@ -240,6 +267,7 @@ private:
     QList<QGeoCoordinate> mHotLeg;
     int lastLegIndex = 0;
     QString mGroup;
+    RangeType historyRange;
 
     bool follow=false;
     bool trackHistory=false;
