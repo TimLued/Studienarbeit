@@ -248,6 +248,15 @@ public:
         historyRange = newRange;
     }
 
+    QVariantList getShortHistory() const{
+        return mShortHistroy;
+    }
+
+    void setShortHistory(QVariantList shortHistory){
+        mShortHistroy= shortHistory;
+    }
+
+
 private:
     QString mId;
     QGeoCoordinate mPos;
@@ -268,6 +277,7 @@ private:
     int lastLegIndex = 0;
     QString mGroup;
     RangeType historyRange;
+    QVariantList mShortHistroy;
 
     bool follow=false;
     bool trackHistory=false;

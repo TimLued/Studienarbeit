@@ -100,11 +100,10 @@ ApplicationWindow  {
         plugin: Plugin{
             name:"mapboxgl"
             PluginParameter{name:"mapboxgl.access_token";value:"pk.eyJ1IjoidGltb3RoeWx1ZWQiLCJhIjoiY2swNTd4N3pyMDQ1djNjcWk3YWk1Mmw4aiJ9.peN9sLC_oLX5m-KOT5RTlA"}
-            PluginParameter{name:"mapboxgl.mapping.additional_style_urls"; value:"mapbox://styles/timothylued/ck06pdqf709ea1do535fgthp6"} //outdoors
-            //mapbox://styles/timothylued/ck058xmm809nc1co4193k21g0
-
+            PluginParameter{name:"mapboxgl.mapping.additional_style_urls"; value:"mapbox://styles/timothylued/ck06pdqf709ea1do535fgthp6,mapbox://styles/timothylued/ck05as97w08w21dp9ak2ukiru"} //outdoors,darkmode
         }
         activeMapType: supportedMapTypes[0]
+
         center: QtPositioning.coordinate(54.3107,10.1291)
         zoomLevel: 14
 
@@ -213,7 +212,6 @@ ApplicationWindow  {
 
         Item {
             id: scale
-            z: map.z + 3
             visible: scaleText.text != "0 m"
             anchors{
                 bottom: parent.bottom;
@@ -247,6 +245,7 @@ ApplicationWindow  {
                 color: "#004EAE"
                 anchors.centerIn: parent
                 text: "0 m"
+                font.pixelSize: 16
             }
             Component.onCompleted: {
                 win.setZoomScale();
@@ -255,29 +254,31 @@ ApplicationWindow  {
 
         Item{
             id: infobar
-            z: 3
             anchors{
                 top: parent.top
                 right: parent.right
                 margins: 10
             }
             height: zoomLbl.height * 2
-            width: 72
+            width: 110
 
             //Zoom Label
-            Label {
+            Text {
                 id: zoomLbl
                 color: "#004EAE"
-                anchors.left: parent.left
+                horizontalAlignment: Text.AlignRight
+                width: coorLbl.width
+                anchors.right: parent.right
                 text: "Zoom: " + Math.round(map.zoomLevel)
+                font.pixelSize: 16
             }
 
-            //Coordinate Label
-            Label {
+            Text {
                 id: coorLbl
                 color: "#004EAE"
                 anchors.top:zoomLbl.bottom
                 anchors.left: parent.left
+                font.pixelSize: 16
             }
         }
 
@@ -294,7 +295,7 @@ ApplicationWindow  {
             Text{
                 id: compass
                 text: "\u29BD"
-                font.pixelSize: 25
+                font.pixelSize: 35
                 color: "#004EAE"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
@@ -303,7 +304,7 @@ ApplicationWindow  {
 
             transform: Rotation {
                 origin.x: compass.implicitWidth/2
-                origin.y: compass.implicitHeight/2
+                origin.y: compass.implicitHeight/2+2
                 angle: 360 - map.bearing
                 Behavior on angle {
                     RotationAnimation{
@@ -324,7 +325,7 @@ ApplicationWindow  {
 
                 Drone{
                     id: droneBody
-                    z:2
+                    z:200
                     droneColor: groupInfo!=""? groupInfo:colorInfo
                     extrapolating: extrapolateInfo
                     droneId: idInfo
@@ -380,6 +381,7 @@ ApplicationWindow  {
 
                             if (k >= 50){//every 50th or corner
                                 if(n <= 100||threadRunning){
+                                    if (threadRunning) dynamicPath.buffer.push(posInfo)
                                     dynamicPath.addCoordinate(posInfo)
                                     k = 0
                                 }else{
@@ -408,7 +410,7 @@ ApplicationWindow  {
                             if (followInfo) dronemodel.toggleFollow(idInfo)
                             positions = dronemodel.getAllDronePos()
                             region = centerMapRegion(positions)
-                            map.fitViewportToGeoShape(region,200)
+                            map.fitViewportToGeoShape(region,50)
 
                         }else if(map.groupfollow!=""){
                             if (followInfo) dronemodel.toggleFollow(idInfo)
@@ -417,7 +419,7 @@ ApplicationWindow  {
                                 positions.push(dronemodel.getDronePos(groupMembers[i]))
                             }
                             region = centerMapRegion(positions)
-                            map.fitViewportToGeoShape(region,200)
+                            map.fitViewportToGeoShape(region,50)
                         }
 
                         if (followInfo){
@@ -443,7 +445,7 @@ ApplicationWindow  {
 
                 MapQuickItem{
                     id:circleRuler
-                    z:1
+                    z:100
                     visible: map.circleRulerVisible && visibleInfo
                     coordinate: droneBody.coordinate
                     anchorPoint.x: zoomCircle
@@ -476,7 +478,7 @@ ApplicationWindow  {
                 MapQuickItem {//PopUp
                     visible: droneBody.popUp && visibleInfo
                     coordinate: droneBody.coordinate
-                    z: 2
+                    z: 200
                     anchorPoint.x: if (!followInfo) {-10}else{-droneBody.width / 2}
                     anchorPoint.y: if (!followInfo) {-10}else{popItem.height / 2}
 
@@ -605,8 +607,6 @@ ApplicationWindow  {
                                     }
                                 }
                             }
-
-
                         }
                     }
                 }
@@ -618,18 +618,20 @@ ApplicationWindow  {
                     line.color: droneBody.droneColor
                     line.width: 1
 
-                    function updatePath(path){
-                        var nPath = []
+                    function update(path){
+                        var shortPath = []
+
                         for (var i = 0; i<path.length;i++){
                             if(path[i]){
-                                nPath.push(QtPositioning.coordinate(path[i][0],path[i][1]))
+                                shortPath.push(QtPositioning.coordinate(path[i][0],path[i][1]))
                             }
                         }
-                        droneBody.threadRunning = false
-                        if(nPath.length>0){
-                            staticPath.path = nPath
-                            dynamicPath.path = []
+
+                        if(shortPath.length>0){
+                            staticPath.path = shortPath
+                            dynamicPath.update()
                             droneBody.k = 50
+                            droneBody.threadRunning = false
                         }
                     }
                 }
@@ -637,11 +639,20 @@ ApplicationWindow  {
                 WorkerScript{
                     id:mWorker
                     source: "qrc:/simplifyPoly.js"
-                    onMessage: staticPath.updatePath(messageObject.reply)
+                    onMessage: {
+                        var answer = messageObject.simple
+                        staticPath.update(answer)
+                    }
                 }
 
                 MapPolyline{//dynamic
                     id: dynamicPath
+                    property variant buffer //updates during staticPath is calculating poly
+                    function update(){
+                        path = []
+                        path = buffer
+                        buffer = []
+                    }
                     visible: trackingHistoryInfo&& visibleInfo
                     line.color: droneBody.droneColor
                     line.width: 1
@@ -680,8 +691,6 @@ ApplicationWindow  {
                 path = mPath
             }
         }
-
-
 
         MapItemView {
             id: wpMarker
@@ -722,7 +731,6 @@ ApplicationWindow  {
 
         WaypointPanel{
             id: wpPanel
-
             anchors{
                 right: actionPanel.left
                 rightMargin: 26
@@ -749,7 +757,14 @@ ApplicationWindow  {
         DronePanel{id:dronePanel}
         ActionPanel{id:actionPanel}
         NotificationPanel{id:notifyPanel;Component.onCompleted: show("Guten Flug")}
-
+        MissionPanel{
+            id: missionPanel
+            anchors{
+                right: actionPanel.left
+                rightMargin: 26
+                verticalCenter: map.verticalCenter
+            }
+        }
     }
 
 }

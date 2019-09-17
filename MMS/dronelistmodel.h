@@ -80,7 +80,8 @@ public:
         RouteRole,
         HotLegRole,
         GroupRole,
-        HistoryRangeRole
+        HistoryRangeRole,
+        ShortHistoryRole
     };
 
     void register_object(const QString &droneId,QQmlContext *context);

@@ -294,7 +294,7 @@ void DroneListModel::setGroup(const QString &id, QString group)
 
 void DroneListModel::setHistoryRange(const QString &id, int start, int end)
 {
-     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){return obj.id() == id;});
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){return obj.id() == id;});
     it->setHistoryRange(start,end);
     QModelIndex ix = index(it - mDrones.begin());
     emit dataChanged(ix, ix, QVector<int>{HistoryRangeRole});
@@ -315,6 +315,8 @@ void DroneListModel::setVisibility(const QString & id,bool visibility){
     QModelIndex ix = index(it - mDrones.begin());
     emit dataChanged(ix, ix, QVector<int>{VisibleRole});
 }
+
+
 
 int DroneListModel::rowCount(const QModelIndex &parent) const {
     Q_UNUSED(parent)
@@ -370,6 +372,8 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getTimestamps();
         case HistoryRangeRole:
             return it.getHistoryRange();
+        case ShortHistoryRole:
+            return it.getShortHistory();
         default:
             break;
         }
@@ -401,6 +405,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[HotLegRole] = "legInfo";
     roles[GroupRole] = "groupInfo";
     roles[HistoryRangeRole] = "rangeInfo";
+    roles[ShortHistoryRole] = "shortHistoryInfo";
     return roles;
 }
 

@@ -7,26 +7,29 @@ Item {
     id: actionPanel
     width: 50
 
+    function show(){actionPanel.visible = true}
+    function hide(){actionPanel.visible = false}
+
     anchors{
         right: parent.right
-        bottom: map.bottom
-        top: map.top
+        bottom: parent.bottom
+        top: parent.top
         rightMargin: 5
     }
 
     Column{
         anchors.verticalCenter: parent.verticalCenter
 
-        //leftPadding: 5
-        //topPadding: actionBG.height/2-btnSize*4/2
-
         spacing: 20
+
         RoundButton{
-            text: "X"
+            text: "\u25A7"
             radius: btnSize / 2
             width: btnSize
-            font.pixelSize: txtSize
+            height: btnSize
+            font.pixelSize: 30
             palette {button: "#3EC6AA"}
+            onClicked: missionPanel.show()
         }
 
         Row{
@@ -81,8 +84,6 @@ Item {
                 }
             }
 
-
-
         }
 
         RoundButton{
@@ -96,6 +97,33 @@ Item {
                 map.isCenterOnAll = !map.isCenterOnAll
             }
         }
+
+        RoundButton{
+            text: "\u2600"
+            width: btnSize
+            radius: btnSize / 2
+            font.pixelSize: txtSize
+            palette {button: "#3EC6AA"}
+            checkable: true
+            onClicked: {
+                map.activeMapType =  map.supportedMapTypes[checked?1:0]
+            }
+        }
+
+        RoundButton{
+            text: "\u20E0"
+            width: btnSize
+            radius: btnSize / 2
+            font.pixelSize: txtSize
+            palette {button: "#3EC6AA"}
+            onClicked: {
+                dronePanel.shown = false
+                notifyPanel.hide()
+                wpPanel.hide()
+                missionPanel.hide
+            }
+        }
+
 
     }
 

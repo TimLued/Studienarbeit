@@ -9,10 +9,12 @@ import Controller 1.0
 
 Item {
     id: content
+
     property string droneId
     property int mHeight: listView.contentHeight + header.height + centerWpBtn.height + centerWpBtn.anchors.margins * 2
-    visible: false
 
+
+    visible: false
     function show(){content.visible = true}
     function hide(){content.visible = false}
 
@@ -27,130 +29,128 @@ Item {
         opacity: 0.8
     }
 
-        Rectangle {
-            id: header
-            color: "#3EC6AA"
-            height: 30
-            width:parent.width
+    Rectangle {
+        id: header
+        color: "#3EC6AA"
+        height: 30
+        width:parent.width
 
-            Text {
-                anchors.centerIn: parent
-                text: droneId
-                font.pixelSize: 14
-                font.letterSpacing: 2
-            }
-
-            Text{
-                text: "X"
-                font.pixelSize: 16
-                anchors.right: parent.right
-                anchors.rightMargin: 20
-                height: parent.height
-                verticalAlignment: Text.AlignVCenter
-                MouseArea{
-                    anchors.fill:parent
-                    onClicked: {
-                        wpModel.clear()
-                        onMapWpModel.update()
-                        map.setWaypoints = false
-                        hide()
-                    }
-                }
-            }
-
+        Text {
+            anchors.centerIn: parent
+            text: droneId
+            font.pixelSize: 14
+            font.letterSpacing: 2
         }
 
-        ScrollView {
-//            Layout.fillWidth: true
-//            Layout.fillHeight: true
-            width: parent.width
-            anchors.top: header.bottom
-            anchors.bottom: centerWpBtn.top
+        Text{
+            text: "X"
+            font.pixelSize: 16
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            height: parent.height
+            verticalAlignment: Text.AlignVCenter
+            MouseArea{
+                anchors.fill:parent
+                onClicked: {
+                    wpModel.clear()
+                    onMapWpModel.update()
+                    map.setWaypoints = false
+                    hide()
+                }
+            }
+        }
 
-            ListView {
-                id: listView
-                clip: true
-                model: wpModel
+    }
 
-                delegate: WaypointDraggableItem {
-                    id: listItemMechanic
+    ScrollView {
+        width: parent.width
+        anchors.top: header.bottom
+        anchors.bottom: centerWpBtn.top
+
+        ListView {
+            id: listView
+            clip: true
+            model: wpModel
+
+            delegate: WaypointDraggableItem {
+                id: listItemMechanic
+                Rectangle {
+                    id: listItemBody
+                    height: textLabel.height * 2
+                    width: listView.width
+                    color: listItemMechanic.mouseHover? "#3EC6AA":"white"
+
+                    Text {
+                        id: textLabel
+                        anchors.verticalCenter: parent.verticalCenter
+                        leftPadding: 5
+                        text: (index+1) + ". " + (name!=""? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3))
+                    }
+
+                    TextField{
+                        id: wpTextField
+                        visible: editWpBtn.checked
+                        anchors.fill: parent
+                        text: name!=""? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3)
+                        selectByMouse: true
+                        background: Rectangle {
+                            border.width: 0
+                        }
+                        onVisibleChanged: {
+                            if (!wpTextField.visible){
+                                wpModel.set(index,{"name":wpTextField.text,"lat":lat,"lon":lon})
+                                onMapWpModel.set(index,{"name":wpTextField.text,"lat":onMapWpModel.get(index).lat,"lon":onMapWpModel.get(index).lon})
+                            }
+                        }
+                    }
+
+                    Text{
+                        text: "X"
+                        color: "#FF5733"
+                        visible: editWpBtn.checked
+                        anchors{
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                            rightMargin: 20
+                        }
+                        height: parent.height
+                        verticalAlignment: Text.AlignVCenter
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked: {
+                                wpModel.remove(index)
+                                onMapWpModel.update()
+                            }
+                        }
+                    }
+
+                    // Bottom line border
                     Rectangle {
-                        id: listItemBody
-                        height: textLabel.height * 2
-                        width: listView.width
-                        color: listItemMechanic.mouseHover? "#3EC6AA":"white"
-
-                        Text {
-                            id: textLabel
-                            anchors.verticalCenter: parent.verticalCenter
-                            leftPadding: 5
-                            text: (index+1) + ". " + (name!=""? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3))
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            bottom: parent.bottom
                         }
-
-                        TextField{
-                            id: wpTextField
-                            visible: editWpBtn.checked
-                            anchors.fill: parent
-                            text: name!=""? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3)
-                            selectByMouse: true
-                            background: Rectangle {
-                                border.width: 0
-                            }
-                            onVisibleChanged: {
-                                if (!wpTextField.visible){
-                                    wpModel.set(index,{"name":wpTextField.text,"lat":lat,"lon":lon})
-                                    onMapWpModel.set(index,{"name":wpTextField.text,"lat":onMapWpModel.get(index).lat,"lon":onMapWpModel.get(index).lon})
-                                }
-                            }
-                         }
-
-                        Text{
-                            text: "X"
-                            color: "#FF5733"
-                            visible: editWpBtn.checked
-                            anchors{
-                                right: parent.right
-                                verticalCenter: parent.verticalCenter
-                                rightMargin: 20
-                            }
-                            height: parent.height
-                            verticalAlignment: Text.AlignVCenter
-                            MouseArea{
-                                anchors.fill:parent
-                                onClicked: {
-                                    wpModel.remove(index)
-                                    onMapWpModel.update()
-                                }
-                            }
-                        }
-
-                        // Bottom line border
-                        Rectangle {
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                                bottom: parent.bottom
-                            }
-                            height: 1
-                            color: "lightgrey"
-                        }
-
+                        height: 1
+                        color: "lightgrey"
                     }
 
-                    onMeClicked: {
-                        var region = QtPositioning.circle(QtPositioning.coordinate(onMapWpModel.get(index).lat,onMapWpModel.get(index).lon),500)
-                        map.fitViewportToGeoShape(region,80)
-                    }
+                }
 
-                    draggedItemParent: content
+                onMeClicked: {
+                    var region = QtPositioning.circle(QtPositioning.coordinate(onMapWpModel.get(index).lat,onMapWpModel.get(index).lon),500)
+                    map.fitViewportToGeoShape(region,100)
+                }
 
-                    onMoveItemRequested: {
-                        wpModel.move(from, to, 1);
-                        onMapWpModel.update()
-                    }
+                draggedItemParent: content
+
+                onMoveItemRequested: {
+                    wpModel.move(from, to, 1);
+                    onMapWpModel.update()
                 }
             }
         }
+    }
 
 
 
@@ -170,7 +170,6 @@ Item {
         font.pixelSize: txtSize
         highlighted: map.setWaypoints
         onClicked: map.setWaypoints = !map.setWaypoints
-
     }
 
     RoundButton{
@@ -205,10 +204,10 @@ Item {
         radius: width / 2
         onClicked: {
             var region = centerMapRegion(routeEditPoly.path)
-            map.fitViewportToGeoShape(region,200)
+            map.fitViewportToGeoShape(region,100)
         }
     }
-    Button{
+    RoundButton{
         id: applyChangesBtn
         anchors{
             bottom: parent.bottom
@@ -216,10 +215,11 @@ Item {
             margins: 5
         }
         palette {button: "#3EC6AA"}
-        text: "Apply"
+        text: "\u2713"
         font.pixelSize: 16
-        height: contentItem.implicitHeight + topPadding + bottomPadding
-        width: contentItem.implicitWidth + leftPadding + rightPadding
+        width: 35
+        height: width
+        radius: width / 2
         onClicked: {
             var jString = '{"drone": ['
             for (var i=0;i<wpModel.count;i++){

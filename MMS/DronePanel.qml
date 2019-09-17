@@ -18,6 +18,7 @@ Item{
             easing.type: Easing.Linear
         }
     }
+
     anchors{
         top: parent.top
         bottom: parent.bottom
@@ -29,7 +30,7 @@ Item{
 
 
     Rectangle{//Closer
-        z:100
+        z:10
         anchors{
             verticalCenter: parent.verticalCenter
             left: panelBG.right
@@ -68,7 +69,7 @@ Item{
                 bottom: parent.bottom
                 left: parent.left
             }
-            width: 150
+            width: panelBG.width
             contentHeight: frame.height
 
             Rectangle{
@@ -116,7 +117,9 @@ Item{
                             }
                         }
                         Text {
-                            anchors.fill:parent
+                            width:parent.width
+                            height:parent.height
+                            y:-1
                             text: panelBG.uavExtended? "-":"+"
                             font.pixelSize: 16
                             horizontalAlignment: Text.AlignHCenter
@@ -194,7 +197,7 @@ Item{
                     id: groupHeader
 
                     property int space: 10
-                    width: 150
+                    width: parent.width
                     height: extendGroupBtn.height
                     anchors{
                         left: parent.left
@@ -226,7 +229,9 @@ Item{
                             }
                         }
                         Text {
-                            anchors.fill:parent
+                            width:parent.width
+                            height:parent.height
+                            y:-1
                             text: panelBG.groupExtended? "-":"+"
                             font.pixelSize: 16
                             horizontalAlignment: Text.AlignHCenter
@@ -342,10 +347,12 @@ Item{
                             Text {
                                 id:addGroupText
                                 text: "+"
-                                anchors.fill:parent
+                                width:parent.width
+                                height:parent.height
                                 font.pixelSize: 16
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
+                                y:-1
                                 color: "white"
                                 elide: Text.ElideRight
                             }
@@ -849,7 +856,7 @@ Item{
 
                         MouseArea{
                             anchors.fill:parent
-                            enabled: droneItem.height !=small
+                            enabled: droneItem.height !=small && wpInfo.length>0
                             onClicked: {
                                 dronemodel.toggleShowingRoute(idInfo)
                             }
@@ -865,7 +872,7 @@ Item{
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            color: showingRouteInfo? "#3EC6AA" : "black"
+                            color: showingRouteInfo? "#3EC6AA" : (wpInfo.length>0?"black":"grey")
                             elide: Text.ElideRight
                         }
                     }
@@ -919,9 +926,10 @@ Item{
                                 }
 
                                 first.onPressedChanged: {
-                                    if(second.pressed)
+                                    if(first.pressed){
                                         lockVal = timestampsInfo.length-1
-                                    else{
+                                        setValues(first.value,second.value)//update position
+                                    }else{
                                         //set history left index
                                         dronemodel.setHistoryRange(idInfo,first.value,-1)
                                         //draw anew
@@ -929,7 +937,6 @@ Item{
                                 }
 
                                 second.onPressedChanged: {
-
                                     if(second.pressed)
                                         lockVal = timestampsInfo.length-1
                                     else{

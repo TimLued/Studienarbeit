@@ -1,5 +1,6 @@
 import QtQuick 2.12
 
+
 DropArea {
     id: root
     property int dropIndex

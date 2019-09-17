@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<RCC>
+    <qresource prefix="/">
+        <file alias="img/scale.png">../MMS/img/scale.png</file>
+        <file alias="img/scale_end.png">../MMS/img/scale_end.png</file>
+    </qresource>
+</RCC>
