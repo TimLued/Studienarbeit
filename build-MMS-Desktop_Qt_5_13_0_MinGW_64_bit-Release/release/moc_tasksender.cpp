@@ -23,7 +23,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_TaskSender_t {
     QByteArrayData data[4];
-    char stringdata0[29];
+    char stringdata0[32];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -33,12 +33,12 @@ struct qt_meta_stringdata_TaskSender_t {
 static const qt_meta_stringdata_TaskSender_t qt_meta_stringdata_TaskSender = {
     {
 QT_MOC_LITERAL(0, 0, 10), // "TaskSender"
-QT_MOC_LITERAL(1, 11, 7), // "setTask"
-QT_MOC_LITERAL(2, 19, 0), // ""
-QT_MOC_LITERAL(3, 20, 8) // "taskInfo"
+QT_MOC_LITERAL(1, 11, 10), // "appendTask"
+QT_MOC_LITERAL(2, 22, 0), // ""
+QT_MOC_LITERAL(3, 23, 8) // "taskInfo"
 
     },
-    "TaskSender\0setTask\0\0taskInfo"
+    "TaskSender\0appendTask\0\0taskInfo"
 };
 #undef QT_MOC_LITERAL
 
@@ -70,7 +70,7 @@ void TaskSender::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         auto *_t = static_cast<TaskSender *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->setTask((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 0: _t->appendTask((*reinterpret_cast< QString(*)>(_a[1]))); break;
         default: ;
         }
     }

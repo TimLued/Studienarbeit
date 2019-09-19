@@ -378,8 +378,14 @@ Item{
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        if(groupItem.height === small){groupItem.height = 180
-                        }else{groupItem.height = small}
+                        if(missionPanel.addingDrones){
+                            for(var i=0;i<memberInfo.length;i++){
+                                missionPanel.addDrone(memberInfo[i])
+                            }
+                        }else{
+                            if(groupItem.height === small){groupItem.height = 180
+                            }else{groupItem.height = small}
+                        }
                     }
                 }
             }
@@ -779,13 +785,15 @@ Item{
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        if (addingToGroup ==""){
-                            if(droneItem.height === small){droneItem.height = 195
-                            }else{droneItem.height = small}
-                        }else{
+                        if (addingToGroup !=""){
                             groupmodel.addMember(addingToGroup,idInfo)
                             var groupColor = groupmodel.getGroupColor(addingToGroup)
                             dronemodel.setGroup(idInfo,groupColor)
+                        }else if(missionPanel.addingDrones){
+                            missionPanel.addDrone(idInfo)
+                        }else{
+                            if(droneItem.height === small){droneItem.height = 195
+                            }else{droneItem.height = small}
                         }
                     }
                 }
@@ -825,7 +833,7 @@ Item{
 
                     Rectangle{
                         id: historyBtn
-                        width: Algos.calcTxtWidth(historyText.text,historyText) + 10
+                        width: Algos.calcTxtWidth(historyText.text,historyText) + 5
 
                         MouseArea{
                             anchors.fill:parent
@@ -841,7 +849,8 @@ Item{
                         Text {
                             id:historyText
                             text: "History"
-                            anchors.fill:parent
+                            width:parent.width
+                            height:parent.height
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
@@ -852,7 +861,7 @@ Item{
 
                     Rectangle{
                         id: routeBtn
-                        width: Algos.calcTxtWidth(routeText.text,routeText) + 10
+                        width: Algos.calcTxtWidth(routeText.text,routeText) + 5
 
                         MouseArea{
                             anchors.fill:parent
@@ -868,11 +877,40 @@ Item{
                         Text {
                             id:routeText
                             text: "Route"
-                            anchors.fill:parent
+                            width:parent.width
+                            height:parent.height
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                             color: showingRouteInfo? "#3EC6AA" : (wpInfo.length>0?"black":"grey")
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    Rectangle{
+                        id: mssionBtn
+                        width: Algos.calcTxtWidth(missionText.text,missionText) + 5
+
+                        MouseArea{
+                            anchors.fill:parent
+                            enabled: droneItem.height !=small
+                            onClicked: {
+                                missionPanel.show(true)
+                            }
+                        }
+                        height: 20
+                        border.color: "black"
+                        border.width: 1
+                        color: "transparent"
+                        Text {
+                            id:missionText
+                            text: "Mission"
+                            width:parent.width
+                            height:parent.height
+                            font.pixelSize: 12
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            color: parent.border.color
                             elide: Text.ElideRight
                         }
                     }
@@ -1279,6 +1317,7 @@ Item{
                                     Text{
                                         id: valueText
                                         text: infoSelectedValuesInfo[index]
+                                        color: valueText.text.includes("\u2227")?"green":(text.includes("\u2228")?"red":"black")
                                         wrapMode: Text.WrapAnywhere
                                         width: parent.width - dataLV.columnWidths
                                         renderType: Text.NativeRendering

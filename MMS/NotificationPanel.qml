@@ -4,8 +4,10 @@ import QtQuick.Controls 2.12
 Item {
     id:notify
     property bool showing: false
+    property variant messages: []
     width: 250
     height: showing? 80:0
+    layer.enabled: true
 
     function hide(){
         showing = false
@@ -13,9 +15,23 @@ Item {
         pBar.value = 0
     }
     function show(info){
-        notifyText.text = info
+        if(showing){
+            //already showing msg
+            notify.messages.push(info)
+            actionPanel.noticationCount = notify.messages.length
+        }else{
+            notifyText.text = info
+            showing = true
+            pAnimation.start()
+        }
+    }
+    function showNow(){
+        notifyText.text = messages[messages.length-1]
+        messages.pop()
+        actionPanel.noticationCount = notify.messages.length
         showing = true
     }
+
 
     Behavior on height{
         PropertyAnimation{
@@ -24,10 +40,9 @@ Item {
         }
     }
 
-    onHeightChanged: if(height == 80) pAnimation.start()
-
     anchors{
         top: parent.top
+        topMargin: -3
         horizontalCenter: parent.horizontalCenter
     }
 
@@ -37,6 +52,7 @@ Item {
         color: "#3EC6AA"
         border.color: "white"
         border.width: 3
+
         radius: 2
         opacity: 0.8
         layer.enabled: true
@@ -50,7 +66,7 @@ Item {
                 right: closeBtn.left
                 bottom: pBar.top
             }
-            height: 60
+            height:60
 
             TextArea{
                 id: notifyText
@@ -129,8 +145,13 @@ Item {
         target: pBar
         property: "value"
         to:1
-        duration: 10000
-        onFinished: hide()
+        duration: 5000
+        onFinished: {
+            //save for later
+            notify.messages.push(notifyText.text)
+            actionPanel.noticationCount = notify.messages.length
+            hide()
+        }
     }
 
 

@@ -1,7 +1,7 @@
-import QtQuick 2.12
+import QtQuick 2.13
 import QtQuick.Controls 2.5
-import QtQuick.Window 2.12
-import QtQuick.Layouts 1.12
+import QtQuick.Window 2.13
+import QtQuick.Layouts 1.13
 import QtPositioning 5.13
 import QtLocation 5.13
 import "algos.js" as Algos
@@ -82,7 +82,7 @@ ApplicationWindow  {
         var region
 
         if(markers.length === 1){
-            region = QtPositioning.circle(markers[0],500)
+            region = QtPositioning.circle(markers[0],200)
         }else if(markers.length === 2){
             var radius = markers[0].distanceTo(markers[1])/2
             var circleCenter = Algos.getLatLngCenter(markers)
@@ -125,6 +125,7 @@ ApplicationWindow  {
         }
 
         Behavior on zoomLevel{
+            enabled: !map.isCenterOnAll&&!map.groupfollow
             NumberAnimation{
                 duration: 100
             }
@@ -306,14 +307,6 @@ ApplicationWindow  {
                 origin.x: compass.implicitWidth/2
                 origin.y: compass.implicitHeight/2+2
                 angle: 360 - map.bearing
-                Behavior on angle {
-                    RotationAnimation{
-                        id:rotAni
-                        duration: 100
-                        direction: RotationAnimation.Shortest
-                        easing.type: Easing.Linear
-                    }
-                }
             }
         }
 
@@ -435,6 +428,9 @@ ApplicationWindow  {
                             map.centerFollowing = false
                         }
 
+                        //update hotleg pointer
+                        wpPointer.direction = hotLegPoly.pathLength()>0? coordinate.azimuthTo(hotLegPoly.path[1]):0
+                        wpPointer.visible = hotLegPoly.pathLength()>0
                     }
 
 
@@ -473,6 +469,48 @@ ApplicationWindow  {
                         }
                     }
                     Component.onCompleted: win.setCircleScale(zoomOffset)
+                }
+
+                MapQuickItem{
+                    id:wpPointer
+
+                    coordinate: droneBody.coordinate
+                    anchorPoint.y: 10
+                    anchorPoint.x: 10
+                    property double direction:0
+
+
+                    sourceItem: Item{
+                        width:20
+                        height:20
+                        y: -20
+
+                        transform: Rotation{
+                            origin.x: 10
+                            origin.y: 30
+                            angle: wpPointer.direction - map.bearing
+                        }
+
+                        Rectangle{
+                            anchors.fill:parent
+                            color:"transparent"
+                            Text{
+                                id:arrowText
+                                width:parent.width
+                                height:parent.height
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                y:-1
+                                text: "\u25B2"
+                                font.pixelSize: 12
+                                anchors.horizontalCenter: parent.horizontalCenter
+
+                            }
+                        }
+
+
+                    }
+
                 }
 
                 MapQuickItem {//PopUp
@@ -586,6 +624,7 @@ ApplicationWindow  {
                                                 Text{
                                                     id: valueText
                                                     text: infoSelectedValuesInfo[index]
+                                                    color: valueText.text.includes("\u2227")?"green":(text.includes("\u2228")?"red":"black")
                                                     wrapMode: Text.WrapAnywhere
                                                     width: parent.width - dataLV.columnWidths-row.spacing*2
                                                     renderType: Text.NativeRendering
@@ -756,7 +795,14 @@ ApplicationWindow  {
 
         DronePanel{id:dronePanel}
         ActionPanel{id:actionPanel}
-        NotificationPanel{id:notifyPanel;Component.onCompleted: show("Guten Flug")}
+        NotificationPanel{id:notifyPanel
+            Component.onCompleted:{
+                show("Guten Flug")
+                show("Drohne hinzugefügt")
+                show("Drohne Alpha neuer Auftrag")
+                show("LangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachricht")
+            }
+        }
         MissionPanel{
             id: missionPanel
             anchors{

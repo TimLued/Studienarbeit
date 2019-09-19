@@ -1,15 +1,22 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick 2.13
+import QtQuick.Controls 2.13
+import QtPositioning 5.13
 import "algos.js" as Algos
 
 Item {
     id: content
     visible: false
-    function show(){content.visible = true}
+    property bool editing: false
+    property bool addingDrones: false
+    function show(edit){content.visible = true;editing=edit}
     function hide(){content.visible = false}
+    function addDrone(drone){
+        if(!modelContains(dronesModel,drone)) dronesModel.append({"ID":drone})
+    }
 
     width: 200
-    height: childrenRect.height
+    height: editing? 325:childrenRect.height
+
     Rectangle{
         id:background
         anchors.fill:parent
@@ -41,7 +48,6 @@ Item {
                 anchors.fill:parent
                 onClicked: {
 
-
                     hide()
                 }
             }
@@ -61,7 +67,7 @@ Item {
 
         Text{
             id:taskHeader
-            text: "Mission / Task"
+            text: !content.editing? "Task":"Mission / Task"
             font.pixelSize: 13
             color:"black"
             anchors{
@@ -93,17 +99,14 @@ Item {
 
         Row{
             spacing: 2
-
-
             Rectangle{
                 height: 60
-                width: parent.parent.width/2 - parent.spacing
+                width: !content.editing? 0:(parent.parent.width/2-parent.spacing)
                 color:"transparent"
                 border.width: 1
                 border.color: "#3EC6AA"
 
                 Flickable  {
-                    id:missionListFlickable
                     anchors{
                         fill:parent
                         topMargin: 4
@@ -112,7 +115,7 @@ Item {
                     interactive: true
                     clip: true
                     flickableDirection: Flickable.VerticalFlick
-                    contentHeight: missionListView.height
+                    contentHeight: missionListView.height + addMissionBtn.height + addMissionBtn.anchors.topMargin
                     ScrollBar.vertical: ScrollBar {
                         policy: (parent.contentHeight>parent.height)?ScrollBar.AlwaysOn:ScrollBar.AlwaysOff
                     }
@@ -124,65 +127,98 @@ Item {
                         clip: true
                         interactive: false
                         spacing: 1
-                        model: ListModel{
-                            ListElement {
-                                name: "Mission 1"
-                            }
+                        highlight: Rectangle{
+                            color: "lightgrey"
+                            opacity: 0.6
+                            anchors.leftMargin: 2
+                            anchors.rightMargin: 2
                         }
+                        focus:true
+                        model: missionModel
 
-                        delegate: Component{
-                            Item{
+
+                        delegate:Item{
+                            width: parent.width
+                            height: missionText.height
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked: missionListView.currentIndex = index
+                            }
+
+                            Text{
+                                id: missionText
+                                text: ID
+                                wrapMode: Text.WrapAnywhere
                                 width: parent.width
-                                height: taskText.height
-
-                                Text{
-                                    id: taskText
-                                    text: model.name
-                                    wrapMode: Text.WrapAnywhere
-                                    width: parent.width
-                                    renderType: Text.NativeRendering
-                                    anchors{
-                                        left:parent.left
-                                        margins:5
-                                        right: taskDelBtn.left
-                                    }
+                                renderType: Text.NativeRendering
+                                anchors{
+                                    left:parent.left
+                                    margins:5
+                                    right: missionDelBtn.left
                                 }
+                            }
 
-                                Text{
-                                    id:taskDelBtn
-                                    text: "X"
-                                    color: "#FF5733"
-                                    anchors{
-                                        right: parent.right
-                                        verticalCenter: parent.verticalCenter
-                                        rightMargin: 10
-                                    }
-                                    height: parent.height
-                                    verticalAlignment: Text.AlignVCenter
-                                    MouseArea{
-                                        anchors.fill:parent
-                                        onClicked: {
-
-
-                                        }
+                            Text{
+                                id:missionDelBtn
+                                text: "X"
+                                color: "#FF5733"
+                                anchors{
+                                    right: parent.right
+                                    verticalCenter: parent.verticalCenter
+                                    rightMargin: 10
+                                }
+                                height: parent.height
+                                verticalAlignment: Text.AlignVCenter
+                                MouseArea{
+                                    anchors.fill:parent
+                                    onClicked: {
+                                        missionModel.remove(index)
                                     }
                                 }
                             }
                         }
-                        onCountChanged: taskListFlickable.returnToBounds();
+
+                        onCountChanged: parent.parent.returnToBounds();
+                    }
+
+                    Rectangle{
+                        id: addMissionBtn
+                        width: 20
+                        height: width
+                        radius: width/2
+                        anchors{
+                            horizontalCenter: parent.horizontalCenter
+                            top: missionListView.bottom
+                            topMargin: 3
+                        }
+                        MouseArea{
+                            anchors.fill:parent
+                            onClicked:missionModel.append({"ID":newName(missionModel,"Mission"),"tasks":[]})
+                        }
+                        color: "#3EC6AA"
+                        Text {
+                            text: "+"
+                            width:parent.width
+                            height:parent.height
+                            font.pixelSize: 16
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            y:-1
+                            color: "black"
+                            elide: Text.ElideRight
+                        }
                     }
                 }
             }
 
             Rectangle{
                 height: 60
-                width: parent.parent.width/2 - parent.spacing
+                width: !content.editing? parent.parent.width:(parent.parent.width/2-parent.spacing)
                 color:"transparent"
                 border.width: 1
                 border.color: "#3EC6AA"
 
                 Flickable  {
-                    id:taskListFlickable
                     anchors{
                         fill:parent
                         topMargin: 4
@@ -193,7 +229,7 @@ Item {
                     flickableDirection: Flickable.VerticalFlick
                     contentHeight: taskListView.height
                     ScrollBar.vertical: ScrollBar {
-                        policy: (taskListFlickable.contentHeight>taskListFlickable.height)?ScrollBar.AlwaysOn:ScrollBar.AlwaysOff
+                        policy: (parent.contentHeight>parent.height)?ScrollBar.AlwaysOn:ScrollBar.AlwaysOff
                     }
 
                     ListView{
@@ -203,66 +239,63 @@ Item {
                         clip: true
                         interactive: false
                         spacing: 1
-                        model: ListModel{
-                            ListElement {
-                                name: "Path"
-                            }
-                            ListElement {
-                                name: "Cicrle Area"
-                            }
-                            ListElement {
-                                name: "Cicrle Area"
-                            }
-                            ListElement {
-                                name: "Cicrle Area"
-                            }
+                        highlight: Rectangle{
+                            color: "lightgrey"
+                            opacity: 0.6
+                            anchors.leftMargin: 2
+                            anchors.rightMargin: 2
                         }
 
-                        delegate: Component{
-                            Item{
+
+                        focus:true
+                        model: missionListView.currentIndex!==-1? missionModel.get(missionListView.currentIndex).tasks:emptyModel
+
+                        delegate: Item{
+                            width: parent.width
+                            height: taskText.height
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked: taskListView.currentIndex = index
+                            }
+
+                            Text{
+                                id: taskText
+                                text: (index+1) + ". " + ID
+                                wrapMode: Text.WrapAnywhere
                                 width: parent.width
-                                height: taskText.height
-
-                                Text{
-                                    id: taskText
-                                    text: (model.index+1) + ". " + model.name
-                                    wrapMode: Text.WrapAnywhere
-                                    width: parent.width
-                                    renderType: Text.NativeRendering
-                                    anchors{
-                                        left:parent.left
-                                        margins:5
-                                        right: taskDelBtn.left
-                                    }
+                                renderType: Text.NativeRendering
+                                anchors{
+                                    left:parent.left
+                                    margins:5
+                                    right: taskDelBtn.left
                                 }
+                            }
 
-                                Text{
-                                    id:taskDelBtn
-                                    text: "X"
-                                    color: "#FF5733"
-                                    anchors{
-                                        right: parent.right
-                                        verticalCenter: parent.verticalCenter
-                                        rightMargin: 10
-                                    }
-                                    height: parent.height
-                                    verticalAlignment: Text.AlignVCenter
-                                    MouseArea{
-                                        anchors.fill:parent
-                                        onClicked: {
+                            Text{
+                                id:taskDelBtn
+                                text: "X"
+                                color: "#FF5733"
+                                anchors{
+                                    right: parent.right
+                                    verticalCenter: parent.verticalCenter
+                                    rightMargin: 10
+                                }
+                                height: parent.height
+                                verticalAlignment: Text.AlignVCenter
+                                MouseArea{
+                                    anchors.fill:parent
+                                    onClicked: {
+                                        missionModel.get(missionListView.currentIndex).tasks.remove(index)
 
-
-                                        }
                                     }
                                 }
                             }
                         }
-                        onCountChanged: taskListFlickable.returnToBounds();
+
+                        onCountChanged: parent.parent.returnToBounds();
                     }
                 }
             }
-
-
         }
 
         Row{
@@ -270,12 +303,20 @@ Item {
             spacing: 4
             anchors.horizontalCenter: parent.horizontalCenter
 
+            function uncheckBtns(){
+                pathBtn.checked = false
+                circleBtn.checked = false
+                rectangleBtn.checked = false
+                polygonBtn.checked = false
+            }
+
             Rectangle{
                 id: pathBtn
+                property bool checked: false
                 width: 30
                 height: width
                 radius: width / 2
-                color: "#3EC6AA"
+                color: checked? "black":"#3EC6AA"
                 Text {
                     text: "\u219D"
                     y:-1
@@ -284,23 +325,25 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize:30
-                    color: "black"
+                    color: parent.checked? "white":"black"
                     elide: Text.ElideRight
                 }
                 MouseArea{
                     anchors.fill:parent
                     onClicked: {
-
+                        if(!parent.checked) parent.parent.uncheckBtns()
+                        parent.checked = !parent.checked
                     }
                 }
             }
 
             Rectangle{
                 id: circleBtn
+                property bool checked: false
                 width: 30
                 height: width
                 radius: width / 2
-                color: "#3EC6AA"
+                color: checked? "black":"#3EC6AA"
                 Text {
                     text: "\u2299"
                     y:-1
@@ -309,23 +352,25 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize:40
-                    color: "black"
+                    color: parent.checked? "white":"black"
                     elide: Text.ElideRight
                 }
                 MouseArea{
                     anchors.fill:parent
                     onClicked: {
-
+                        if(!parent.checked) parent.parent.uncheckBtns()
+                        parent.checked = !parent.checked
                     }
                 }
             }
 
             Rectangle{
                 id: rectangleBtn
+                property bool checked: false
                 width: 30
                 height: width
                 radius: width / 2
-                color: "#3EC6AA"
+                color: checked? "black":"#3EC6AA"
                 Text {
                     text: "\u25A7"
                     width:parent.width
@@ -333,23 +378,25 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize:30
-                    color: "black"
+                    color: parent.checked? "white":"black"
                     elide: Text.ElideRight
                 }
                 MouseArea{
                     anchors.fill:parent
                     onClicked: {
-
+                        if(!parent.checked) parent.parent.uncheckBtns()
+                        parent.checked = !parent.checked
                     }
                 }
             }
 
             Rectangle{
                 id: polygonBtn
+                property bool checked: false
                 width: 30
                 height: width
                 radius: width / 2
-                color: "#3EC6AA"
+                color: checked? "black":"#3EC6AA"
                 Text {
                     text: "\u2B21"
                     y:-1
@@ -358,13 +405,14 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize:23
-                    color: "black"
+                    color: parent.checked? "white":"black"
                     elide: Text.ElideRight
                 }
                 MouseArea{
                     anchors.fill:parent
                     onClicked: {
-
+                        if(!parent.checked) parent.parent.uncheckBtns()
+                        parent.checked = !parent.checked
                     }
                 }
             }
@@ -402,24 +450,129 @@ Item {
             }
         }
 
-        ScrollView{
-            width:parent.width
-            height: 50
-            TextArea {
-                id: descriptionText
-                text: "id:\ncors:"
-                padding: 2
-                topPadding: 3
-                bottomPadding: 3
-                background: Rectangle {
-                    anchors.fill:parent
-                    border.color: "#3EC6AA"
+        Column{
+            spacing: 3
+            width: parent.width
+            height: childrenRect.height
+
+
+            ScrollView{
+                width:parent.parent.width
+                height: 50
+                TextArea {
+                    id: descriptionText
+                    text: (taskListView.currentIndex!=-1&&missionListView.currentIndex!=-1)?missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).taskType:""
+                    padding: 3
+                    selectByMouse: true
+                    background: Rectangle {
+                        anchors.fill:parent
+                        border.color: "#3EC6AA"
+                    }
                 }
             }
+
+
+            Text{
+                id:typeText
+                width: parent.width
+                property string type: (taskListView.currentIndex!=-1&&missionListView.currentIndex!=-1)? missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).geoType:""
+                text: "<b>Typ</b>: " + type
+            }
+
+
+            Rectangle{
+                height: 50
+                width: parent.width
+                color:"transparent"
+                border.width: 1
+                border.color: "#3EC6AA"
+
+                Flickable  {
+                    anchors{
+                        fill:parent
+                        topMargin: 4
+                        leftMargin: 5
+                        bottomMargin: 4
+                    }
+                    interactive: true
+                    clip: true
+                    flickableDirection: Flickable.VerticalFlick
+                    contentHeight: taskListView.height
+                    ScrollBar.vertical: ScrollBar {
+                        policy: (parent.contentHeight>parent.height)?ScrollBar.AlwaysOn:ScrollBar.AlwaysOff
+                    }
+
+                    ListView{
+                        id: geoListView
+                        width: parent.width
+                        height: childrenRect.height
+                        clip: true
+                        interactive: false
+                        spacing: 1
+
+                        focus:true
+                        model: (missionListView.currentIndex!==-1&&taskListView.currentIndex!==-1)? missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).pValues:emptyModel
+
+                        property variant columnWidths: Algos.calcTxtWidth("Pos 10", typeText)
+
+                        delegate: Item{
+                            width: parent.width
+                            height: keyText.height
+
+                            Row{
+                                id: row
+                                width: parent.width
+                                spacing: 2
+
+                                Text{
+                                    id: keyText
+                                    text: "Cor " + (index+1)
+                                    wrapMode: Text.WrapAnywhere
+                                    width: geoListView.columnWidths
+                                    renderType: Text.NativeRendering
+                                }
+                                Loader { sourceComponent: columnSeparator; height: keyText.height>valueText.height?keyText.height:valueText.height}
+                                Text{
+                                    id: valueText
+                                    text: lat +"," + lon
+                                    wrapMode: Text.WrapAnywhere
+                                    width: parent.width - geoListView.columnWidths
+                                    renderType: Text.NativeRendering
+                                }
+                                Component {
+                                    id: columnSeparator
+                                    Rectangle {
+                                        width: 1
+                                        color: "black"
+                                        opacity: 0.3
+                                    }
+                                }
+                            }
+
+                        }
+
+
+                        onCountChanged: parent.parent.returnToBounds();
+                    }
+                }
+            }
+
+
         }
+
+
+
+
+
+
+
+
+
+
 
         Text{
             id:droneHeader
+            visible: !content.editing
             text: "Drones"
             font.pixelSize: 13
             color:"black"
@@ -454,9 +607,9 @@ Item {
             spacing: 5
 
             Rectangle{
-                height: 40
+                height:content.editing? 0:40
                 width: parent.parent.width - addBtn.width - parent.spacing
-                color:"transparent"
+                color:"white"
                 border.width: 1
                 border.color: "#3EC6AA"
 
@@ -481,21 +634,8 @@ Item {
                         height: childrenRect.height
                         clip: true
                         interactive: false
-                        spacing: 2
-                        model:ListModel {
-                            ListElement {
-                                name: "Alpha"
-                            }
-                            ListElement {
-                                name: "Bravo"
-                            }
-                            ListElement {
-                                name: "Bravo"
-                            }
-                            ListElement {
-                                name: "Bravo"
-                            }
-                        }
+                        spacing: 1
+                        model:dronesModel
 
                         delegate: Component{
                             Item{
@@ -504,12 +644,12 @@ Item {
 
                                 Text{
                                     id: droneText
-                                    text: model.name
+                                    text: ID
                                     wrapMode: Text.WrapAnywhere
                                     renderType: Text.NativeRendering
                                     anchors{
                                         left:parent.left
-                                        margins:5
+                                        leftMargin: 5
                                         right: droneDelBtn.left
                                     }
                                 }
@@ -528,24 +668,25 @@ Item {
                                     MouseArea{
                                         anchors.fill:parent
                                         onClicked: {
-
-
+                                            dronesModel.remove(index)
                                         }
                                     }
                                 }
                             }
                         }
-                        onCountChanged: taskListFlickable.returnToBounds();
+                        onCountChanged: parent.parent.returnToBounds();
                     }
                 }
             }
 
             Rectangle{
                 id: addBtn
+                property bool checked:false
+                visible: !content.editing
                 width: 30
                 height: width
                 radius: width / 2
-                color: "#3EC6AA"
+                color: checked? "black":"#3EC6AA"
                 Text {
                     text: "+"
                     width:parent.width
@@ -553,29 +694,30 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize:20
-                    color: "black"
+                    color: parent.checked? "white":"black"
                     y:-1
                     elide: Text.ElideRight
                 }
                 MouseArea{
                     anchors.fill:parent
                     onClicked: {
-
+                        parent.checked = !parent.checked
+                        addingDrones = parent.checked
                     }
                 }
             }
 
         }
 
-        Row{
-            spacing:1
-            anchors.horizontalCenter: parent.horizontalCenter
+
+
             Rectangle{
                 id: finishBtn
                 width: 30
                 height: width
                 radius: width / 2
                 color: "#3EC6AA"
+                anchors.horizontalCenter: parent.horizontalCenter
 
                 Text {
                     text: "\u2713"
@@ -583,26 +725,72 @@ Item {
                     height:parent.height
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize:23
+                    font.pixelSize:20
                     color: "black"
                     elide: Text.ElideRight
                 }
                 MouseArea{
                     anchors.fill:parent
                     onClicked: {
-
+                        hide()
                     }
                 }
             }
-        }
+
 
         Rectangle{height:4;width:parent.width;color:"transparent"}
 
     }
 
+    //Models for creating NEW missions with tasks
+    ListModel{
+        id: missionModel
+        ListElement{
+            ID:"Mission 1"
+            tasks:[
+                ListElement{
+                    ID:"Task 1"
+                    geoType:"rechteck"
+                    taskType:"aufklären"
+                    pValues:[
+                        ListElement{
+                            lat: 54.31
+                            lon: 10.12
+                        },
+                        ListElement{
+                            lat: 54.50
+                            lon: 10.10
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+    ListModel{id: dronesModel}
+    ListModel{id:emptyModel}
 
+    function newName(model,prefix){
+        var nr = 1
+        var name = prefix + " " + nr
 
+        restart:
+        for (var i = 0; i < model.count; i++) {
+            if (model.get(i).ID === name) {
+                nr+=1
+                name = prefix + " " + nr
+                continue restart
+            }
+        }
+        return name
+    }
 
-
+    function modelContains(model,item){
+        for (var i = 0; i < model.count; i++) {
+            if (model.get(i).ID===item){
+                return true
+            }
+        }
+        return false
+    }
 
 }

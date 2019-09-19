@@ -113,11 +113,20 @@ public:
         return showRoute;
     }
 
-    void setLeg(QList<QGeoCoordinate> leg){
+    void setLeg(QList<QGeoCoordinate> leg,int index){
         mHotLeg = leg;
+        mHotLegIndex = index;
     }
 
-    QVariantList getLeg() const{
+    int getLegIndex() const{
+        return mHotLegIndex;
+    }
+
+    QVariant getLeg() const{
+        return mRoute[mHotLegIndex];
+    }
+
+    QVariantList getLegCoordinates() const{
         QVariantList leg_list;
         for (const QGeoCoordinate &coord : mHotLeg) {
           leg_list << QVariant::fromValue(coord);
@@ -274,6 +283,7 @@ private:
     QVariantList mRoute;
     QList<QGeoCoordinate> mRoutePath;
     QList<QGeoCoordinate> mHotLeg;
+    int mHotLegIndex;
     int lastLegIndex = 0;
     QString mGroup;
     RangeType historyRange;

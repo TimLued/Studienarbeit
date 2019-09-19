@@ -223,7 +223,7 @@ Item {
         onClicked: {
             var jString = '{"drone": ['
             for (var i=0;i<wpModel.count;i++){
-                jString+='{"id":"'+wpModel.get(i).name+'","lat":"'+wpModel.get(i).lat + '","lon":"'+wpModel.get(i).lon+ '","drone":"'+droneId+'"}'
+                jString+='{"id":"'+wpModel.get(i).name+'","lat":"'+wpModel.get(i).lat + '","lon":"'+wpModel.get(i).lon+ '","drone":"'+droneId+(i===0?'","drone":"1':"")+'"}'
                 if(i<wpModel.count-1) jString += ','
             }
             jString+=']}'

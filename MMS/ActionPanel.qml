@@ -6,7 +6,7 @@ import QtPositioning 5.12
 Item {
     id: actionPanel
     width: 50
-
+    property int noticationCount: 0
     function show(){actionPanel.visible = true}
     function hide(){actionPanel.visible = false}
 
@@ -23,13 +23,24 @@ Item {
         spacing: 20
 
         RoundButton{
+            text: noticationCount
+            radius: btnSize / 2
+            width: btnSize
+            height: btnSize
+            font.pixelSize: 16
+            palette {button: noticationCount>0?"#ff9e17":"#3EC6AA"}
+            onClicked: {
+                if (noticationCount>0) notifyPanel.showNow()}
+        }
+
+        RoundButton{
             text: "\u25A7"
             radius: btnSize / 2
             width: btnSize
             height: btnSize
             font.pixelSize: 30
             palette {button: "#3EC6AA"}
-            onClicked: missionPanel.show()
+            onClicked: missionPanel.show(false)
         }
 
         Row{

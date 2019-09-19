@@ -10,15 +10,15 @@ TaskSender::TaskSender(QObject *parent):
     server->listen("drone_task");
 }
 
-void TaskSender::setTask(QString taskInfo)
+void TaskSender::appendTask(QString taskInfo)
 {
-    m_task = taskInfo;
+    m_task.append(taskInfo);
 }
 
 bool TaskSender::sendTask()
 {
     try {
-        if(m_task == ""){
+        if(m_task.count()==0){
             QLocalSocket *clientConnection = server->nextPendingConnection();
             clientConnection->disconnectFromServer();
             return false;
@@ -27,8 +27,8 @@ bool TaskSender::sendTask()
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
         out << quint32(m_task.size());
-        out << m_task;
-        m_task = "";
+        out << m_task.first();
+        m_task.removeFirst();
 
         QLocalSocket *clientConnection = server->nextPendingConnection();
         connect(clientConnection, QOverload<QLocalSocket::LocalSocketError>::of(&QLocalSocket::error),this, &TaskSender::serverError);

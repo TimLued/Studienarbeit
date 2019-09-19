@@ -26,7 +26,7 @@ Controller::Controller(QObject *parent):
     taskSender = new TaskSender;
     t2 = new QThread;
     taskSender->moveToThread(t2);
-    connect(this,SIGNAL(taskChanged(QString)),taskSender,SLOT(setTask(QString)));
+    connect(this,SIGNAL(taskChanged(QString)),taskSender,SLOT(appendTask(QString)));
     t2->start();
 }
 

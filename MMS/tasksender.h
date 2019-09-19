@@ -11,13 +11,13 @@ public:
     explicit TaskSender(QObject *parent = nullptr);
 
 public slots:
-    void setTask(QString taskInfo);
+    void appendTask(QString taskInfo);
 
 private:
     QLocalServer *server;
     void serverError();
     bool sendTask();
-    QString m_task;
+    QList<QString> m_task;
 
 };
 
