@@ -12,7 +12,7 @@ Item {
 
     property string droneId
     property int mHeight: listView.contentHeight + header.height + centerWpBtn.height + centerWpBtn.anchors.margins * 2
-
+    property bool addingWaypoints:false
 
     visible: false
     function show(){content.visible = true}
@@ -54,7 +54,7 @@ Item {
                 onClicked: {
                     wpModel.clear()
                     onMapWpModel.update()
-                    map.setWaypoints = false
+                    addingWaypoints = false
                     hide()
                 }
             }
@@ -91,13 +91,13 @@ Item {
                         id: wpTextField
                         visible: editWpBtn.checked
                         anchors.fill: parent
-                        text: name!=""? name : Algos.roundNumber(lat,3) + ", " + Algos.roundNumber(lon,3)
+                        text: textLabel.text.replace((index+1) + ". ","")
                         selectByMouse: true
                         background: Rectangle {
                             border.width: 0
                         }
                         onVisibleChanged: {
-                            if (!wpTextField.visible){
+                            if (!wpTextField.visible && wpTextField.text !=textLabel.text.replace((index+1) + ". ","")){
                                 wpModel.set(index,{"name":wpTextField.text,"lat":lat,"lon":lon})
                                 onMapWpModel.set(index,{"name":wpTextField.text,"lat":onMapWpModel.get(index).lat,"lon":onMapWpModel.get(index).lon})
                             }
@@ -168,8 +168,8 @@ Item {
         palette {button: "#3EC6AA"}
         text: "+"
         font.pixelSize: txtSize
-        highlighted: map.setWaypoints
-        onClicked: map.setWaypoints = !map.setWaypoints
+        highlighted: addingWaypoints
+        onClicked: addingWaypoints = !addingWaypoints
     }
 
     RoundButton{

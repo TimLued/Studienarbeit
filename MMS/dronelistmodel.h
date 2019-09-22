@@ -81,7 +81,8 @@ public:
         HotLegRole,
         GroupRole,
         HistoryRangeRole,
-        ShortHistoryRole
+        ShortHistoryRole,
+        changeNoteRole
     };
 
     void register_object(const QString &droneId,QQmlContext *context);

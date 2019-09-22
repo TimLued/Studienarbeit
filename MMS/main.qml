@@ -21,7 +21,7 @@ ApplicationWindow  {
     property int zoomOffset: 0
     property variant droneCorList
 
-    property int movingMarker:-1
+    property int movingWpIndex:-1
 
 
     //MAP SCALE
@@ -115,8 +115,6 @@ ApplicationWindow  {
         property bool isCenterOnAll: false
         property string groupfollow: ""
         property bool circleRulerVisible: false
-        
-        property bool setWaypoints: false
 
         onZoomLevelChanged:{
             win.setZoomScale()
@@ -168,15 +166,20 @@ ApplicationWindow  {
 
             onPositionChanged: {
                 cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
-                if (movingMarker!=-1){
-                    onMapWpModel.set(movingMarker,{"name":onMapWpModel.get(movingMarker).name,"lat":cor.latitude.toString(),"lon":cor.longitude.toString()})
+
+                if (movingWpIndex!=-1){
+                    onMapWpModel.set(movingWpIndex,{"name":onMapWpModel.get(movingWpIndex).name,"lat":cor.latitude.toString(),"lon":cor.longitude.toString()})
                     routeEditPoly.update()
-                    //update coordinate in WP Panel
-                    wpModel.set(movingMarker,{"name":wpModel.get(movingMarker).name,"lat":onMapWpModel.get(movingMarker).lat,"lon":onMapWpModel.get(movingMarker).lon})
-
+                    wpModel.set(movingWpIndex,{"name":wpModel.get(movingWpIndex).name,"lat":cor.latitude,"lon":cor.longitude})
                 }
-                coorLbl.text = Algos.roundNumber(cor.latitude,3) + ", " +  Algos.roundNumber(cor.longitude,3)
 
+                if(wpPanel.addingWaypoints||missionPanel.addingCor){
+                    cursorShape = Qt.CrossCursor
+                }else{
+                    cursorShape = Qt.ArrowCursor
+                }
+
+                coorLbl.text = Algos.roundNumber(cor.latitude,3) + ", " +  Algos.roundNumber(cor.longitude,3)
                 //rotation
                 //scale win.height - nn = 360
                 if (map.rotating)map.bearing = nnBear + (nn - mouseY) * (360/win.height)
@@ -190,11 +193,11 @@ ApplicationWindow  {
                     nnBear = map.bearing
                     if (!map.rotating) map.droneRotAniLock = false
 
-                }else if(mouse.button === Qt.LeftButton && map.setWaypoints){
-                    var cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
-                    wpModel.append({"name":"","lat":cor.latitude.toString(),"lon":cor.longitude.toString()})
-                    //onMapWpModel.append({"name":"","lat":cor.latitude.toString(),"lon":cor.longitude.toString()})
+                }else if(mouse.button === Qt.LeftButton && wpPanel.addingWaypoints){
+                    wpModel.append({"name":"","lat":cor.latitude,"lon":cor.longitude})
                     onMapWpModel.update()
+                }else if(mouse.button === Qt.LeftButton &&missionPanel.addingCor){
+                    missionPanel.addCor(cor.latitude,cor.longitude)
                 }
             }
 
@@ -205,7 +208,6 @@ ApplicationWindow  {
                 }else if(mouse.button === Qt.LeftButton){
                 }
             }
-
 
         }
 
@@ -337,6 +339,9 @@ ApplicationWindow  {
                         mWorker.sendMessage(historyInfo)
                     }
 
+                    property string note:noteInfo
+                    onNoteChanged: notifyPanel.show(note.substring(2))
+
                     property double dist
                     onExtrapolatingChanged: {
                         if (extrapolating){
@@ -402,8 +407,10 @@ ApplicationWindow  {
                         if (map.isCenterOnAll) {
                             if (followInfo) dronemodel.toggleFollow(idInfo)
                             positions = dronemodel.getAllDronePos()
-                            region = centerMapRegion(positions)
-                            map.fitViewportToGeoShape(region,50)
+                            if (positions.length>0){
+                                region = centerMapRegion(positions)
+                                map.fitViewportToGeoShape(region,50)
+                            }
 
                         }else if(map.groupfollow!=""){
                             if (followInfo) dronemodel.toggleFollow(idInfo)
@@ -411,8 +418,10 @@ ApplicationWindow  {
                             for(var i=0;i<groupMembers.length;i++){
                                 positions.push(dronemodel.getDronePos(groupMembers[i]))
                             }
-                            region = centerMapRegion(positions)
-                            map.fitViewportToGeoShape(region,50)
+                            if (positions.length>0){
+                                region = centerMapRegion(positions)
+                                map.fitViewportToGeoShape(region,50)
+                            }
                         }
 
                         if (followInfo){
@@ -530,7 +539,7 @@ ApplicationWindow  {
 
                         Rectangle{
                             anchors.fill: parent
-                            anchors.margins: 4
+                            anchors.margins: 2
 
                             Text{
                                 id: popHeader
@@ -717,24 +726,9 @@ ApplicationWindow  {
 
         }
 
-        MapPolyline{
-            id: routeEditPoly
-            line.color: "black"
-            line.width: 1
-
-            function update(){
-                var mPath = []
-                for (var i = 0; i<onMapWpModel.count;i++){
-                    mPath.push(QtPositioning.coordinate(onMapWpModel.get(i).lat,onMapWpModel.get(i).lon))
-                }
-                path = mPath
-            }
-        }
-
         MapItemView {
-            id: wpMarker
-            model: onMapWpModel
-
+            id: taskMarker
+            model:corModel
             delegate: MapQuickItem {
                 coordinate: QtPositioning.coordinate(lat,lon)
                 anchorPoint.x: 10
@@ -756,16 +750,90 @@ ApplicationWindow  {
                         anchors.fill:parent
                         onClicked: {
                             if (mouse.button === Qt.LeftButton) {
-                                if(movingMarker==-1){movingMarker = index}else{movingMarker = -1}
+
                             }
                         }
-
                     }
 
                 }
 
             }
         }
+
+
+        ListModel{id:corModel}
+
+
+        MapPolyline{
+            id: routeEditPoly
+            line.color: "black"
+            line.width: 1
+
+            function update(){
+                var mPath = []
+                for (var i = 0; i<onMapWpModel.count;i++){
+                    mPath.push(QtPositioning.coordinate(onMapWpModel.get(i).lat,onMapWpModel.get(i).lon))
+                }
+                path = mPath
+            }
+        }
+
+        MapItemView {
+            id: wpMarker
+            model: onMapWpModel
+            delegate: MapQuickItem {
+                coordinate: QtPositioning.coordinate(lat,lon)
+                anchorPoint.x: 10
+                anchorPoint.y: 10
+
+                sourceItem:Rectangle{
+                    color: "#3EC6AA"
+                    width: 20
+                    height: 20
+                    radius: width/2
+                    Text {
+                        text: index!=-1? (index + 1) : ""
+                        color: "white"
+                        anchors.centerIn: parent
+                        font.bold: true
+                    }
+
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: {
+                            if (mouse.button === Qt.LeftButton) {
+                                if(wpPanel.addingWaypoints){
+                                    //same coordinate again --> for circle course
+
+                                    wpModel.append({"name":"","lat":coordinate.latitude,"lon":coordinate.longitude})
+                                    onMapWpModel.update()
+
+                                }else {
+
+                                    if (movingWpIndex!=-1){
+                                        for (var i=0;i<wpModel.count;i++){
+                                            if(i!==movingWpIndex){
+                                                if(coordinate.distanceTo(QtPositioning.coordinate(wpModel.get(i).lat,wpModel.get(i).lon)) < 30){
+                                                    onMapWpModel.set(movingWpIndex,{"name":onMapWpModel.get(movingWpIndex).name,"lat":wpModel.get(i).lat.toString(),"lon":wpModel.get(i).lon.toString()})
+                                                    routeEditPoly.update()
+                                                    wpModel.set(movingWpIndex,{"name":wpModel.get(movingWpIndex).name,"lat":wpModel.get(i).lat,"lon":wpModel.get(i).lon})
+                                                    break
+                                                }
+                                            }
+                                        }
+                                    }
+                                    movingWpIndex=movingWpIndex==-1?index:-1
+
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        }
+
 
 
         WaypointPanel{
@@ -786,7 +854,8 @@ ApplicationWindow  {
             function update(){
                 onMapWpModel.clear()
                 for (var i = 0; i<wpModel.count;i++){
-                    onMapWpModel.append(wpModel.get(i))
+                    //onMapWpModel.append(wpModel.get(i))
+                    onMapWpModel.append({"name":wpModel.get(i).name,"lat":wpModel.get(i).lat.toString(),"lon":wpModel.get(i).lon.toString()})
                 }
                 routeEditPoly.update()
             }
@@ -797,10 +866,10 @@ ApplicationWindow  {
         ActionPanel{id:actionPanel}
         NotificationPanel{id:notifyPanel
             Component.onCompleted:{
-                show("Guten Flug")
-                show("Drohne hinzugefügt")
-                show("Drohne Alpha neuer Auftrag")
-                show("LangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachricht")
+//                show("Hinweis: Drohne Alpha hinzugefügt.")
+//                show("Hinweis: Drohne Alpha neuer Auftrag")
+//                show("Achtung: Auftrag für Alpha abgelehnt.")
+//                show("Hinweis: LangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachricht")
             }
         }
         MissionPanel{

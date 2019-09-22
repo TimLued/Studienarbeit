@@ -418,9 +418,7 @@ Item{
 
                 TextField{
                     id: groupTextField
-                    anchors{
-                        fill: groupName
-                    }
+                    anchors.fill: groupName
                     leftPadding: 0
                     font.pixelSize: txtSize
                     visible: groupNameEditBtn.checked
@@ -815,13 +813,16 @@ Item{
 
                 Row{
                     id: row0
-                    Label{
+                    spacing: 1
+                    Text{
                         id: lbl1
                         text: idInfo
+                        font.letterSpacing: 1
                         color: if(visibleInfo) {groupInfo!=""? groupInfo:colorInfo}else{"grey"}
                         font.pixelSize: txtSize
                         wrapMode: Text.WrapAnywhere
-                        width: 150 -parent.anchors.leftMargin
+                        width:parent.parent.width
+
                         renderType: Text.NativeRendering
                         onColorChanged: cbBG.color = color
                     }
@@ -1276,7 +1277,7 @@ Item{
 
                 Flickable  {
                     id:droneFlickable
-                    height: contentHeight<(!trackingHistoryInfo?95:50)?contentHeight:(!trackingHistoryInfo?95:50)
+                    height:mainColumn.height - mainColumn.spacing * (mainColumn.children.length-1) - row0.height-row1.height-row1_2.height-row2.height-row3.height
                     width: 130
                     interactive: true
                     clip: true

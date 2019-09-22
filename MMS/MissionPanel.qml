@@ -8,12 +8,41 @@ Item {
     visible: false
     property bool editing: false
     property bool addingDrones: false
-    function show(edit){content.visible = true;editing=edit}
-    function hide(){content.visible = false}
-    function addDrone(drone){
-        if(!modelContains(dronesModel,drone)) dronesModel.append({"ID":drone})
+    property bool addingCor: false
+    function show(edit){
+        content.visible = true
+        editing=edit
+        clearModels()
+        if(editing){//load drone missions
+
+
+        }else{
+            missionModel.append({ID:"Mission",tasks:[]})
+            missionListView.currentIndex=0
+        }
+    }
+    function hide(){
+        content.visible = false
+        clearModels()
+        taskButtons.uncheckBtns()
+        editTaskBtn.checked = false
+        addingDrones = false
+        addingCor = false
+    }
+    function clearModels(){
+        missionModel.clear()
+        taskModel.clear()
+        corModel.clear()
+        dronesModel.clear()
     }
 
+    function addDrone(drone){if(!modelContains(dronesModel,drone)) dronesModel.append({"ID":drone})}
+    function addCor(lat,lon){
+        //set cors in missionmodel missionindex&taskindex
+        missionModel.addCor(missionListView.currentIndex,taskListView.currentIndex,{"lat":lat,"lon":lon})
+        updateCorModel(taskListView.currentIndex)
+
+    }
     width: 200
     height: editing? 325:childrenRect.height
 
@@ -21,7 +50,7 @@ Item {
         id:background
         anchors.fill:parent
         color:"white"
-        opacity: 0.8
+        //opacity: 0.8
     }
 
     Rectangle {
@@ -115,7 +144,7 @@ Item {
                     interactive: true
                     clip: true
                     flickableDirection: Flickable.VerticalFlick
-                    contentHeight: missionListView.height + addMissionBtn.height + addMissionBtn.anchors.topMargin
+                    contentHeight: missionListView.height + btnRow.height + 2
                     ScrollBar.vertical: ScrollBar {
                         policy: (parent.contentHeight>parent.height)?ScrollBar.AlwaysOn:ScrollBar.AlwaysOff
                     }
@@ -129,50 +158,77 @@ Item {
                         spacing: 1
                         highlight: Rectangle{
                             color: "lightgrey"
-                            opacity: 0.6
-                            anchors.leftMargin: 2
-                            anchors.rightMargin: 2
+                            opacity: 0.3
+                            z:4
                         }
                         focus:true
                         model: missionModel
+                        onCurrentIndexChanged:{
+                            if (currentIndex != -1)
+                                taskModel.update(currentIndex)
+                            else taskModel.clear()
+                        }
 
 
-                        delegate:Item{
+                        delegate:Rectangle{
+                            z:1
                             width: parent.width
                             height: missionText.height
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked: missionListView.currentIndex = index
                             }
+                            anchors{
+                                left:parent.left
+                                right:parent.right
+                                margins: 5
+                                rightMargin: 10
+                            }
 
                             Text{
                                 id: missionText
                                 text: ID
+                                z:2
                                 wrapMode: Text.WrapAnywhere
                                 width: parent.width
                                 renderType: Text.NativeRendering
                                 anchors{
                                     left:parent.left
-                                    margins:5
                                     right: missionDelBtn.left
+                                }
+                                leftPadding: 3
+                            }
+
+                            TextField{
+                                id: missionTextField
+                                z:3
+                                padding: 0
+                                leftPadding: 2
+                                visible: editMissionBtn.checked
+                                anchors.fill: parent
+                                text: missionText.text
+                                selectByMouse: true
+                                background: Rectangle {border.width: 0}
+                                onVisibleChanged: {
+                                    if (!visible&&!modelContains(missionModel,text)){
+                                        missionModel.setProperty(index,"ID",text)
+                                    }
                                 }
                             }
 
                             Text{
                                 id:missionDelBtn
+                                z:2
                                 text: "X"
                                 color: "#FF5733"
-                                anchors{
-                                    right: parent.right
-                                    verticalCenter: parent.verticalCenter
-                                    rightMargin: 10
-                                }
+                                anchors.right: parent.right
                                 height: parent.height
                                 verticalAlignment: Text.AlignVCenter
                                 MouseArea{
                                     anchors.fill:parent
                                     onClicked: {
                                         missionModel.remove(index)
+                                        missionListView.currentIndex=-1
                                     }
                                 }
                             }
@@ -180,33 +236,38 @@ Item {
 
                         onCountChanged: parent.parent.returnToBounds();
                     }
-
-                    Rectangle{
-                        id: addMissionBtn
-                        width: 20
-                        height: width
-                        radius: width/2
+                    Row{
+                        id:btnRow
+                        spacing: 3
                         anchors{
                             horizontalCenter: parent.horizontalCenter
                             top: missionListView.bottom
-                            topMargin: 3
+                            topMargin: 2
                         }
-                        MouseArea{
-                            anchors.fill:parent
-                            onClicked:missionModel.append({"ID":newName(missionModel,"Mission"),"tasks":[]})
-                        }
-                        color: "#3EC6AA"
-                        Text {
+
+                        RoundButton{
+                            id: addMissionBtn
+                            width: 20
+                            height: width
+                            radius: width/2
+                            palette {button: checked? "black":"#3EC6AA"}
                             text: "+"
-                            width:parent.width
-                            height:parent.height
-                            font.pixelSize: 16
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            y:-1
-                            color: "black"
-                            elide: Text.ElideRight
+                            onClicked: missionModel.append({"ID":newName(missionModel,"Mission"),"tasks":[]})
                         }
+
+
+                        RoundButton{
+                            id: editMissionBtn
+                            enabled:missionListView.model.count>0
+                            width: 20
+                            height: width
+                            radius: width/2
+                            checkable: true
+                            palette {button: checked? "black":"#3EC6AA"}
+                            text: "\u26ED"
+
+                        }
+
                     }
                 }
             }
@@ -227,7 +288,7 @@ Item {
                     interactive: true
                     clip: true
                     flickableDirection: Flickable.VerticalFlick
-                    contentHeight: taskListView.height
+                    contentHeight: taskListView.height+editTaskBtn.height
                     ScrollBar.vertical: ScrollBar {
                         policy: (parent.contentHeight>parent.height)?ScrollBar.AlwaysOn:ScrollBar.AlwaysOff
                     }
@@ -241,59 +302,109 @@ Item {
                         spacing: 1
                         highlight: Rectangle{
                             color: "lightgrey"
-                            opacity: 0.6
-                            anchors.leftMargin: 2
-                            anchors.rightMargin: 2
+                            opacity: 0.3
+                            z:4
+                        }
+                        focus:true
+                        model:missionListView.currentIndex!=-1?missionModel.get(missionListView.currentIndex).tasks:emptyModel
+
+                        onCurrentIndexChanged:{
+                            if (currentIndex != -1)
+                                updateCorModel(currentIndex)
+                            else corModel.clear()
                         }
 
-
-                        focus:true
-                        model: missionListView.currentIndex!==-1? missionModel.get(missionListView.currentIndex).tasks:emptyModel
-
-                        delegate: Item{
+                        delegate: Rectangle{
+                            z:1
                             width: parent.width
                             height: taskText.height
                             MouseArea{
                                 anchors.fill: parent
                                 onClicked: taskListView.currentIndex = index
                             }
+                            anchors{
+                                left:parent.left
+                                right:parent.right
+                                margins: 5
+                                rightMargin: 10
+                            }
 
                             Text{
                                 id: taskText
+                                z:2
                                 text: (index+1) + ". " + ID
                                 wrapMode: Text.WrapAnywhere
                                 width: parent.width
                                 renderType: Text.NativeRendering
                                 anchors{
                                     left:parent.left
-                                    margins:5
                                     right: taskDelBtn.left
                                 }
                             }
 
+                            TextField{
+                                id: taskTextField
+                                z:3
+                                padding: 0
+                                leftPadding: 0
+                                visible: editTaskBtn.checked
+                                anchors.fill: parent
+                                text: taskText.text.replace((index+1) + ". ","")
+                                selectByMouse: true
+                                background: Rectangle {border.width: 0}
+                                onVisibleChanged: {
+                                    if (!visible&&!modelContains(taskModel,text)){
+                                        missionModel.get(missionListView.currentIndex).tasks.get(index).ID = text
+                                        taskModel.update(missionListView.currentIndex)
+                                        taskListView.currentIndex = index
+                                    }else{
+                                        text = taskText.text.replace((index+1) + ". ","")
+                                    }
+
+                                }
+                            }
+
+
                             Text{
                                 id:taskDelBtn
+                                z:2
                                 text: "X"
                                 color: "#FF5733"
-                                anchors{
-                                    right: parent.right
-                                    verticalCenter: parent.verticalCenter
-                                    rightMargin: 10
-                                }
+                                anchors.right: parent.right
                                 height: parent.height
                                 verticalAlignment: Text.AlignVCenter
                                 MouseArea{
                                     anchors.fill:parent
                                     onClicked: {
                                         missionModel.get(missionListView.currentIndex).tasks.remove(index)
-
+                                        taskModel.update(missionListView.currentIndex)
+                                        taskListView.currentIndex=-1
+                                        //corModel.update(taskListView.currentIndex)
                                     }
                                 }
                             }
                         }
-
                         onCountChanged: parent.parent.returnToBounds();
                     }
+
+                    RoundButton{
+                        id: editTaskBtn
+                        width: 20
+                        height: width
+                        radius: width/2
+                        anchors{
+                            top: taskListView.bottom
+                            horizontalCenter: parent.horizontalCenter
+                        }
+                        enabled:taskListView.model.count>0
+                        checkable: true
+                        palette {button: checked? "black":"#3EC6AA"}
+                        text: "\u26ED"
+                        onCheckedChanged: addingCor = checked
+
+                    }
+
+
                 }
             }
         }
@@ -331,8 +442,21 @@ Item {
                 MouseArea{
                     anchors.fill:parent
                     onClicked: {
-                        if(!parent.checked) parent.parent.uncheckBtns()
-                        parent.checked = !parent.checked
+                        if(missionListView.currentIndex!=-1){
+                            if(!parent.checked) parent.parent.uncheckBtns()
+                            parent.checked = !parent.checked
+
+                            addingCor = parent.checked
+
+                            if(parent.checked){
+                                missionModel.addTask(missionListView.currentIndex,{"ID":newName(taskModel,"Task"),
+                                                         "geoType":"path",
+                                                         "taskType":"",
+                                                         pValues:[]})
+                                taskModel.update(missionListView.currentIndex)
+                            }
+                            taskListView.currentIndex = taskModel.count-1
+                        }
                     }
                 }
             }
@@ -360,6 +484,7 @@ Item {
                     onClicked: {
                         if(!parent.checked) parent.parent.uncheckBtns()
                         parent.checked = !parent.checked
+                        addingCor = parent.checked
                     }
                 }
             }
@@ -386,6 +511,7 @@ Item {
                     onClicked: {
                         if(!parent.checked) parent.parent.uncheckBtns()
                         parent.checked = !parent.checked
+                        addingCor = parent.checked
                     }
                 }
             }
@@ -413,6 +539,7 @@ Item {
                     onClicked: {
                         if(!parent.checked) parent.parent.uncheckBtns()
                         parent.checked = !parent.checked
+                        addingCor = parent.checked
                     }
                 }
             }
@@ -461,12 +588,19 @@ Item {
                 height: 50
                 TextArea {
                     id: descriptionText
-                    text: (taskListView.currentIndex!=-1&&missionListView.currentIndex!=-1)?missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).taskType:""
+                    enabled: editTaskBtn.checked||pathBtn.checked //NEEDS EDIT
+                    text: (taskListView.currentIndex!=-1)?taskModel.get(taskListView.currentIndex).taskType:""
                     padding: 3
                     selectByMouse: true
                     background: Rectangle {
                         anchors.fill:parent
                         border.color: "#3EC6AA"
+                    }
+                    onEnabledChanged: {
+                        if(!enabled&&missionListView.currentIndex!=-1&&taskListView.currentIndex!=-1){
+                            missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).taskType = text
+                            taskModel.update(missionListView.currentIndex)
+                        }
                     }
                 }
             }
@@ -475,7 +609,7 @@ Item {
             Text{
                 id:typeText
                 width: parent.width
-                property string type: (taskListView.currentIndex!=-1&&missionListView.currentIndex!=-1)? missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).geoType:""
+                property string type: (taskListView.currentIndex!=-1)? taskModel.get(taskListView.currentIndex).geoType:""
                 text: "<b>Typ</b>: " + type
             }
 
@@ -497,7 +631,7 @@ Item {
                     interactive: true
                     clip: true
                     flickableDirection: Flickable.VerticalFlick
-                    contentHeight: taskListView.height
+                    contentHeight: geoListView.height
                     ScrollBar.vertical: ScrollBar {
                         policy: (parent.contentHeight>parent.height)?ScrollBar.AlwaysOn:ScrollBar.AlwaysOff
                     }
@@ -508,16 +642,13 @@ Item {
                         height: childrenRect.height
                         clip: true
                         interactive: false
-                        spacing: 1
-
                         focus:true
-                        model: (missionListView.currentIndex!==-1&&taskListView.currentIndex!==-1)? missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).pValues:emptyModel
-
-                        property variant columnWidths: Algos.calcTxtWidth("Pos 10", typeText)
+                        model: corModel
+                        property variant columnWidths: Algos.calcTxtWidth("99", typeText)
 
                         delegate: Item{
                             width: parent.width
-                            height: keyText.height
+                            height: row.height
 
                             Row{
                                 id: row
@@ -526,7 +657,7 @@ Item {
 
                                 Text{
                                     id: keyText
-                                    text: "Cor " + (index+1)
+                                    text: (index+1)+": "
                                     wrapMode: Text.WrapAnywhere
                                     width: geoListView.columnWidths
                                     renderType: Text.NativeRendering
@@ -534,7 +665,7 @@ Item {
                                 Loader { sourceComponent: columnSeparator; height: keyText.height>valueText.height?keyText.height:valueText.height}
                                 Text{
                                     id: valueText
-                                    text: lat +"," + lon
+                                    text:  Algos.roundNumber(lat,3) +"," + Algos.roundNumber(lon,3)
                                     wrapMode: Text.WrapAnywhere
                                     width: parent.width - geoListView.columnWidths
                                     renderType: Text.NativeRendering
@@ -559,15 +690,6 @@ Item {
 
 
         }
-
-
-
-
-
-
-
-
-
 
 
         Text{
@@ -711,31 +833,31 @@ Item {
 
 
 
-            Rectangle{
-                id: finishBtn
-                width: 30
-                height: width
-                radius: width / 2
-                color: "#3EC6AA"
-                anchors.horizontalCenter: parent.horizontalCenter
+        Rectangle{
+            id: finishBtn
+            width: 30
+            height: width
+            radius: width / 2
+            color: "#3EC6AA"
+            anchors.horizontalCenter: parent.horizontalCenter
 
-                Text {
-                    text: "\u2713"
-                    width:parent.width
-                    height:parent.height
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize:20
-                    color: "black"
-                    elide: Text.ElideRight
-                }
-                MouseArea{
-                    anchors.fill:parent
-                    onClicked: {
-                        hide()
-                    }
+            Text {
+                text: "\u2713"
+                width:parent.width
+                height:parent.height
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                font.pixelSize:20
+                color: "black"
+                elide: Text.ElideRight
+            }
+            MouseArea{
+                anchors.fill:parent
+                onClicked: {
+                    hide()
                 }
             }
+        }
 
 
         Rectangle{height:4;width:parent.width;color:"transparent"}
@@ -745,29 +867,73 @@ Item {
     //Models for creating NEW missions with tasks
     ListModel{
         id: missionModel
-        ListElement{
-            ID:"Mission 1"
-            tasks:[
-                ListElement{
-                    ID:"Task 1"
-                    geoType:"rechteck"
-                    taskType:"aufklären"
-                    pValues:[
-                        ListElement{
-                            lat: 54.31
-                            lon: 10.12
-                        },
-                        ListElement{
-                            lat: 54.50
-                            lon: 10.10
-                        }
-                    ]
-                }
-            ]
+        //        ListElement{
+        //            ID:"Mission 1"
+        //            tasks:[
+        //                ListElement{
+        //                    ID:"Task 1"
+        //                    geoType:"rechteck"
+        //                    taskType:"aufklären"
+        //                    pValues:[
+        //                        ListElement{
+        //                            lat: 54.31
+        //                            lon: 10.12
+        //                        },
+        //                        ListElement{
+        //                            lat: 54.50
+        //                            lon: 10.10
+        //                        }
+        //                    ]
+        //                }
+        //            ]
+        //        }
+        function addTask(index,task){
+            missionModel.get(index).tasks.append(task)
+        }
+
+        function addCor(index,task,cor){
+            missionModel.get(index).tasks.get(task).pValues.append(cor)
+        }
+
+    }
+    ListModel{
+        id: taskModel
+        //        ListElement{
+        //            ID:"Task 1"
+        //            geoType:"rect"
+        //            taskType:"aufklären"
+        //            pValues:[
+        //                ListElement{
+        //                    lat: 54.31
+        //                    lon: 10.12
+        //                },
+        //                ListElement{
+        //                    lat: 54.50
+        //                    lon: 10.10
+        //                }
+        //            ]
+        //        }
+
+        function update(missionIndex){
+            taskModel.clear()
+            for (var i = 0; i<missionModel.get(missionIndex).tasks.count;i++){
+                taskModel.append(missionModel.get(missionIndex).tasks.get(i))
+            }
+        }
+
+    }
+
+
+    ListModel{id:dronesModel}
+    ListModel{id:emptyModel}
+
+    function updateCorModel(taskIndex){
+        corModel.clear()
+        for (var i = 0; i<taskModel.get(taskIndex).pValues.count;i++){
+            corModel.append(taskModel.get(taskIndex).pValues.get(i))
         }
     }
-    ListModel{id: dronesModel}
-    ListModel{id:emptyModel}
+
 
     function newName(model,prefix){
         var nr = 1
@@ -784,9 +950,9 @@ Item {
         return name
     }
 
-    function modelContains(model,item){
+    function modelContains(model,id){
         for (var i = 0; i < model.count; i++) {
-            if (model.get(i).ID===item){
+            if (model.get(i).ID===id){
                 return true
             }
         }

@@ -27,9 +27,7 @@ function degr2rad(deg){
 }
 
 function roundNumber(number, digits){
-//    var multiple = Math.pow(10, digits);
-//    return Math.round(number * multiple) / multiple;
-    return number.toFixed(digits)
+    return parseFloat(number).toFixed(digits)
 }
 
 function getLatLngCenter(latLngInDegr) {

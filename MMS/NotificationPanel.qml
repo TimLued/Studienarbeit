@@ -22,10 +22,13 @@ Item {
         }else{
             notifyText.text = info
             showing = true
+            //pBar.value = 0.75
             pAnimation.start()
         }
     }
     function showNow(){
+        pAnimation.stop()
+        pBar.value=0
         notifyText.text = messages[messages.length-1]
         messages.pop()
         actionPanel.noticationCount = notify.messages.length
@@ -50,7 +53,7 @@ Item {
         id: background
         anchors.fill: parent
         color: "#3EC6AA"
-        border.color: "white"
+        border.color: notifyText.text.toLowerCase().indexOf("achtung:")!=-1?"#FF5733":"white"
         border.width: 3
 
         radius: 2

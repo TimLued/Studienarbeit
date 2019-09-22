@@ -7,13 +7,9 @@
 #include <QDialogButtonBox>
 #include <QListWidgetItem>
 #include <QDateTime>
-
 #include <possource.h>
-
 #include <QThread>
-
 #include <iostream>
-
 #include <QtNetwork>
 
 

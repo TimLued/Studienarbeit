@@ -6,6 +6,7 @@
 #include <iostream>
 #include <QQmlContext>
 #include <QDateTime>
+#include <QStringList>
 typedef QPair<int,int> RangeType;
 
 class Drone
@@ -265,6 +266,14 @@ public:
         mShortHistroy= shortHistory;
     }
 
+    void setChangeNote(QString note){
+        changeNote<<note;
+    }
+
+    QString getChangeNote() const{
+        return QString::number(changeNote.count()-1) +":" + changeNote.last();
+    }
+
 
 private:
     QString mId;
@@ -288,6 +297,7 @@ private:
     QString mGroup;
     RangeType historyRange;
     QVariantList mShortHistroy;
+    QList<QString> changeNote;
 
     bool follow=false;
     bool trackHistory=false;

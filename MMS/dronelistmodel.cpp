@@ -30,8 +30,14 @@ bool DroneListModel::updateDrone(const QString & jInfo){
                 return obj.id() == jDroneInfo["drone"].toString();});
 
         Waypoint wp{jDroneInfo["id"].toString(),jDroneInfo["lat"].toString(),jDroneInfo["lon"].toString()};
+        QModelIndex ix = index(it_wp - mDrones.begin());
+
         if(it_wp != mDrones.end()){
-            if(jDroneInfo.keys().contains("reset")) it_wp->resetRoute();//delete old data
+            if(jDroneInfo.keys().contains("reset")) {
+                it_wp->resetRoute();//delete old data
+                it_wp->setChangeNote("Flugplanupdate für " + it_wp->id());
+                emit dataChanged(ix, ix, QVector<int>{changeNoteRole});
+            }
             it_wp->appendRoute(QVariant::fromValue(wp));
             it_wp->appendRoutePath(coord);
         }else{//should occur just once per drone
@@ -40,7 +46,6 @@ bool DroneListModel::updateDrone(const QString & jInfo){
             mDrones.last().appendRoutePath(coord);
         }
 
-        QModelIndex ix = index(it_wp - mDrones.begin());
         emit dataChanged(ix, ix, QVector<int>{WaypointRole,RouteRole});
         return true;
     }
@@ -70,7 +75,7 @@ bool DroneListModel::updateDrone(const QString & jInfo){
                 infoValues << val;
             }else{//Update value
 
-                if(key=="altitude"){
+                if(key.toLower()=="altitude"){
 
 
                     double oVal  = infoValues[infoNames.indexOf(key)].toString().split(" ")[0].toDouble();
@@ -83,8 +88,6 @@ bool DroneListModel::updateDrone(const QString & jInfo){
                 infoValues[infoNames.indexOf(key)] = val;
             }
         }
-
-
 
         QModelIndex ix = index(it - mDrones.begin());
 
@@ -138,15 +141,15 @@ bool DroneListModel::updateDrone(const QString & jInfo){
         }else{//Update value
             infoValues[infoNames.indexOf("speed")] = mSpeed;
         }
-        if (!infoNames.contains("ALL")){
-            infoNames << "ALL";
-            infoValues << "ALL";
-        }
         if (!infoNames.contains("Hot Leg")){
             infoNames << "Hot Leg";
             infoValues << (it->getLegIndex()!=-1?it->getLeg().value<Waypoint>().id:"-");
         }else{//update
             infoValues[infoNames.indexOf("Hot Leg")]= it->getLegIndex()!=-1?it->getLeg().value<Waypoint>().id:"-";
+        }
+        if (!infoNames.contains("ALL")){
+            infoNames << "ALL";
+            infoValues << "ALL";
         }
 
         Data data{coord, angle, speed,timestamp, infoNames,infoValues};
@@ -170,6 +173,7 @@ bool DroneListModel::createDrone(const QString & id){
             break;
         }else if (i == colors.count()-1) {usedColors.clear();}
     }
+    it.setChangeNote("Hinweis: Neue UAV " + id);
     mDrones<< it;
     endInsertRows();
     return true;
@@ -254,7 +258,7 @@ bool DroneListModel::setSelectedInfoList(const QString&id,QString info){
 
 bool DroneListModel::setUnselectedInfoList(const QString&id,QString info){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
-            return obj.id() == id;});   
+            return obj.id() == id;});
     QModelIndex ix = index(it - mDrones.begin());
 
 
@@ -393,6 +397,8 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getHistoryRange();
         case ShortHistoryRole:
             return it.getShortHistory();
+        case changeNoteRole:
+            return it.getChangeNote();
         default:
             break;
         }
@@ -425,6 +431,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[GroupRole] = "groupInfo";
     roles[HistoryRangeRole] = "rangeInfo";
     roles[ShortHistoryRole] = "shortHistoryInfo";
+    roles[changeNoteRole] = "noteInfo";
     return roles;
 }
 
