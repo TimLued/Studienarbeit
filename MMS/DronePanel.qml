@@ -28,7 +28,6 @@ Item{
         bottomMargin: 20
     }
 
-
     Rectangle{//Closer
         z:10
         anchors{
@@ -363,8 +362,6 @@ Item{
             }
         }
     }
-
-
 
     Component{
         id: groupLvDelegate
@@ -766,8 +763,6 @@ Item{
         }
     }
 
-
-
     Component{
         id: droneLvDelegate
         Item{
@@ -775,6 +770,9 @@ Item{
             width: parent.width
             height: small
             opacity: 1
+            property bool droneMarked:markInfo
+            property int large: 200
+            onDroneMarkedChanged: if(droneMarked) height=(height==large)?small:large
 
             Rectangle{
                 anchors.fill: parent
@@ -790,7 +788,7 @@ Item{
                         }else if(missionPanel.addingDrones){
                             missionPanel.addDrone(idInfo)
                         }else{
-                            if(droneItem.height === small){droneItem.height = 195
+                            if(droneItem.height === small){droneItem.height = large
                             }else{droneItem.height = small}
                         }
                     }
@@ -966,7 +964,12 @@ Item{
 
                                 first.onPressedChanged: {
                                     if(first.pressed){
-                                        lockVal = timestampsInfo.length-1
+                                        if (second.value===lockVal){
+                                            lockVal = timestampsInfo.length-1
+                                            second.value = lockVal
+                                        }else lockVal = timestampsInfo.length-1
+
+
                                         setValues(first.value,second.value)//update position
                                     }else{
                                         //set history left index
@@ -1016,7 +1019,7 @@ Item{
                                 if(showingRouteInfo) dronemodel.toggleShowingRoute(idInfo)
                                 wpModel.clear()
                                 for (var i = 0;i<wpInfo.length;i++){
-                                    wpModel.append({"name":wpInfo[i].id,"lat":wpInfo[i].lat,"lon":wpInfo[i].lon})
+                                    wpModel.append({"name":wpInfo[i].id,"lat":parseFloat(wpInfo[i].lat),"lon":parseFloat(wpInfo[i].lon)})
                                 }
                                 onMapWpModel.update()
 

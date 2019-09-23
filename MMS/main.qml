@@ -4,6 +4,7 @@ import QtQuick.Window 2.13
 import QtQuick.Layouts 1.13
 import QtPositioning 5.13
 import QtLocation 5.13
+import QtQuick.Particles 2.13
 import "algos.js" as Algos
 
 ApplicationWindow  {
@@ -20,8 +21,10 @@ ApplicationWindow  {
     property string zoomRadius
     property int zoomOffset: 0
     property variant droneCorList
-
     property int movingWpIndex:-1
+    property int movingTaskIndex:-1
+    property double tmpCircleRadius
+    property variant mousePos:QtPositioning.coordinate(0,0)
 
 
     //MAP SCALE
@@ -67,15 +70,15 @@ ApplicationWindow  {
 
 
     function setCircleScale(k){
-        var info = calculateScale(scaleImage.sourceSize.width,k)
+        var info = calculateScale(50,k)
         zoomRadius = Algos.formatDistance(info[0])
-        zoomCircle = (scaleImage.sourceSize.width * info[1]) //border.width 3
+        zoomCircle = (50*info[1])
     }
 
     function setZoomScale(){
-        var info = calculateScale(scaleImage.sourceSize.width,0)
+        var info = calculateScale(50,0)
         scaleText.text = Algos.formatDistance(info[0])
-        scaleImage.width = (scaleImage.sourceSize.width * info[1]) - 2 * scaleImageLeft.sourceSize.width
+        scaleImage.width = (50*info[1]) - 2 * scaleImageRight.width
     }
 
     function centerMapRegion(markers){
@@ -96,7 +99,7 @@ ApplicationWindow  {
     Map{
         id: map
         anchors.fill:parent
-
+        z:1
         plugin: Plugin{
             name:"mapboxgl"
             PluginParameter{name:"mapboxgl.access_token";value:"pk.eyJ1IjoidGltb3RoeWx1ZWQiLCJhIjoiY2swNTd4N3pyMDQ1djNjcWk3YWk1Mmw4aiJ9.peN9sLC_oLX5m-KOT5RTlA"}
@@ -160,26 +163,37 @@ ApplicationWindow  {
             anchors.fill: parent
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-            property variant cor
             property int nn
             property double nnBear
 
             onPositionChanged: {
-                cor = map.toCoordinate(Qt.point(mouse.x, mouse.y))
+                mousePos = map.toCoordinate(Qt.point(mouse.x, mouse.y))
 
                 if (movingWpIndex!=-1){
-                    onMapWpModel.set(movingWpIndex,{"name":onMapWpModel.get(movingWpIndex).name,"lat":cor.latitude.toString(),"lon":cor.longitude.toString()})
+                    onMapWpModel.set(movingWpIndex,{"name":onMapWpModel.get(movingWpIndex).name,"lat":mousePos.latitude,"lon":mousePos.longitude})
                     routeEditPoly.update()
-                    wpModel.set(movingWpIndex,{"name":wpModel.get(movingWpIndex).name,"lat":cor.latitude,"lon":cor.longitude})
+                    wpModel.set(movingWpIndex,{"name":wpModel.get(movingWpIndex).name,"lat":mousePos.latitude,"lon":mousePos.longitude})
                 }
 
-                if(wpPanel.addingWaypoints||missionPanel.addingCor){
+                 if (movingTaskIndex!=-1){
+                     corModel.set(movingTaskIndex,{"pos":mousePos})
+                     taskPoly.update()
+                 }
+
+                 if(missionPanel.addingTaskCor){
+                     if(missionPanel.selectedTaskType=="circle"&& corModel.count==1){
+                        tmpCircleRadius = QtPositioning.coordinate(corModel.get(0).cor.latitude,corModel.get(0).cor.longitude).distanceTo(mousePos)
+                        radiusPoly.update(mousePos)
+                     }
+                 }
+
+                if(wpPanel.addingWaypoints||missionPanel.addingTaskCor){
                     cursorShape = Qt.CrossCursor
                 }else{
                     cursorShape = Qt.ArrowCursor
                 }
 
-                coorLbl.text = Algos.roundNumber(cor.latitude,3) + ", " +  Algos.roundNumber(cor.longitude,3)
+                coorLbl.text = Algos.roundNumber(mousePos.latitude,3) + ", " +  Algos.roundNumber(mousePos.longitude,3)
                 //rotation
                 //scale win.height - nn = 360
                 if (map.rotating)map.bearing = nnBear + (nn - mouseY) * (360/win.height)
@@ -194,10 +208,10 @@ ApplicationWindow  {
                     if (!map.rotating) map.droneRotAniLock = false
 
                 }else if(mouse.button === Qt.LeftButton && wpPanel.addingWaypoints){
-                    wpModel.append({"name":"","lat":cor.latitude,"lon":cor.longitude})
+                    wpModel.append({"name":"","lat":mousePos.latitude,"lon":mousePos.longitude})
                     onMapWpModel.update()
-                }else if(mouse.button === Qt.LeftButton &&missionPanel.addingCor){
-                    missionPanel.addCor(cor.latitude,cor.longitude)
+                }else if(mouse.button === Qt.LeftButton &&missionPanel.addingTaskCor){
+                    missionPanel.addCor(mousePos)
                 }
             }
 
@@ -225,27 +239,33 @@ ApplicationWindow  {
             height: scaleText.height * 2
             width: scaleImage.width
 
-            Image {
+            Rectangle {
                 id: scaleImageLeft
-                source: "img/scale_end.png"
-                anchors.bottom: parent.bottom
+                height:5
+                width:2
+                color:infobar.mColor
+                anchors.verticalCenter: scaleImage.verticalCenter
                 anchors.right: scaleImage.left
             }
-            Image {
+            Rectangle {
                 id: scaleImage
-                source: "img/scale.png"
+                height:2
+                color:infobar.mColor
                 anchors.bottom: parent.bottom
                 anchors.right: scaleImageRight.left
             }
-            Image {
+            Rectangle {
                 id: scaleImageRight
-                source: "img/scale_end.png"
-                anchors.bottom: parent.bottom
+                height:5
+                width:2
+                color:infobar.mColor
+                anchors.verticalCenter: scaleImage.verticalCenter
                 anchors.right: parent.right
             }
-            Label {
+
+            Text{
                 id: scaleText
-                color: "#004EAE"
+                color: infobar.mColor
                 anchors.centerIn: parent
                 text: "0 m"
                 font.pixelSize: 16
@@ -257,6 +277,7 @@ ApplicationWindow  {
 
         Item{
             id: infobar
+            property string mColor:map.activeMapType ===  map.supportedMapTypes[1]?"white":"#004EAE"
             anchors{
                 top: parent.top
                 right: parent.right
@@ -268,7 +289,7 @@ ApplicationWindow  {
             //Zoom Label
             Text {
                 id: zoomLbl
-                color: "#004EAE"
+                color: parent.mColor
                 horizontalAlignment: Text.AlignRight
                 width: coorLbl.width
                 anchors.right: parent.right
@@ -278,7 +299,7 @@ ApplicationWindow  {
 
             Text {
                 id: coorLbl
-                color: "#004EAE"
+                color: parent.mColor
                 anchors.top:zoomLbl.bottom
                 anchors.left: parent.left
                 font.pixelSize: 16
@@ -299,7 +320,7 @@ ApplicationWindow  {
                 id: compass
                 text: "\u29BD"
                 font.pixelSize: 35
-                color: "#004EAE"
+                color: infobar.mColor
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
                 anchors.fill: parent
@@ -324,6 +345,7 @@ ApplicationWindow  {
                     droneColor: groupInfo!=""? groupInfo:colorInfo
                     extrapolating: extrapolateInfo
                     droneId: idInfo
+                    bearing: followInfo?0:angleInfo - map.bearing
                     extrapolationTime: 1000
                     visible: visibleInfo
                     trackingHistory: trackingHistoryInfo
@@ -427,22 +449,17 @@ ApplicationWindow  {
                         if (followInfo){
                             map.center = coordinate
                             map.pan(0,-map.height/2+100)
-                            bearing = 0
                             map.bearing = angleInfo
                             map.centerFollowing = true
                             map.rotating = false
 
-                        }else{
-                            bearing= angleInfo - map.bearing
-                            map.centerFollowing = false
-                        }
+                        }else map.centerFollowing = false
+
 
                         //update hotleg pointer
                         wpPointer.direction = hotLegPoly.pathLength()>0? coordinate.azimuthTo(hotLegPoly.path[1]):0
                         wpPointer.visible = hotLegPoly.pathLength()>0
                     }
-
-
 
 
                 }
@@ -579,7 +596,7 @@ ApplicationWindow  {
                                 MouseArea{
                                     anchors.fill:parent
                                     onClicked: {
-                                        droneBody.popUp = !droneBody.popUp
+                                        droneBody.popUp = false
                                     }
                                 }
                             }
@@ -726,11 +743,110 @@ ApplicationWindow  {
 
         }
 
+        //models for displaying whole taskButtons
+        ListModel{id:pathModel}
+        ListModel{id:circleModel}//{cor1,cor2}
+        ListModel{id:rectModel}//{cor1,cor2}
+        ListModel{id:polyModel}//{polyPath:[cor,cor]
+
+        MapItemView{
+            id: pathType
+            model: pathModel
+            delegate: MapPolyline {
+                line.color: "#1962ff"
+                line.width: 2
+            }
+        }
+
+        MapItemView{
+            id: circleType
+            model:circleModel
+
+            delegate: MapCircle {
+                id:circle
+                center:QtPositioning.coordinate(cor.latitude,cor.longitude)
+                radius:(rad==0&&missionPanel.addingTaskCor)?win.tmpCircleRadius:rad
+                color: "#eb8328"
+                opacity: 0.5
+                border.width: 3
+                border.color: "black"
+                onCenterChanged: radiusPoly.setStart(center)
+                onRadiusChanged: distText.updateText(Algos.roundNumber(radius,0))
+            }
+
+        }
+
+        MapQuickItem{
+            coordinate: win.mousePos
+            sourceItem: Text{
+                id:distText
+                function updateText(r){text = r + " m"}
+            }
+            anchorPoint.x:-sourceItem.width
+            anchorPoint.y:sourceItem.height
+        }
+
+        MapPolyline{
+            id:radiusPoly
+            function setStart(cor){
+                path = []
+                addCoordinate(QtPositioning.coordinate(cor.latitude,cor.longitude))
+                addCoordinate(QtPositioning.coordinate(cor.latitude,cor.longitude))
+            }
+            function update(cor){
+                replaceCoordinate(1,cor)
+            }
+        }
+
+
+
+        MapItemView{
+            id: rectType
+            model:rectModel
+            delegate: MapRectangle {
+                color: "#38d93e"
+                border.width: 2
+                border.color: color
+                opacity: 0.3
+                topLeft:QtPositioning.coordinate(lat1,lon1)
+                bottomRight:QtPositioning.coordinate(lat2,lon2)
+            }
+        }
+
+
+        MapItemView{
+            id: polyType
+            model:polyModel
+
+            delegate: MapPolygon {
+                color: "#38d93e"
+                path:polyPath
+            }
+        }
+
+
+        //Editing taskMarker
+//        MapCircle{
+//            id:taskCircle
+//            property bool hasCenter: false
+//            color: "#ffae17"
+//            opacity: 0.3
+//            border.width: 2
+//            border.color: color
+//            function updateCenter(p1){
+//                center = p1
+//                hasCenter = true
+//            }
+//            function updateRadius(p2){
+//                radius = center.distanceTo(p2)
+//            }
+//        }
+
         MapItemView {
             id: taskMarker
-            model:corModel
+            model:pathModel
             delegate: MapQuickItem {
-                coordinate: QtPositioning.coordinate(lat,lon)
+                coordinate: QtPositioning.coordinate(cor.latitude,cor.longitude)
                 anchorPoint.x: 10
                 anchorPoint.y: 10
 
@@ -750,7 +866,7 @@ ApplicationWindow  {
                         anchors.fill:parent
                         onClicked: {
                             if (mouse.button === Qt.LeftButton) {
-
+                                movingTaskIndex=movingTaskIndex==-1?index:-1
                             }
                         }
                     }
@@ -760,10 +876,24 @@ ApplicationWindow  {
             }
         }
 
+        MapPolyline{
+            id: taskPoly
+            line.color: "black"
+            line.width: 1
+
+            function update(){
+                var mPath = []
+                for (var i = 0; i<corModel.count;i++){
+                    mPath.push(QtPositioning.coordinate(corModel.get(i).cor.latitude,corModel.get(i).cor.longitude))
+                }
+                path = mPath
+            }
+        }
 
         ListModel{id:corModel}
 
 
+        //Waypoints
         MapPolyline{
             id: routeEditPoly
             line.color: "black"
@@ -814,7 +944,7 @@ ApplicationWindow  {
                                         for (var i=0;i<wpModel.count;i++){
                                             if(i!==movingWpIndex){
                                                 if(coordinate.distanceTo(QtPositioning.coordinate(wpModel.get(i).lat,wpModel.get(i).lon)) < 30){
-                                                    onMapWpModel.set(movingWpIndex,{"name":onMapWpModel.get(movingWpIndex).name,"lat":wpModel.get(i).lat.toString(),"lon":wpModel.get(i).lon.toString()})
+                                                    onMapWpModel.set(movingWpIndex,{"name":onMapWpModel.get(movingWpIndex).name,"lat":wpModel.get(i).lat,"lon":wpModel.get(i).lon})
                                                     routeEditPoly.update()
                                                     wpModel.set(movingWpIndex,{"name":wpModel.get(movingWpIndex).name,"lat":wpModel.get(i).lat,"lon":wpModel.get(i).lon})
                                                     break
@@ -836,14 +966,27 @@ ApplicationWindow  {
 
 
 
-        WaypointPanel{
-            id: wpPanel
-            anchors{
-                right: actionPanel.left
-                rightMargin: 26
-                verticalCenter: map.verticalCenter
-            }
-        }
+    }
+    Map {
+        id: mapOverlay
+        anchors.fill: parent
+        plugin: Plugin { name: "itemsoverlay" }
+        gesture.enabled: false
+        center: map.center
+        color: 'transparent'
+        minimumFieldOfView: map.minimumFieldOfView
+        maximumFieldOfView: map.maximumFieldOfView
+        minimumTilt: map.minimumTilt
+        maximumTilt: map.maximumTilt
+        minimumZoomLevel: map.minimumZoomLevel
+        maximumZoomLevel: map.maximumZoomLevel
+        zoomLevel: map.zoomLevel
+        tilt: map.tilt;
+        bearing: map.bearing
+        fieldOfView: map.fieldOfView
+        z: map.z + 1
+
+        WaypointPanel{id: wpPanel}
 
         ListModel {//in order to change order without violatioing active model
             id: wpModel
@@ -855,7 +998,7 @@ ApplicationWindow  {
                 onMapWpModel.clear()
                 for (var i = 0; i<wpModel.count;i++){
                     //onMapWpModel.append(wpModel.get(i))
-                    onMapWpModel.append({"name":wpModel.get(i).name,"lat":wpModel.get(i).lat.toString(),"lon":wpModel.get(i).lon.toString()})
+                    onMapWpModel.append({"name":wpModel.get(i).name,"lat":wpModel.get(i).lat,"lon":wpModel.get(i).lon})
                 }
                 routeEditPoly.update()
             }
@@ -864,23 +1007,12 @@ ApplicationWindow  {
 
         DronePanel{id:dronePanel}
         ActionPanel{id:actionPanel}
-        NotificationPanel{id:notifyPanel
-            Component.onCompleted:{
-//                show("Hinweis: Drohne Alpha hinzugefügt.")
-//                show("Hinweis: Drohne Alpha neuer Auftrag")
-//                show("Achtung: Auftrag für Alpha abgelehnt.")
-//                show("Hinweis: LangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachrichtLangeNachricht")
-            }
-        }
-        MissionPanel{
-            id: missionPanel
-            anchors{
-                right: actionPanel.left
-                rightMargin: 26
-                verticalCenter: map.verticalCenter
-            }
-        }
+        NotificationPanel{id:notifyPanel}
+        MissionPanel{id: missionPanel;z:100}
+
     }
+
+
 
 }
 

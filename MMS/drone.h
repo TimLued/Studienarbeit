@@ -274,6 +274,14 @@ public:
         return QString::number(changeNote.count()-1) +":" + changeNote.last();
     }
 
+    bool marked() const{
+        return markInList;
+    }
+
+    void setMarked(){
+        markInList = !markInList;
+    }
+
 
 private:
     QString mId;
@@ -304,6 +312,7 @@ private:
     bool showRoute=false;
     bool extrapolate = false;
     bool mVisible = true;
+    bool markInList = false;
 
 };
 

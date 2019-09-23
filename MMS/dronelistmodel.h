@@ -82,7 +82,8 @@ public:
         GroupRole,
         HistoryRangeRole,
         ShortHistoryRole,
-        changeNoteRole
+        changeNoteRole,
+        markListRole
     };
 
     void register_object(const QString &droneId,QQmlContext *context);
@@ -108,6 +109,7 @@ public:
     Q_INVOKABLE QVariant getRoute(const QString&id);
     Q_INVOKABLE void setGroup(const QString &id,QString group);
     Q_INVOKABLE void setHistoryRange(const QString &id,int start,int end);
+    Q_INVOKABLE void switchMarked(const QString &id);
 
 private:
     QList<Drone> mDrones;

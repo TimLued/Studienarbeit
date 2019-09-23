@@ -14,6 +14,12 @@ Item {
     property int mHeight: listView.contentHeight + header.height + centerWpBtn.height + centerWpBtn.anchors.margins * 2
     property bool addingWaypoints:false
 
+    anchors{
+        right:parent.right
+        rightMargin: 80
+        verticalCenter: parent.verticalCenter
+    }
+
     visible: false
     function show(){content.visible = true}
     function hide(){content.visible = false}
@@ -26,7 +32,6 @@ Item {
     Rectangle{
         anchors.fill:parent
         color:"white"
-        opacity: 0.8
     }
 
     Rectangle {

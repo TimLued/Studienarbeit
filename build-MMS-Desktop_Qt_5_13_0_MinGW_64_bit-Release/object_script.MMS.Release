@@ -4,7 +4,6 @@ release/grouplistmodel.o
 release/main.o
 release/posupdater.o
 release/tasksender.o
-release/qrc_qml_qmlcache.o
 release/ActionPanel_qml.o
 release/algos_js.o
 release/simplifyPoly_js.o

@@ -106,6 +106,14 @@ Item {
             highlighted: map.isCenterOnAll
             onClicked: {
                 map.isCenterOnAll = !map.isCenterOnAll
+                if(map.isCenterOnAll ){
+                    var positions = dronemodel.getAllDronePos()
+                    if (positions.length>0){
+                        var region = centerMapRegion(positions)
+                        map.fitViewportToGeoShape(region,50)
+                    }
+                }
+
             }
         }
 

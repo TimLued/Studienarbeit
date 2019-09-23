@@ -66,6 +66,7 @@ bool DroneListModel::updateDrone(const QString & jInfo){
         QRegExp re("[+-]?\\d*\\.?\\d+");
 
         foreach(const QString& key, jDroneInfo.keys()) {
+
             QString val = jDroneInfo.value(key).toString();
             if (re.exactMatch(val)) val = QString::number(val.toDouble(),'f',2); //round if info is numerical
 
@@ -87,6 +88,7 @@ bool DroneListModel::updateDrone(const QString & jInfo){
                 };
                 infoValues[infoNames.indexOf(key)] = val;
             }
+
         }
 
         QModelIndex ix = index(it - mDrones.begin());
@@ -323,6 +325,16 @@ void DroneListModel::setHistoryRange(const QString &id, int start, int end)
     emit dataChanged(ix, ix, QVector<int>{HistoryRangeRole});
 }
 
+void DroneListModel::switchMarked(const QString &id)
+{
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){return obj.id() == id;});
+    it->setMarked();
+    QModelIndex ix = index(it - mDrones.begin());
+    emit dataChanged(ix, ix, QVector<int>{markListRole});
+    it->setMarked();//for next call
+    emit dataChanged(ix, ix, QVector<int>{markListRole});
+}
+
 void DroneListModel::setColor(const QString &id, QString color){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
@@ -399,6 +411,8 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
             return it.getShortHistory();
         case changeNoteRole:
             return it.getChangeNote();
+        case markListRole:
+            return it.marked();
         default:
             break;
         }
@@ -432,6 +446,7 @@ QHash<int, QByteArray> DroneListModel::roleNames() const {
     roles[HistoryRangeRole] = "rangeInfo";
     roles[ShortHistoryRole] = "shortHistoryInfo";
     roles[changeNoteRole] = "noteInfo";
+    roles[markListRole] = "markInfo";
     return roles;
 }
 

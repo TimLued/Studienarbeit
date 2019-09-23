@@ -141,8 +141,6 @@ Item {
 
     }
 
-
-
     NumberAnimation{
         id: pAnimation
         target: pBar
@@ -156,6 +154,5 @@ Item {
             hide()
         }
     }
-
 
 }

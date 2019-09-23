@@ -4,7 +4,6 @@ debug/grouplistmodel.o
 debug/main.o
 debug/posupdater.o
 debug/tasksender.o
-debug/qrc_qml_qmlcache.o
 debug/ActionPanel_qml.o
 debug/algos_js.o
 debug/simplifyPoly_js.o

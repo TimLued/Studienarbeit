@@ -12,7 +12,5 @@
         <file>ActionPanel.qml</file>
         <file>simplifyPoly.js</file>
         <file>algos.js</file>
-        <file>img/scale.png</file>
-        <file>img/scale_end.png</file>
     </qresource>
 </RCC>

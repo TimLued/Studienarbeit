@@ -37,8 +37,19 @@ MapQuickItem {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: popUp = !popUp
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: {
+                switch (mouse.button){
+                case Qt.RightButton:
+                    dronemodel.switchMarked(droneId)
+                    break
+                case Qt.LeftButton:
+                     popUp = !popUp
+                    break
+                }
+            }
         }
+
         Rectangle{
             id: droneRect
             anchors.fill: parent
