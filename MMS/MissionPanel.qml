@@ -32,33 +32,37 @@ Item {
     }
     function hide(){
         content.visible = false
-        clearModels()
+        clearAllModels()
         taskButtons.uncheckBtns()
         editTaskBtn.checked = false
         addingDrones = false
         addingTaskCor = false
     }
     function clearAllModels(){
+        missionListView.currentIndex = -1
+        taskListView.currentIndex = -1
         missionModel.clear()
         taskModel.clear()
         corModel.clear()
-        taskPoly.update()
+        //taskPoly.update()
         dronesModel.clear()
+        clearMapModels()
     }
     function clearMapModels(){
         circleModel.clear()
         pathModel.clear()
+        markerModel.clear()
+        //taskPoly.update()
         rectModel.clear()
         polyModel.clear()
-        corModel.clear()
     }
 
     function addDrone(drone){if(!modelContains(dronesModel,drone)) dronesModel.append({"ID":drone})}
 
-    function addCor(cor){
+    function addMouseCor(cor){
         //set cors in missionmodel missionindex&taskindex
-        if(["circle","rectangle"].indexOf(selectedTaskType)==-1||corModel.count <2){
-            missionModel.addCor(missionListView.currentIndex,taskListView.currentIndex,{"cor":QtPositioning.coordinate(cor.latitude,cor.longitude)})
+        if(["circle","rectangle"].indexOf(selectedTaskType)==-1||corModel.count<2){
+            addCor(missionListView.currentIndex,taskListView.currentIndex,{"cor":QtPositioning.coordinate(cor.latitude,cor.longitude)})
             taskModel.update(missionListView.currentIndex)
             updateCorModel(taskListView.currentIndex)
         }
@@ -339,9 +343,9 @@ Item {
 
                             onCurrentIndexChanged:{
                                 if (currentIndex != -1){
-                                    updateCorModel(taskListView.currentIndex)
                                     selectedTaskType = taskModel.get(currentIndex).geoType
-                                }else clearMapModels()
+                                    updateCorModel(taskListView.currentIndex)
+                                }else corModel.clear()
                             }
 
                             delegate: Rectangle{
@@ -363,6 +367,8 @@ Item {
                                     id: taskText
                                     z:2
                                     text: (index+1) + ". " + ID
+                                    color: defined?"black":"grey"
+                                    font.italic: !defined
                                     wrapMode: Text.WrapAnywhere
                                     width: parent.width
                                     renderType: Text.NativeRendering
@@ -429,8 +435,16 @@ Item {
                             checkable: true
                             palette {button: checked? "black":"#3EC6AA"}
                             text: "\u26ED"
-                            onCheckedChanged: addingTaskCor = checked
+                            onCheckedChanged: {
+                                if (checked){
+                                    if (["circle","rectangle"].indexOf(selectedTaskType)==-1||corModel.count<2) addingTaskCor = checked
+                                }else {
+                                    addingTaskCor = checked
+                                    clearMapModels()
+                                    updateDraw()
+                                }
 
+                            }
                         }
 
 
@@ -477,9 +491,10 @@ Item {
                                 addingTaskCor = parent.checked
 
                                 if(parent.checked){
-                                    missionModel.addTask(missionListView.currentIndex,{"ID":newName(taskModel,"Path"),
+                                    addTask(missionListView.currentIndex,{"ID":newName(taskModel,"Path"),
                                                              "geoType":"path",
                                                              "taskType":"",
+                                                             "defined":false,
                                                              "pValues":[]})
                                     taskModel.update(missionListView.currentIndex)
                                 }
@@ -510,18 +525,21 @@ Item {
                     MouseArea{
                         anchors.fill:parent
                         onClicked: {
-                            if(!parent.checked) parent.parent.uncheckBtns()
-                            parent.checked = !parent.checked
-                            addingTaskCor = parent.checked
+                            if(missionListView.currentIndex!=-1){
+                                if(!parent.checked) parent.parent.uncheckBtns()
+                                parent.checked = !parent.checked
+                                addingTaskCor = parent.checked
 
-                            if(parent.checked){
-                                missionModel.addTask(missionListView.currentIndex,{"ID":newName(taskModel,"Circle"),
-                                                         "geoType":"circle",
-                                                         "taskType":"",
-                                                         "pValues":[]})
-                                taskModel.update(missionListView.currentIndex)
+                                if(parent.checked){
+                                    addTask(missionListView.currentIndex,{"ID":newName(taskModel,"Circle"),
+                                                "geoType":"circle",
+                                                "taskType":"",
+                                                "defined":false,
+                                                "pValues":[]})
+                                    taskModel.update(missionListView.currentIndex)
+                                }
+                                taskListView.currentIndex = taskModel.count-1
                             }
-                            taskListView.currentIndex = taskModel.count-1
                         }
                     }
                 }
@@ -625,7 +643,7 @@ Item {
                     height: 50
                     TextArea {
                         id: descriptionText
-                        enabled: editTaskBtn.checked||pathBtn.checked //NEEDS EDIT
+                        enabled: editTaskBtn.checked||pathBtn.checked ||circleBtn.checked ||rectangleBtn.checked || polygonBtn.checked
                         text: (taskListView.currentIndex!=-1)?taskModel.get(taskListView.currentIndex).taskType:""
                         padding: 3
                         selectByMouse: true
@@ -733,9 +751,8 @@ Item {
                                         MouseArea{
                                             anchors.fill:parent
                                             onClicked: {
-                                                geoListView.currentIndex=index
                                                 removeCor(missionListView.currentIndex,taskListView.currentIndex,index)
-                                                geoListView.currentIndex=-1
+
                                             }
                                         }
                                     }
@@ -901,31 +918,68 @@ Item {
 
 
 
-            Rectangle{
-                id: finishBtn
-                width: 30
-                height: width
-                radius: width / 2
-                color: "#3EC6AA"
+            Row{
+                spacing: 15
                 anchors.horizontalCenter: parent.horizontalCenter
 
-                Text {
-                    text: "\u2713"
-                    width:parent.width
-                    height:parent.height
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignHCenter
+                RoundButton{
+                    id: showMissionBtn
+                    width: 30
+                    height: width
+                    radius: width/2
+                    palette {button: "#3EC6AA"}
                     font.pixelSize:20
-                    color: "black"
-                    elide: Text.ElideRight
-                }
-                MouseArea{
-                    anchors.fill:parent
-                    onClicked: {
-                        hide()
+                    text: "="
+                    onClicked:{
+                        clearMapModels()
+                        taskListView.currentIndex=-1
+                        addingTaskCor=false
+                        taskButtons.uncheckBtns()
+                        for (var i = 0; i<taskModel.count;i++){
+                            if(taskModel.get(i).defined){
+                                var data = taskModel.get(i).pValues
+                                switch(taskModel.get(i).geoType){
+                                case "path":
+                                    var corList = []
+                                    for (var j = 0; j<data.count;j++){
+                                        corList.push({"lat":data.get(j).cor.latitude,"lon":data.get(j).cor.longitude})
+                                    }
+                                    pathModel.append({"pPath": corList})
+                                    break
+                                case "circle":
+                                    var dist = QtPositioning.coordinate(data.get(0).cor.latitude,data.get(0).cor.longitude).distanceTo(QtPositioning.coordinate(data.get(1).cor.latitude,data.get(1).cor.longitude))
+                                    circleModel.append({"cor":data.get(0).cor,"rad":dist})
+                                    break
+                                case "rectangle":
+
+                                    break
+
+                                case "polygon":
+
+                                    break
+                                }
+                            }
+                        }
                     }
                 }
+
+                RoundButton{
+                    id: finishBtn
+                    width: 30
+                    height: width
+                    radius: width/2
+                    palette {button: "#3EC6AA"}
+                    font.pixelSize:20
+                    text: "\u2713"
+                    onClicked: hide()
+                }
             }
+
+
+
+
+
+
 
 
             Rectangle{height:4;width:parent.width;color:"transparent"}
@@ -957,13 +1011,6 @@ Item {
         //                }
         //            ]
         //        }
-        function addTask(index,task){
-            missionModel.get(index).tasks.append(task)
-        }
-
-        function addCor(index,task,cor){
-            missionModel.get(index).tasks.get(task).pValues.append(cor)
-        }
 
     }
     ListModel{
@@ -1000,6 +1047,7 @@ Item {
         for (var i = 0; i<taskModel.get(taskIndex).pValues.count;i++){
             corModel.append(taskModel.get(taskIndex).pValues.get(i))
         }
+        clearMapModels()
         updateDraw()
     }
 
@@ -1032,32 +1080,71 @@ Item {
         taskModel.remove(task)
     }
 
+
+    function addTask(index,task){
+        missionModel.get(index).tasks.append(task)
+    }
+
+    function definitionCheck(mission,task){
+        var corAmount = missionModel.get(mission).tasks.get(task).pValues.count
+        var type = missionModel.get(mission).tasks.get(task).geoType
+        if(["path","polygon"].indexOf(type)>-1)
+            return (corAmount>0)
+        else
+            return (corAmount===2)
+    }
+
+    function addCor(mission,task,cor){
+        missionModel.get(mission).tasks.get(task).pValues.append(cor)
+        missionModel.get(mission).tasks.get(task).defined = definitionCheck(mission,task)
+    }
+
     function removeCor(mission,task,cor){
         missionModel.get(mission).tasks.get(task).pValues.remove(cor)
+        missionModel.get(mission).tasks.get(task).defined = definitionCheck(mission,task)
+
         taskModel.update(mission)
         corModel.remove(cor)
+        clearMapModels()
         updateDraw()
-
+        addingTaskCor = editTaskBtn.checked&&(["circle","rectangle"].indexOf(selectedTaskType)==-1||corModel.count<2)
     }
 
     function updateDraw(){
-
         switch(selectedTaskType){
         case "path":
-            pathModel.clear()
-            for (var i = 0; i<corModel.count;i++){
-                pathModel.append(corModel.get(i))
+            markerModel.clear()
+            for (var j = 0; j<corModel.count;j++){
+                markerModel.append(corModel.get(j))
             }
-            taskPoly.update()
+            var corList = []
+            for (var i = 0; i<corModel.count;i++){
+                corList.push({"lat":corModel.get(i).cor.latitude,"lon":corModel.get(i).cor.longitude})
+            }
+            pathModel.append({"pPath": corList})
+
+
+            //taskPoly.update()
             break
+
         case "circle":
             if(corModel.count==1){
-                circleModel.set(0,{"cor":corModel.get(0).cor,"rad":0})
-                radiusPoly.setStart(corModel.get(0).cor)
-            }else
-                circleModel.setProperty(0,"rad",QtPositioning.coordinate(corModel.get(0).cor.latitude,corModel.get(0).cor.longitude).distanceTo(QtPositioning.coordinate(corModel.get(1).cor.latitude,corModel.get(1).cor.longitude)))
-                radiusPoly.path = []
+                tmpCircleRadius=0
                 distText.updateText("")
+                circleModel.append({"cor":corModel.get(0).cor,"rad":0})
+                radiusPoly.setStart(corModel.get(0).cor)
+            }else if(corModel.count==2){
+                var dist = QtPositioning.coordinate(corModel.get(0).cor.latitude,corModel.get(0).cor.longitude).distanceTo(QtPositioning.coordinate(corModel.get(1).cor.latitude,corModel.get(1).cor.longitude))
+                circleModel.append({"cor":corModel.get(0).cor,"rad":dist})
+                taskButtons.uncheckBtns()
+                addingTaskCor=false
+                radiusPoly.path = []
+                tmpCircleRadius=0
+                distText.updateText("")
+            }else if(corModel.count==0){
+                radiusPoly.path = []
+                tmpCircleRadius=0
+            }
             break
         case "rectangle":
             //

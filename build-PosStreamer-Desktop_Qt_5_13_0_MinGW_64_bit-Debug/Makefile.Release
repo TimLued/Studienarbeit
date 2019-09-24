@@ -114,11 +114,17 @@ compiler_rcc_clean:
 release/qrc_logfile.cpp: ../PosStreamer/logfile.qrc \
 		C:/Qt/5.13.0/mingw73_64/bin/rcc.exe \
 		../PosStreamer/jdrone4.txt \
+		../PosStreamer/trajectory1.txt \
+		../PosStreamer/trajectory5.txt \
 		../PosStreamer/jdrone3.txt \
 		../PosStreamer/jdroneV1.txt \
+		../PosStreamer/trajectory4.txt \
 		../PosStreamer/jdrone2.txt \
+		../PosStreamer/trajectory3.txt \
 		../PosStreamer/jdrone1.txt \
-		../PosStreamer/jwp.txt
+		../PosStreamer/jwp.txt \
+		../PosStreamer/trajectory2.txt \
+		../PosStreamer/trajectory6.txt
 	C:\Qt\5.13.0\mingw73_64\bin\rcc.exe -name logfile ..\PosStreamer\logfile.qrc -o release\qrc_logfile.cpp
 
 compiler_moc_predefs_make_all: release/moc_predefs.h
@@ -270,9 +276,11 @@ release/moc_clientapplication.cpp: ../PosStreamer/clientapplication.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtWidgets/qlistwidget.h \
 		../PosStreamer/possource.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/QObject \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/QDateTime \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qdatetime.h \
 		release/moc_predefs.h \
 		C:/Qt/5.13.0/mingw73_64/bin/moc.exe
-	C:\Qt\5.13.0\mingw73_64\bin\moc.exe $(DEFINES) --include "C:/Users/Timothy/Google Drive/Uni/Studienarbeit/github/Studienarbeit/build-PosStreamer-Desktop_Qt_5_13_0_MinGW_64_bit-Debug/release/moc_predefs.h" -IC:/Qt/5.13.0/mingw73_64/mkspecs/win32-g++ -I"C:/Users/Timothy/Google Drive/Uni/Studienarbeit/github/Studienarbeit/PosStreamer" -IC:/Qt/5.13.0/mingw73_64/include -IC:/Qt/5.13.0/mingw73_64/include/QtWidgets -IC:/Qt/5.13.0/mingw73_64/include/QtGui -IC:/Qt/5.13.0/mingw73_64/include/QtANGLE -IC:/Qt/5.13.0/mingw73_64/include/QtNetwork -IC:/Qt/5.13.0/mingw73_64/include/QtCore -I. -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++ -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/backward -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include-fixed -IC:/Qt/Tools/mingw730_64/x86_64-w64-mingw32/include ..\PosStreamer\clientapplication.h -o release\moc_clientapplication.cpp
+	C:\Qt\5.13.0\mingw73_64\bin\moc.exe $(DEFINES) --include "D:/Google Drive/Uni/Studienarbeit/github/Studienarbeit/build-PosStreamer-Desktop_Qt_5_13_0_MinGW_64_bit-Debug/release/moc_predefs.h" -IC:/Qt/5.13.0/mingw73_64/mkspecs/win32-g++ -I"D:/Google Drive/Uni/Studienarbeit/github/Studienarbeit/PosStreamer" -IC:/Qt/5.13.0/mingw73_64/include -IC:/Qt/5.13.0/mingw73_64/include/QtWidgets -IC:/Qt/5.13.0/mingw73_64/include/QtGui -IC:/Qt/5.13.0/mingw73_64/include/QtANGLE -IC:/Qt/5.13.0/mingw73_64/include/QtNetwork -IC:/Qt/5.13.0/mingw73_64/include/QtCore -I. -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++ -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/backward -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include-fixed -IC:/Qt/Tools/mingw730_64/x86_64-w64-mingw32/include ..\PosStreamer\clientapplication.h -o release\moc_clientapplication.cpp
 
 release/moc_clientsocket.cpp: ../PosStreamer/clientsocket.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/QObject \
@@ -329,7 +337,7 @@ release/moc_clientsocket.cpp: ../PosStreamer/clientsocket.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qobject_impl.h \
 		release/moc_predefs.h \
 		C:/Qt/5.13.0/mingw73_64/bin/moc.exe
-	C:\Qt\5.13.0\mingw73_64\bin\moc.exe $(DEFINES) --include "C:/Users/Timothy/Google Drive/Uni/Studienarbeit/github/Studienarbeit/build-PosStreamer-Desktop_Qt_5_13_0_MinGW_64_bit-Debug/release/moc_predefs.h" -IC:/Qt/5.13.0/mingw73_64/mkspecs/win32-g++ -I"C:/Users/Timothy/Google Drive/Uni/Studienarbeit/github/Studienarbeit/PosStreamer" -IC:/Qt/5.13.0/mingw73_64/include -IC:/Qt/5.13.0/mingw73_64/include/QtWidgets -IC:/Qt/5.13.0/mingw73_64/include/QtGui -IC:/Qt/5.13.0/mingw73_64/include/QtANGLE -IC:/Qt/5.13.0/mingw73_64/include/QtNetwork -IC:/Qt/5.13.0/mingw73_64/include/QtCore -I. -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++ -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/backward -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include-fixed -IC:/Qt/Tools/mingw730_64/x86_64-w64-mingw32/include ..\PosStreamer\clientsocket.h -o release\moc_clientsocket.cpp
+	C:\Qt\5.13.0\mingw73_64\bin\moc.exe $(DEFINES) --include "D:/Google Drive/Uni/Studienarbeit/github/Studienarbeit/build-PosStreamer-Desktop_Qt_5_13_0_MinGW_64_bit-Debug/release/moc_predefs.h" -IC:/Qt/5.13.0/mingw73_64/mkspecs/win32-g++ -I"D:/Google Drive/Uni/Studienarbeit/github/Studienarbeit/PosStreamer" -IC:/Qt/5.13.0/mingw73_64/include -IC:/Qt/5.13.0/mingw73_64/include/QtWidgets -IC:/Qt/5.13.0/mingw73_64/include/QtGui -IC:/Qt/5.13.0/mingw73_64/include/QtANGLE -IC:/Qt/5.13.0/mingw73_64/include/QtNetwork -IC:/Qt/5.13.0/mingw73_64/include/QtCore -I. -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++ -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/backward -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include-fixed -IC:/Qt/Tools/mingw730_64/x86_64-w64-mingw32/include ..\PosStreamer\clientsocket.h -o release\moc_clientsocket.cpp
 
 release/moc_possource.cpp: ../PosStreamer/possource.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/QObject \
@@ -384,9 +392,13 @@ release/moc_possource.cpp: ../PosStreamer/possource.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qvarlengtharray.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcontainerfwd.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qobject_impl.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/QDateTime \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qdatetime.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qshareddata.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qhash.h \
 		release/moc_predefs.h \
 		C:/Qt/5.13.0/mingw73_64/bin/moc.exe
-	C:\Qt\5.13.0\mingw73_64\bin\moc.exe $(DEFINES) --include "C:/Users/Timothy/Google Drive/Uni/Studienarbeit/github/Studienarbeit/build-PosStreamer-Desktop_Qt_5_13_0_MinGW_64_bit-Debug/release/moc_predefs.h" -IC:/Qt/5.13.0/mingw73_64/mkspecs/win32-g++ -I"C:/Users/Timothy/Google Drive/Uni/Studienarbeit/github/Studienarbeit/PosStreamer" -IC:/Qt/5.13.0/mingw73_64/include -IC:/Qt/5.13.0/mingw73_64/include/QtWidgets -IC:/Qt/5.13.0/mingw73_64/include/QtGui -IC:/Qt/5.13.0/mingw73_64/include/QtANGLE -IC:/Qt/5.13.0/mingw73_64/include/QtNetwork -IC:/Qt/5.13.0/mingw73_64/include/QtCore -I. -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++ -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/backward -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include-fixed -IC:/Qt/Tools/mingw730_64/x86_64-w64-mingw32/include ..\PosStreamer\possource.h -o release\moc_possource.cpp
+	C:\Qt\5.13.0\mingw73_64\bin\moc.exe $(DEFINES) --include "D:/Google Drive/Uni/Studienarbeit/github/Studienarbeit/build-PosStreamer-Desktop_Qt_5_13_0_MinGW_64_bit-Debug/release/moc_predefs.h" -IC:/Qt/5.13.0/mingw73_64/mkspecs/win32-g++ -I"D:/Google Drive/Uni/Studienarbeit/github/Studienarbeit/PosStreamer" -IC:/Qt/5.13.0/mingw73_64/include -IC:/Qt/5.13.0/mingw73_64/include/QtWidgets -IC:/Qt/5.13.0/mingw73_64/include/QtGui -IC:/Qt/5.13.0/mingw73_64/include/QtANGLE -IC:/Qt/5.13.0/mingw73_64/include/QtNetwork -IC:/Qt/5.13.0/mingw73_64/include/QtCore -I. -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++ -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include/c++/backward -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include -IC:/Qt/Tools/mingw730_64/lib/gcc/x86_64-w64-mingw32/7.3.0/include-fixed -IC:/Qt/Tools/mingw730_64/x86_64-w64-mingw32/include ..\PosStreamer\possource.h -o release\moc_possource.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -664,7 +676,8 @@ release/clientsocket.o: ../PosStreamer/clientsocket.cpp ../PosStreamer/clientsoc
 		C:/Qt/5.13.0/mingw73_64/include/QtNetwork/qsslkey.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtNetwork/qudpsocket.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtNetwork/qtnetworkversion.h \
-		../PosStreamer/possource.h
+		../PosStreamer/possource.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/QDateTime
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\clientsocket.o ..\PosStreamer\clientsocket.cpp
 
 release/main.o: ../PosStreamer/main.cpp ../PosStreamer/clientapplication.h \
@@ -807,6 +820,8 @@ release/main.o: ../PosStreamer/main.cpp ../PosStreamer/clientapplication.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtWidgets/qlistwidget.h \
 		../PosStreamer/possource.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/QObject \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/QDateTime \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qdatetime.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtWidgets/QApplication \
 		C:/Qt/5.13.0/mingw73_64/include/QtWidgets/qapplication.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcoreapplication.h \
@@ -956,6 +971,8 @@ release/clientapplication.o: ../PosStreamer/clientapplication.cpp ../PosStreamer
 		C:/Qt/5.13.0/mingw73_64/include/QtWidgets/qlistwidget.h \
 		../PosStreamer/possource.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/QObject \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/QDateTime \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qdatetime.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/QtCore \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/QtCoreDepends \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qabstractanimation.h \
@@ -975,7 +992,6 @@ release/clientapplication.o: ../PosStreamer/clientapplication.cpp ../PosStreamer
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcache.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcborarray.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcborvalue.h \
-		C:/Qt/5.13.0/mingw73_64/include/QtCore/qdatetime.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcborcommon.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/quuid.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcbormap.h \
@@ -1201,6 +1217,10 @@ release/possource.o: ../PosStreamer/possource.cpp ../PosStreamer/possource.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qvarlengtharray.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcontainerfwd.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qobject_impl.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/QDateTime \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qdatetime.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qshareddata.h \
+		C:/Qt/5.13.0/mingw73_64/include/QtCore/qhash.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/QtCore \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/QtCoreDepends \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qabstractanimation.h \
@@ -1210,11 +1230,9 @@ release/possource.o: ../PosStreamer/possource.cpp ../PosStreamer/possource.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qvariant.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qmap.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qdebug.h \
-		C:/Qt/5.13.0/mingw73_64/include/QtCore/qhash.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qtextstream.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qiodevice.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qlocale.h \
-		C:/Qt/5.13.0/mingw73_64/include/QtCore/qshareddata.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qset.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcontiguouscache.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qsharedpointer.h \
@@ -1233,7 +1251,6 @@ release/possource.o: ../PosStreamer/possource.cpp ../PosStreamer/possource.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcache.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcborarray.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcborvalue.h \
-		C:/Qt/5.13.0/mingw73_64/include/QtCore/qdatetime.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qcborcommon.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qregularexpression.h \
 		C:/Qt/5.13.0/mingw73_64/include/QtCore/qurl.h \

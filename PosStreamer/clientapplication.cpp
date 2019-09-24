@@ -178,7 +178,6 @@ bool ClientApplication::nextPos()
         out << line;
 
         QLocalSocket *clientConnection = server->nextPendingConnection();
-        connect(clientConnection, QOverload<QLocalSocket::LocalSocketError>::of(&QLocalSocket::error),this, &ClientApplication::serverError);
         connect(clientConnection, &QLocalSocket::disconnected, clientConnection, &QLocalSocket:: deleteLater);
         clientConnection->write(block);
         clientConnection->flush();
@@ -188,10 +187,5 @@ bool ClientApplication::nextPos()
         std::cerr << "Error: " << ex.what() << std::endl;
     }
     return true;
-}
-
-void ClientApplication::serverError()
-{
-    std::cout << server->errorString().toUtf8().constData() << std::endl;
 }
 

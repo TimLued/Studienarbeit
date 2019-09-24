@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_PosSource_t {
-    QByteArrayData data[7];
-    char stringdata0[67];
+    QByteArrayData data[8];
+    char stringdata0[65];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -36,13 +36,14 @@ QT_MOC_LITERAL(0, 0, 9), // "PosSource"
 QT_MOC_LITERAL(1, 10, 10), // "posUpdated"
 QT_MOC_LITERAL(2, 21, 0), // ""
 QT_MOC_LITERAL(3, 22, 9), // "startStop"
-QT_MOC_LITERAL(4, 32, 11), // "setupSource"
-QT_MOC_LITERAL(5, 44, 10), // "setRunning"
-QT_MOC_LITERAL(6, 55, 11) // "readNextPos"
+QT_MOC_LITERAL(4, 32, 8), // "loadFile"
+QT_MOC_LITERAL(5, 41, 4), // "file"
+QT_MOC_LITERAL(6, 46, 10), // "setRunning"
+QT_MOC_LITERAL(7, 57, 7) // "uavTick"
 
     },
     "PosSource\0posUpdated\0\0startStop\0"
-    "setupSource\0setRunning\0readNextPos"
+    "loadFile\0file\0setRunning\0uavTick"
 };
 #undef QT_MOC_LITERAL
 
@@ -64,17 +65,17 @@ static const uint qt_meta_data_PosSource[] = {
 
  // slots: name, argc, parameters, tag, flags
        3,    2,   42,    2, 0x0a /* Public */,
-       4,    2,   47,    2, 0x0a /* Public */,
-       5,    2,   52,    2, 0x0a /* Public */,
-       6,    0,   57,    2, 0x08 /* Private */,
+       4,    1,   47,    2, 0x0a /* Public */,
+       6,    1,   50,    2, 0x0a /* Public */,
+       7,    0,   53,    2, 0x08 /* Private */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::QString,    2,
 
  // slots: parameters
     QMetaType::Void, QMetaType::Bool, QMetaType::Bool,    2,    2,
-    QMetaType::Void, QMetaType::QString, QMetaType::Int,    2,    2,
-    QMetaType::Void, QMetaType::Bool, QMetaType::Int,    2,    2,
+    QMetaType::Void, QMetaType::QString,    5,
+    QMetaType::Void, QMetaType::Bool,    2,
     QMetaType::Void,
 
        0        // eod
@@ -88,9 +89,9 @@ void PosSource::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         switch (_id) {
         case 0: _t->posUpdated((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 1: _t->startStop((*reinterpret_cast< bool(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
-        case 2: _t->setupSource((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 3: _t->setRunning((*reinterpret_cast< bool(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 4: _t->readNextPos(); break;
+        case 2: _t->loadFile((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 3: _t->setRunning((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 4: _t->uavTick(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {

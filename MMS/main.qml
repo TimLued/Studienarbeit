@@ -176,8 +176,9 @@ ApplicationWindow  {
                 }
 
                  if (movingTaskIndex!=-1){
-                     corModel.set(movingTaskIndex,{"pos":mousePos})
-                     taskPoly.update()
+                     //pathModel.set(movingTaskIndex,{"pos":mousePos})
+                     pathModel.get(0).set(movingTaskIndex,{"pos":mousePos})
+                     markerModel.set(movingTaskIndex,{"pos":mousePos})
                  }
 
                  if(missionPanel.addingTaskCor){
@@ -211,7 +212,7 @@ ApplicationWindow  {
                     wpModel.append({"name":"","lat":mousePos.latitude,"lon":mousePos.longitude})
                     onMapWpModel.update()
                 }else if(mouse.button === Qt.LeftButton &&missionPanel.addingTaskCor){
-                    missionPanel.addCor(mousePos)
+                    missionPanel.addMouseCor(mousePos)
                 }
             }
 
@@ -743,18 +744,79 @@ ApplicationWindow  {
 
         }
 
-        //models for displaying whole taskButtons
+        //models for displaying whole tasks
         ListModel{id:pathModel}
+        ListModel{id:markerModel}
         ListModel{id:circleModel}//{cor1,cor2}
         ListModel{id:rectModel}//{cor1,cor2}
         ListModel{id:polyModel}//{polyPath:[cor,cor]
 
+        ListModel{id:corModel}
+
         MapItemView{
             id: pathType
             model: pathModel
+
             delegate: MapPolyline {
-                line.color: "#1962ff"
+                line.color: "black"
                 line.width: 2
+                Component.onCompleted: {
+                    var corList = []
+                    for (var i=0;i<pPath.count;i++){
+                        corList.push(QtPositioning.coordinate(pPath.get(i).lat,pPath.get(i).lon))
+                    }
+                    path=corList
+                }
+            }
+        }
+
+        MapItemView {
+            id: taskMarker
+            model:markerModel
+
+            delegate: MapQuickItem {
+                coordinate: QtPositioning.coordinate(cor.latitude,cor.longitude)
+                anchorPoint.x: 10
+                anchorPoint.y: 10
+
+                sourceItem:Rectangle{
+                    color: "#3EC6AA"
+                    width: 20
+                    height: 20
+                    radius: width/2
+                    Text {
+                        text: index!=-1? (index + 1) : ""
+                        color: "white"
+                        anchors.centerIn: parent
+                        font.bold: true
+                    }
+
+                    MouseArea{
+                        anchors.fill:parent
+                        onClicked: {
+                            if (mouse.button === Qt.LeftButton) {
+
+
+                                //ON SAME POSITION OF OTHER
+
+//                                for (var i=0;i<taskMarker.count;i++){
+//                                    if(i!==movingWpIndex){
+//                                        if(coordinate.distanceTo(QtPositioning.coordinate(wpModel.get(i).lat,wpModel.get(i).lon)) < 30){
+//                                            onMapWpModel.set(movingWpIndex,{"name":onMapWpModel.get(movingWpIndex).name,"lat":wpModel.get(i).lat,"lon":wpModel.get(i).lon})
+//                                            routeEditPoly.update()
+//                                            wpModel.set(movingWpIndex,{"name":wpModel.get(movingWpIndex).name,"lat":wpModel.get(i).lat,"lon":wpModel.get(i).lon})
+//                                            break
+//                                        }
+//                                    }
+//                                }
+
+                                movingTaskIndex=movingTaskIndex==-1?index:-1
+                            }
+                        }
+                    }
+
+                }
+
             }
         }
 
@@ -765,13 +827,13 @@ ApplicationWindow  {
             delegate: MapCircle {
                 id:circle
                 center:QtPositioning.coordinate(cor.latitude,cor.longitude)
-                radius:(rad==0&&missionPanel.addingTaskCor)?win.tmpCircleRadius:rad
+                radius:(missionPanel.addingTaskCor||!rad)?win.tmpCircleRadius:rad
                 color: "#eb8328"
                 opacity: 0.5
                 border.width: 3
                 border.color: "black"
                 onCenterChanged: radiusPoly.setStart(center)
-                onRadiusChanged: distText.updateText(Algos.roundNumber(radius,0))
+                onRadiusChanged: if(missionPanel.addingTaskCor&&missionPanel.selectedTaskType=="circle") distText.updateText(Algos.roundNumber(radius,0))
             }
 
         }
@@ -780,7 +842,10 @@ ApplicationWindow  {
             coordinate: win.mousePos
             sourceItem: Text{
                 id:distText
-                function updateText(r){text = r + " m"}
+                function updateText(r){
+                    text = r + " m"
+                    visible = r!==""
+                }
             }
             anchorPoint.x:-sourceItem.width
             anchorPoint.y:sourceItem.height
@@ -824,58 +889,6 @@ ApplicationWindow  {
             }
         }
 
-
-        //Editing taskMarker
-//        MapCircle{
-//            id:taskCircle
-//            property bool hasCenter: false
-//            color: "#ffae17"
-//            opacity: 0.3
-//            border.width: 2
-//            border.color: color
-//            function updateCenter(p1){
-//                center = p1
-//                hasCenter = true
-//            }
-//            function updateRadius(p2){
-//                radius = center.distanceTo(p2)
-//            }
-//        }
-
-        MapItemView {
-            id: taskMarker
-            model:pathModel
-            delegate: MapQuickItem {
-                coordinate: QtPositioning.coordinate(cor.latitude,cor.longitude)
-                anchorPoint.x: 10
-                anchorPoint.y: 10
-
-                sourceItem:Rectangle{
-                    color: "#3EC6AA"
-                    width: 20
-                    height: 20
-                    radius: width/2
-                    Text {
-                        text: index!=-1? (index + 1) : ""
-                        color: "white"
-                        anchors.centerIn: parent
-                        font.bold: true
-                    }
-
-                    MouseArea{
-                        anchors.fill:parent
-                        onClicked: {
-                            if (mouse.button === Qt.LeftButton) {
-                                movingTaskIndex=movingTaskIndex==-1?index:-1
-                            }
-                        }
-                    }
-
-                }
-
-            }
-        }
-
         MapPolyline{
             id: taskPoly
             line.color: "black"
@@ -883,15 +896,12 @@ ApplicationWindow  {
 
             function update(){
                 var mPath = []
-                for (var i = 0; i<corModel.count;i++){
-                    mPath.push(QtPositioning.coordinate(corModel.get(i).cor.latitude,corModel.get(i).cor.longitude))
+                for (var i = 0; i<pathModel.count;i++){
+                    mPath.push(QtPositioning.coordinate(pathModel.get(i).cor.latitude,pathModel.get(i).cor.longitude))
                 }
                 path = mPath
             }
         }
-
-        ListModel{id:corModel}
-
 
         //Waypoints
         MapPolyline{

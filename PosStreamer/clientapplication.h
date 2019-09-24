@@ -34,7 +34,6 @@ private:
     PosSource* source;
     QThread* t;
     QLocalServer *server;
-    void serverError();
     QList<QString> buffer;
     QTimer *timer;
 

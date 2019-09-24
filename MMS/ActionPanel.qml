@@ -139,7 +139,7 @@ Item {
                 dronePanel.shown = false
                 notifyPanel.hide()
                 wpPanel.hide()
-                missionPanel.hide
+                missionPanel.hide()
             }
         }
 
