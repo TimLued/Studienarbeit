@@ -12,5 +12,17 @@
         <file>trajectory4.txt</file>
         <file>trajectory5.txt</file>
         <file>trajectory6.txt</file>
+        <file>jdrone5.txt</file>
+        <file>jdrone6.txt</file>
+        <file>jdrone7.txt</file>
+        <file>jdrone8.txt</file>
+        <file>jdrone9.txt</file>
+        <file>jdroneV2.txt</file>
+        <file>jdroneV3.txt</file>
+        <file>jdroneV4.txt</file>
+        <file>jdroneV5.txt</file>
+        <file>jdroneV6.txt</file>
+        <file>jdroneV7.txt</file>
+        <file>jdroneV8.txt</file>
     </qresource>
 </RCC>

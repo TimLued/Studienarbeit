@@ -991,45 +991,29 @@ Item {
     //Models for creating NEW missions with tasks
     ListModel{
         id: missionModel
-        //        ListElement{
-        //            ID:"Mission 1"
-        //            tasks:[
-        //                ListElement{
-        //                    ID:"Task 1"
-        //                    geoType:"rechteck"
-        //                    taskType:"aufklären"
-        //                    pValues:[
-        //                        ListElement{
-        //                            lat: 54.31
-        //                            lon: 10.12
-        //                        },
-        //                        ListElement{
-        //                            lat: 54.50
-        //                            lon: 10.10
-        //                        }
-        //                    ]
-        //                }
-        //            ]
-        //        }
+//        ListElement{
+//            ID: "Mission 1"
+//            tasks:[
+//                ListElement{
+//                    ID:         "Kreis 1"
+//                    geoType:    "kreis"
+//                    taskType:   "Ziel aufklären"
+//                    defined:    false
+//                    pValues:[
+//                        ListElement{
+//                            cor: QtPositioning.coordinate()
+//                        },
+//                        ListElement{
+//                            cor: QtPositioning.coordinate()
+//                        }
+//                    ]
+//                }
+//            ]
+//        }
 
     }
     ListModel{
         id: taskModel
-        //        ListElement{
-        //            ID:"Task 1"
-        //            geoType:"rect"
-        //            taskType:"aufklären"
-        //            pValues:[
-        //                ListElement{
-        //                    lat: 54.31
-        //                    lon: 10.12
-        //                },
-        //                ListElement{
-        //                    lat: 54.50
-        //                    lon: 10.10
-        //                }
-        //            ]
-        //        }
 
         function update(missionIndex){
             taskModel.clear()
