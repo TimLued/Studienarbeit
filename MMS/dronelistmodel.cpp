@@ -29,137 +29,208 @@ bool DroneListModel::updateDrone(const QString & jInfo){
         auto it_wp = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
                 return obj.id() == jDroneInfo["drone"].toString();});
 
-        Waypoint wp{jDroneInfo["id"].toString(),jDroneInfo["lat"].toString(),jDroneInfo["lon"].toString()};
-        QModelIndex ix = index(it_wp - mDrones.begin());
+    Waypoint wp{jDroneInfo["id"].toString(),jDroneInfo["lat"].toString(),jDroneInfo["lon"].toString()};
+    QModelIndex ix = index(it_wp - mDrones.begin());
 
-        if(it_wp != mDrones.end()){
-            if(jDroneInfo.keys().contains("reset")) {
-                it_wp->resetRoute();//delete old data
-                it_wp->setChangeNote("Flugplanupdate für " + it_wp->id());
-                emit dataChanged(ix, ix, QVector<int>{changeNoteRole});
-            }
-            it_wp->appendRoute(QVariant::fromValue(wp));
-            it_wp->appendRoutePath(coord);
-        }else{//should occur just once per drone
-            createDrone(jDroneInfo["drone"].toString());
-            mDrones.last().appendRoute(QVariant::fromValue(wp));
-            mDrones.last().appendRoutePath(coord);
+    if(it_wp != mDrones.end()){
+        if(jDroneInfo.keys().contains("reset")) {
+            it_wp->resetRoute();//delete old data
+            it_wp->setChangeNote("Flugplanupdate für " + it_wp->id());
+            emit dataChanged(ix, ix, QVector<int>{changeNoteRole});
         }
-
-        emit dataChanged(ix, ix, QVector<int>{WaypointRole,RouteRole});
-        return true;
+        it_wp->appendRoute(QVariant::fromValue(wp));
+        it_wp->appendRoutePath(coord);
+    }else{//should occur just once per drone
+        createDrone(jDroneInfo["drone"].toString());
+        mDrones.last().appendRoute(QVariant::fromValue(wp));
+        mDrones.last().appendRoutePath(coord);
     }
 
-    if(it != mDrones.end()){
+    emit dataChanged(ix, ix, QVector<int>{WaypointRole,RouteRole});
+    return true;
+}
 
-        /*append
+if(it != mDrones.end()){
+
+    /*append
         DETERMINE bearing and speed from coordinates
         std::cout<<it->getHistory().last().value<QGeoCoordinate>().azimuthTo(coord)<<std::endl;
         50Hz updates
         std::cout<<coord.distanceTo(it->getHistory().last().value<QGeoCoordinate>())/0.02<<std::endl;
         */
 
-        //save all data
-        QVariantList infoNames = it -> getInfoNames(); //load old list (so if later value is not updated)
-        QVariantList infoValues = it -> getInfoValues();
+    //save all data
+    QVariantList infoNames = it -> getInfoNames(); //load old list (so if later value is not updated)
+    QVariantList infoValues = it -> getInfoValues();
 
-        QRegExp re("[+-]?\\d*\\.?\\d+");
+    QRegExp re("[+-]?\\d*\\.?\\d+");
 
-        foreach(const QString& key, jDroneInfo.keys()) {
+    foreach(const QString& key, jDroneInfo.keys()) {
 
-            QString val = jDroneInfo.value(key).toString();
-            if (re.exactMatch(val)) val = QString::number(val.toDouble(),'f',2); //round if info is numerical
+        QString val = jDroneInfo.value(key).toString();
+        if (re.exactMatch(val)) val = QString::number(val.toDouble(),'f',2); //round if info is numerical
 
-            if (!infoNames.contains(key)) {//no double allowed
-                infoNames << key;
-                if(key=="altitude") val+=" -";
-                infoValues << val;
-            }else{//Update value
-
-                if(key.toLower()=="altitude"){
-
-
-                    double oVal  = infoValues[infoNames.indexOf(key)].toString().split(" ")[0].toDouble();
-                    double diff = std::abs(val.toDouble()-oVal);
-
-
-                    val+= diff<0.01? " -" : (val.toDouble()-oVal>0? " \u2227":" \u2228");
-
-                };
-                infoValues[infoNames.indexOf(key)] = val;
-            }
-
-        }
-
-        QModelIndex ix = index(it - mDrones.begin());
-
-        //hot leg
-        QList<QGeoCoordinate> wpList = it->getRoutePathInCoordinates();
-        double bearCheck,wpAzi,projectedAzi,distToLastWp;
-        if (wpList.length()>2){
-            for(int i=(it->getLastLeg()!=-1?it->getLastLeg():0);i<wpList.length()-1;i++){
-
-                wpAzi = wpList[i].azimuthTo(wpList[i+1]);
-                distToLastWp = it->pos().distanceTo(wpList[i]);
-                projectedAzi = it->pos().atDistanceAndAzimuth(-distToLastWp,angle).azimuthTo(wpList[i+1]);
-
-                bearCheck = abs(wpAzi-projectedAzi);
-                if (bearCheck<1&&(i+2)<wpList.length()){
-                    if(it->pos().distanceTo(wpList[i+1])<200){
-                        //next leg
-                        it->setLeg({wpList[i+1],wpList[i+2]},i+2);
-                        it->setLastLeg(i);
-                    }else{
-                        it->setLeg({wpList[i],wpList[i+1]},i+1);
-                        it->setLastLeg(i);
-                    }
-                    break;
-                }else if((bearCheck<1&&(i+1)<wpList.length())){
-                    it->setLeg({wpList[i],wpList[i+1]},i+1);
-                    it->setLastLeg(i);
-                    break;
-                }
-                if(i==wpList.length()-2){
-                    //no leg
-                    it->setLeg({},-1);
-                    it->setLastLeg(-1);
-                }
-            }
-        }else{it->setLeg({},-1);}
-
-        emit dataChanged(ix, ix, QVector<int>{HotLegRole});
-
-
-        //speed
-        double distance = it->pos().distanceTo(coord);
-        double time =it->getTimeStamp().time().msecsTo(timestamp.time());
-        double speed = distance / time * 1000;
-        if (speed < 0) speed = it->getSpeed();
-        QString mSpeed = QString::number(speed,'f',2);
-
-        if (!infoNames.contains("speed")) {//save to infos
-            infoNames << "speed";
-            infoValues << mSpeed;
+        if (!infoNames.contains(key)) {//no double allowed
+            infoNames << key;
+            if(key=="altitude") val+=" -";
+            infoValues << val;
         }else{//Update value
-            infoValues[infoNames.indexOf("speed")] = mSpeed;
-        }
-        if (!infoNames.contains("Hot Leg")){
-            infoNames << "Hot Leg";
-            infoValues << (it->getLegIndex()!=-1?it->getLeg().value<Waypoint>().id:"-");
-        }else{//update
-            infoValues[infoNames.indexOf("Hot Leg")]= it->getLegIndex()!=-1?it->getLeg().value<Waypoint>().id:"-";
-        }
-        if (!infoNames.contains("ALL")){
-            infoNames << "ALL";
-            infoValues << "ALL";
+
+            if(key.toLower()=="altitude"){
+
+
+                double oVal  = infoValues[infoNames.indexOf(key)].toString().split(" ")[0].toDouble();
+                double diff = std::abs(val.toDouble()-oVal);
+
+
+                val+= diff<0.01? " -" : (val.toDouble()-oVal>0? " \u2227":" \u2228");
+
+            };
+            infoValues[infoNames.indexOf(key)] = val;
         }
 
-        Data data{coord, angle, speed,timestamp, infoNames,infoValues};
-        return setData(ix, QVariant::fromValue(data), PosRole);
-    }else{
-        //create
-        return createDrone(id);
     }
+
+    QModelIndex ix = index(it - mDrones.begin());
+
+    //hot leg
+    QList<QGeoCoordinate> wpList = it->getRoutePathInCoordinates();
+
+
+    //double bearCheck,wpAzi,projectedAzi,distToLastWp;
+
+    if (wpList.length()>2){
+        //distance to wp getting smaller
+        QList<QPair<int,double>>distCandidates;
+
+        if (it->getHistory().length()-2>-1){
+            QGeoCoordinate oldPos = it->getHistory()[it->getHistory().length()-2].value<QGeoCoordinate>();
+            double oldDist,newDist;
+            for (int j=(it->getLastLeg()!=-1?it->getLastLeg():0);j<wpList.length();j++){
+                oldDist = oldPos.distanceTo(wpList[j]);
+                newDist = it->pos().distanceTo(wpList[j]);
+                if(newDist-oldDist<0.) distCandidates.append(qMakePair(j,newDist));
+            }
+        }
+
+        //Course
+        if(distCandidates.length()>0){
+            QList<QPair<int,double>>courseCandidates = {};
+
+            for(int i=0;i<distCandidates.length();i++){
+                int index = distCandidates[i].first;
+                if(index!=0){
+                    double courseWpWp = wpList[index-1].azimuthTo(wpList[index]);
+                    double droneToLastWp = it->pos().distanceTo(wpList[index-1]);
+                    double droneCourse = it->pos().atDistanceAndAzimuth(-droneToLastWp,angle).azimuthTo(wpList[index]);
+                    if(abs(droneCourse-courseWpWp)<45) courseCandidates.append(qMakePair(index,distCandidates[i].second));
+                }
+            }
+
+            //get closest or next in chain
+            if(courseCandidates.length()>0){
+                int indexOfDist = 0;
+                double smallestDist=0.;
+                for(int k=0;k<courseCandidates.length();k++){
+                    if(smallestDist==0.||smallestDist-courseCandidates[k].second>0){
+                        smallestDist = courseCandidates[k].second;
+                        indexOfDist = courseCandidates[k].first;
+                        if(courseCandidates[k].first==it->getLastLeg()+1) break;
+                    }
+                }
+
+                //dist < 200
+                if(smallestDist<200 && indexOfDist+1<wpList.length()){//next leg
+                    it->setLeg({wpList[indexOfDist],wpList[indexOfDist+1]},indexOfDist+1);
+                    it->setLastLeg(indexOfDist);
+                }else{
+                    it->setLeg({wpList[indexOfDist-1],wpList[indexOfDist]},indexOfDist-1);
+                    it->setLastLeg(indexOfDist-1);
+                }
+            }else{
+                it->setLeg({},-1);
+                it->setLastLeg(-1);
+            }
+        }else{
+            it->setLeg({},-1);
+            it->setLastLeg(-1);
+        }
+
+
+
+
+
+        //        for(int i=(it->getLastLeg()!=-1?it->getLastLeg():0);i<wpList.length()-1;i++){
+        //            //Start from last leg
+        //            wpAzi = wpList[i].azimuthTo(wpList[i+1]);
+        //            distToLastWp = it->pos().distanceTo(wpList[i]);
+        //            projectedAzi = it->pos().atDistanceAndAzimuth(-distToLastWp,angle).azimuthTo(wpList[i+1]);
+
+        //            bearCheck = abs(wpAzi-projectedAzi);
+        //            std::cout<<bearCheck<<std::endl;
+        //            if (bearCheck<180 && (i+2)<wpList.length()){
+        //                if(it->pos().distanceTo(wpList[i+1])<200){
+        //                    //next leg
+        //                    it->setLeg({wpList[i+1],wpList[i+2]},i+2);
+        //                    it->setLastLeg(i);
+        //                }else{
+        //                    it->setLeg({wpList[i],wpList[i+1]},i+1);
+        //                    it->setLastLeg(i);
+        //                }
+        //                break;
+        //            }else if((bearCheck<180 && (i+1)<wpList.length())){
+        //                it->setLeg({wpList[i],wpList[i+1]},i+1);
+        //                it->setLastLeg(i);
+        //                break;
+        //            }
+        //            if(i==wpList.length()-2){
+        //                //no leg
+        //                it->setLeg({},-1);
+        //                it->setLastLeg(-1);
+        //            }
+        //        }
+
+
+
+    }else{
+//        it->setLeg({},-1);
+//        it->setLastLeg(-1);
+    }
+
+
+    emit dataChanged(ix, ix, QVector<int>{HotLegRole});
+
+
+    //speed
+    double distance = it->pos().distanceTo(coord);
+    double time =it->getTimeStamp().time().msecsTo(timestamp.time());
+    double speed = distance / time * 1000;
+    if (speed < 0) speed = it->getSpeed();
+    QString mSpeed = QString::number(speed,'f',2);
+
+    if (!infoNames.contains("speed")) {//save to infos
+        infoNames << "speed";
+        infoValues << mSpeed;
+    }else{//Update value
+        infoValues[infoNames.indexOf("speed")] = mSpeed;
+    }
+    if (!infoNames.contains("Hot Leg")){
+        infoNames << "Hot Leg";
+        infoValues << (it->getLegIndex()!=-1?it->getLeg().value<Waypoint>().id:"-");
+    }else{//update
+        infoValues[infoNames.indexOf("Hot Leg")]= it->getLegIndex()!=-1?it->getLeg().value<Waypoint>().id:"-";
+    }
+    if (!infoNames.contains("ALL")){
+        infoNames << "ALL";
+        infoValues << "ALL";
+    }
+
+    Data data{coord, angle, speed,timestamp, infoNames,infoValues};
+    return setData(ix, QVariant::fromValue(data), PosRole);
+}else{
+//create
+return createDrone(id);
+}
 }
 
 bool DroneListModel::createDrone(const QString & id){
@@ -249,11 +320,11 @@ bool DroneListModel::setSelectedInfoList(const QString&id,QString info){
     emit dataChanged(ix, ix, QVector<int>{InfoSelectedNamesRole,InfoSelectedValuesRole});
 
 
-//    if(!it->addSelectedInfoNames(info)) return false;
-//    int index = it->getInfoNames().indexOf(info);
-//    QString val = it->getInfoValues().value(index).toString();
-//    it->addSelectedInfoValues(val);
-//    emit dataChanged(ix, ix, QVector<int>{InfoSelectedNamesRole,InfoSelectedValuesRole});
+    //    if(!it->addSelectedInfoNames(info)) return false;
+    //    int index = it->getInfoNames().indexOf(info);
+    //    QString val = it->getInfoValues().value(index).toString();
+    //    it->addSelectedInfoValues(val);
+    //    emit dataChanged(ix, ix, QVector<int>{InfoSelectedNamesRole,InfoSelectedValuesRole});
 
     return true;
 }
@@ -376,7 +447,7 @@ QVariant DroneListModel::data(const QModelIndex &index, int role) const {
         case TrackingRole:
             return it.trackingHistory();
         case ShowingRouteRole:
-             return it.showingRoute();
+            return it.showingRoute();
         case HistoryRole:
             return it.getHistory();
         case FollowRole:

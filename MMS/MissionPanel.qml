@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtPositioning 5.13
 import "algos.js" as Algos
+import Controller 1.0
 
 Item {
     id: content
@@ -44,7 +45,6 @@ Item {
         missionModel.clear()
         taskModel.clear()
         corModel.clear()
-        //taskPoly.update()
         dronesModel.clear()
         clearMapModels()
     }
@@ -52,16 +52,20 @@ Item {
         circleModel.clear()
         pathModel.clear()
         markerModel.clear()
-        //taskPoly.update()
         rectModel.clear()
         polyModel.clear()
+        distText.updateText("")
+    }
+    function showRaddius(rad){
+        radiusTextField.rad = rad
     }
 
     function addDrone(drone){if(!modelContains(dronesModel,drone)) dronesModel.append({"ID":drone})}
 
     function addMouseCor(cor){
-        //set cors in missionmodel missionindex&taskindex
-        if(["circle","rectangle"].indexOf(selectedTaskType)==-1||corModel.count<2){
+        if(["circle","rectangle"].indexOf(selectedTaskType)==-1||corModel.count<2){           
+            if(selectedTaskType=="rectangle" && corModel.count==1) //topLeft, bottomRight error
+                if(cor.latitude>corModel.get(0).cor.latitude || cor.longitude<corModel.get(0).cor.longitude) return false
             addCor(missionListView.currentIndex,taskListView.currentIndex,{"cor":QtPositioning.coordinate(cor.latitude,cor.longitude)})
             taskModel.update(missionListView.currentIndex)
             updateCorModel(taskListView.currentIndex)
@@ -69,7 +73,7 @@ Item {
     }
 
     width: 200
-    height: background.childrenRect.height
+    height: !editing? 390: 350-droneHeader.height-mainContent.spacing*2
 
     Rectangle{
         id:background
@@ -345,7 +349,12 @@ Item {
                                 if (currentIndex != -1){
                                     selectedTaskType = taskModel.get(currentIndex).geoType
                                     updateCorModel(taskListView.currentIndex)
-                                }else corModel.clear()
+                                }else{
+                                    selectedTaskType = ""
+                                    corModel.clear()
+                                    clearMapModels()
+
+                                }
                             }
 
                             delegate: Rectangle{
@@ -412,9 +421,10 @@ Item {
                                     MouseArea{
                                         anchors.fill:parent
                                         onClicked: {
-                                            taskListView.currentIndex=index
                                             removeTask(missionListView.currentIndex,index)
-                                            taskListView.currentIndex=-1
+                                            parent.parent.parent.currentIndex=-1
+                                            corModel.clear()
+                                            clearMapModels()
                                         }
                                     }
                                 }
@@ -490,15 +500,7 @@ Item {
                                 parent.checked = !parent.checked
                                 addingTaskCor = parent.checked
 
-                                if(parent.checked){
-                                    addTask(missionListView.currentIndex,{"ID":newName(taskModel,"Path"),
-                                                             "geoType":"path",
-                                                             "taskType":"",
-                                                             "defined":false,
-                                                             "pValues":[]})
-                                    taskModel.update(missionListView.currentIndex)
-                                }
-                                taskListView.currentIndex = taskModel.count-1
+                                if(parent.checked) addTask(missionListView.currentIndex,"Path")
                             }
                         }
                     }
@@ -530,15 +532,7 @@ Item {
                                 parent.checked = !parent.checked
                                 addingTaskCor = parent.checked
 
-                                if(parent.checked){
-                                    addTask(missionListView.currentIndex,{"ID":newName(taskModel,"Circle"),
-                                                "geoType":"circle",
-                                                "taskType":"",
-                                                "defined":false,
-                                                "pValues":[]})
-                                    taskModel.update(missionListView.currentIndex)
-                                }
-                                taskListView.currentIndex = taskModel.count-1
+                                if(parent.checked) addTask(missionListView.currentIndex,"Circle")
                             }
                         }
                     }
@@ -567,6 +561,8 @@ Item {
                             if(!parent.checked) parent.parent.uncheckBtns()
                             parent.checked = !parent.checked
                             addingTaskCor = parent.checked
+
+                            if(parent.checked) addTask(missionListView.currentIndex,"Rectangle")
                         }
                     }
                 }
@@ -595,6 +591,8 @@ Item {
                             if(!parent.checked) parent.parent.uncheckBtns()
                             parent.checked = !parent.checked
                             addingTaskCor = parent.checked
+
+                            if(parent.checked) addTask(missionListView.currentIndex,"Polygon")
                         }
                     }
                 }
@@ -662,11 +660,40 @@ Item {
                 }
 
 
-                Text{
-                    id:typeText
-                    width: parent.width
-                    property string type: (taskListView.currentIndex!=-1)? taskModel.get(taskListView.currentIndex).geoType:""
-                    text: "<b>Typ</b>: " + type
+                Row{
+                    spacing: 5
+                    Text{
+                        id:typeText
+                        property string type: (taskListView.currentIndex!=-1)? taskModel.get(taskListView.currentIndex).geoType:""
+                        text: "<b>Typ</b>: " + type
+                    }
+                    Text{text: "R:";visible: selectedTaskType=="circle"}
+                    TextField{
+                        id:radiusTextField
+                        property double rad
+                        visible: selectedTaskType=="circle"
+                        background: Rectangle {border.width: 0}
+                        selectByMouse: true
+                        validator: DoubleValidator{bottom:0;top:10000}
+                        height: typeText.height
+                        leftPadding: 0
+                        padding: 0
+                        text: Algos.roundNumber(rad,1)
+                        onVisibleChanged: {
+                            if(selectedTaskType=="circle"&& missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).defined){
+                                var pos1 = missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).pValues.get(0).cor
+                                var pos2 = missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).pValues.get(1).cor
+                                rad = QtPositioning.coordinate(pos1.latitude,pos1.longitude).distanceTo(QtPositioning.coordinate(pos2.latitude,pos2.longitude))
+                            }
+                        }
+
+                        onEditingFinished:{
+                            missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).pValues.set(1,{"cor":QtPositioning.coordinate(corModel.get(0).cor.latitude,corModel.get(0).cor.longitude).atDistanceAndAzimuth(text,0)})
+                            taskModel.update(missionListView.currentIndex)
+                            updateCorModel(taskListView.currentIndex)
+                        }
+                    }
+                    Text{text: "m";visible: selectedTaskType=="circle"}
                 }
 
 
@@ -814,7 +841,8 @@ Item {
                 spacing: 5
 
                 Rectangle{
-                    height:content.editing? 0:40
+                    height: 40
+                    visible: !content.editing
                     width: parent.parent.width - addBtn.width - parent.spacing
                     color:"white"
                     border.width: 1
@@ -888,8 +916,8 @@ Item {
 
                 Rectangle{
                     id: addBtn
-                    property bool checked:false
                     visible: !content.editing
+                    property bool checked:false
                     width: 30
                     height: width
                     radius: width / 2
@@ -916,10 +944,8 @@ Item {
 
             }
 
-
-
             Row{
-                spacing: 15
+                spacing: 10
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 RoundButton{
@@ -936,11 +962,12 @@ Item {
                         addingTaskCor=false
                         taskButtons.uncheckBtns()
                         for (var i = 0; i<taskModel.count;i++){
+                            var corList = []
                             if(taskModel.get(i).defined){
                                 var data = taskModel.get(i).pValues
                                 switch(taskModel.get(i).geoType){
                                 case "path":
-                                    var corList = []
+
                                     for (var j = 0; j<data.count;j++){
                                         corList.push({"lat":data.get(j).cor.latitude,"lon":data.get(j).cor.longitude})
                                     }
@@ -951,11 +978,14 @@ Item {
                                     circleModel.append({"cor":data.get(0).cor,"rad":dist})
                                     break
                                 case "rectangle":
-
+                                    rectModel.append({"cor1":data.get(0).cor,"cor2":data.get(1).cor})
                                     break
 
                                 case "polygon":
-
+                                    for (var k = 0; k<data.count;k++){
+                                        corList.push({"lat":data.get(k).cor.latitude,"lon":data.get(k).cor.longitude})
+                                    }
+                                    polyModel.append({"pPath": corList})
                                     break
                                 }
                             }
@@ -971,18 +1001,27 @@ Item {
                     palette {button: "#3EC6AA"}
                     font.pixelSize:20
                     text: "\u2713"
-                    onClicked: hide()
+                    onClicked: {
+                        //send missionS to taskReceiver
+
+
+                        var jString = '{"drone": ['
+                        for (var i=0;i<wpModel.count;i++){
+                            jString+='{"id":"'+wpModel.get(i).name+'","lat":"'+wpModel.get(i).lat + '","lon":"'+wpModel.get(i).lon+ '","drone":"'+droneId+(i===0?'","drone":"1':"")+'"}'
+                            if(i<wpModel.count-1) jString += ','
+                        }
+                        jString+=']}'
+                        controller.task = jString
+
+
+                        hide()
+                    }
+                }
+
+                Controller{
+                    id: controller
                 }
             }
-
-
-
-
-
-
-
-
-            Rectangle{height:4;width:parent.width;color:"transparent"}
 
         }
 
@@ -1066,7 +1105,13 @@ Item {
 
 
     function addTask(index,task){
-        missionModel.get(index).tasks.append(task)
+        missionModel.get(index).tasks.append({"ID":newName(taskModel,task),
+                                                 "geoType":task.toLowerCase(),
+                                                 "taskType":"",
+                                                 "defined":false,
+                                                 "pValues":[]})
+        taskModel.update(index)
+        taskListView.currentIndex = taskModel.count-1
     }
 
     function definitionCheck(mission,task){
@@ -1086,7 +1131,6 @@ Item {
     function removeCor(mission,task,cor){
         missionModel.get(mission).tasks.get(task).pValues.remove(cor)
         missionModel.get(mission).tasks.get(task).defined = definitionCheck(mission,task)
-
         taskModel.update(mission)
         corModel.remove(cor)
         clearMapModels()
@@ -1094,21 +1138,21 @@ Item {
         addingTaskCor = editTaskBtn.checked&&(["circle","rectangle"].indexOf(selectedTaskType)==-1||corModel.count<2)
     }
 
+
     function updateDraw(){
+        var corList = []
+
         switch(selectedTaskType){
         case "path":
-            markerModel.clear()
+            //markerModel.clear()
             for (var j = 0; j<corModel.count;j++){
                 markerModel.append(corModel.get(j))
             }
-            var corList = []
             for (var i = 0; i<corModel.count;i++){
                 corList.push({"lat":corModel.get(i).cor.latitude,"lon":corModel.get(i).cor.longitude})
             }
             pathModel.append({"pPath": corList})
 
-
-            //taskPoly.update()
             break
 
         case "circle":
@@ -1131,10 +1175,26 @@ Item {
             }
             break
         case "rectangle":
-            //
+            switch(corModel.count){
+            case 1:
+                rectModel.append({"cor1":corModel.get(0).cor,"cor2":corModel.get(0).cor})
+                tmpRectCor =QtPositioning.coordinate(corModel.get(0).cor.latitude,corModel.get(0).cor.longitude)
+                break
+            case 2:
+                rectModel.append({"cor1":corModel.get(0).cor,"cor2":corModel.get(1).cor})
+                taskButtons.uncheckBtns()
+                addingTaskCor=false
+                tmpRectCor =QtPositioning.coordinate(corModel.get(0).cor.latitude,corModel.get(0).cor.longitude)
+                break
+            }
+
             break
         case "polygon":
-            //
+            for (var k = 0; k<corModel.count;k++){
+                corList.push({"lat":corModel.get(k).cor.latitude,"lon":corModel.get(k).cor.longitude})
+            }
+            polyModel.append({"pPath": corList})
+
             break
         }
     }

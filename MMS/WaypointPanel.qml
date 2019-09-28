@@ -233,12 +233,13 @@ Item {
             }
             jString+=']}'
             controller.task = jString
+
+            hide()
         }
     }
 
     Controller{
         id: controller
-
     }
 
 

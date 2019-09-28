@@ -39,7 +39,6 @@ public:
         for (int i=historyRange.first;i<(historyRange.second==-2?history.length():historyRange.second+1);i++){
           history_list << QVariant::fromValue(history[i]);
         }
-        //history_list << QVariant::fromValue(mPos);
         return history_list;
     }
 
@@ -300,10 +299,10 @@ private:
     QVariantList mRoute;
     QList<QGeoCoordinate> mRoutePath;
     QList<QGeoCoordinate> mHotLeg;
-    int mHotLegIndex;
-    int lastLegIndex = 0;
+    int mHotLegIndex = -1;
+    int lastLegIndex = -1;
     QString mGroup;
-    RangeType historyRange;
+    RangeType historyRange = qMakePair(0,-2);
     QVariantList mShortHistroy;
     QList<QString> changeNote;
 

@@ -22,8 +22,8 @@ ApplicationWindow  {
     property int zoomOffset: 0
     property variant droneCorList
     property int movingWpIndex:-1
-    property int movingTaskIndex:-1
     property double tmpCircleRadius
+    property variant tmpRectCor
     property variant mousePos:QtPositioning.coordinate(0,0)
 
 
@@ -175,18 +175,14 @@ ApplicationWindow  {
                     wpModel.set(movingWpIndex,{"name":wpModel.get(movingWpIndex).name,"lat":mousePos.latitude,"lon":mousePos.longitude})
                 }
 
-                 if (movingTaskIndex!=-1){
-                     //pathModel.set(movingTaskIndex,{"pos":mousePos})
-                     pathModel.get(0).set(movingTaskIndex,{"pos":mousePos})
-                     markerModel.set(movingTaskIndex,{"pos":mousePos})
-                 }
-
-                 if(missionPanel.addingTaskCor){
-                     if(missionPanel.selectedTaskType=="circle"&& corModel.count==1){
+                if(missionPanel.addingTaskCor){
+                    if(missionPanel.selectedTaskType=="circle"&& corModel.count==1){
                         tmpCircleRadius = QtPositioning.coordinate(corModel.get(0).cor.latitude,corModel.get(0).cor.longitude).distanceTo(mousePos)
                         radiusPoly.update(mousePos)
-                     }
-                 }
+                    }else if(missionPanel.selectedTaskType=="rectangle"&& corModel.count==1){
+                        tmpRectCor = mousePos
+                    }
+                }
 
                 if(wpPanel.addingWaypoints||missionPanel.addingTaskCor){
                     cursorShape = Qt.CrossCursor
@@ -207,7 +203,6 @@ ApplicationWindow  {
                     nn = mouseY
                     nnBear = map.bearing
                     if (!map.rotating) map.droneRotAniLock = false
-
                 }else if(mouse.button === Qt.LeftButton && wpPanel.addingWaypoints){
                     wpModel.append({"name":"","lat":mousePos.latitude,"lon":mousePos.longitude})
                     onMapWpModel.update()
@@ -357,9 +352,11 @@ ApplicationWindow  {
                     onHistoryEndChanged: updateHistory()
 
                     function updateHistory(){
-                        dynamicPath.path = []
-                        threadRunning = true
-                        mWorker.sendMessage(historyInfo)
+                        if(trackingHistory){
+                            dynamicPath.path = []
+                            threadRunning = true
+                            mWorker.sendMessage(historyInfo)
+                        }
                     }
 
                     property string note:noteInfo
@@ -770,6 +767,26 @@ ApplicationWindow  {
             }
         }
 
+        MapItemView{
+            id: polyType
+            model:polyModel
+
+            delegate: MapPolygon {
+                color: "blue"
+                opacity: 0.3
+                border.width: 2
+                border.color:"black"
+
+                Component.onCompleted: {
+                    var corList = []
+                    for (var i=0;i<pPath.count;i++){
+                        corList.push(QtPositioning.coordinate(pPath.get(i).lat,pPath.get(i).lon))
+                    }
+                    path=corList
+                }
+            }
+        }
+
         MapItemView {
             id: taskMarker
             model:markerModel
@@ -794,24 +811,9 @@ ApplicationWindow  {
                     MouseArea{
                         anchors.fill:parent
                         onClicked: {
-                            if (mouse.button === Qt.LeftButton) {
+                            if (mouse.button === Qt.LeftButton && missionPanel.addingTaskCor)
+                                missionPanel.addMouseCor(coordinate)
 
-
-                                //ON SAME POSITION OF OTHER
-
-//                                for (var i=0;i<taskMarker.count;i++){
-//                                    if(i!==movingWpIndex){
-//                                        if(coordinate.distanceTo(QtPositioning.coordinate(wpModel.get(i).lat,wpModel.get(i).lon)) < 30){
-//                                            onMapWpModel.set(movingWpIndex,{"name":onMapWpModel.get(movingWpIndex).name,"lat":wpModel.get(i).lat,"lon":wpModel.get(i).lon})
-//                                            routeEditPoly.update()
-//                                            wpModel.set(movingWpIndex,{"name":wpModel.get(movingWpIndex).name,"lat":wpModel.get(i).lat,"lon":wpModel.get(i).lon})
-//                                            break
-//                                        }
-//                                    }
-//                                }
-
-                                movingTaskIndex=movingTaskIndex==-1?index:-1
-                            }
                         }
                     }
 
@@ -829,11 +831,14 @@ ApplicationWindow  {
                 center:QtPositioning.coordinate(cor.latitude,cor.longitude)
                 radius:(missionPanel.addingTaskCor||!rad)?win.tmpCircleRadius:rad
                 color: "#eb8328"
-                opacity: 0.5
+                opacity: 0.3
                 border.width: 3
                 border.color: "black"
                 onCenterChanged: radiusPoly.setStart(center)
-                onRadiusChanged: if(missionPanel.addingTaskCor&&missionPanel.selectedTaskType=="circle") distText.updateText(Algos.roundNumber(radius,0))
+                onRadiusChanged: if(missionPanel.addingTaskCor&&missionPanel.selectedTaskType=="circle"){
+                                     distText.updateText(Algos.roundNumber(radius,0))
+                                     missionPanel.showRaddius(radius)
+                                 }
             }
 
         }
@@ -864,42 +869,16 @@ ApplicationWindow  {
         }
 
 
-
         MapItemView{
             id: rectType
             model:rectModel
             delegate: MapRectangle {
                 color: "#38d93e"
                 border.width: 2
-                border.color: color
+                border.color: "black"
                 opacity: 0.3
-                topLeft:QtPositioning.coordinate(lat1,lon1)
-                bottomRight:QtPositioning.coordinate(lat2,lon2)
-            }
-        }
-
-
-        MapItemView{
-            id: polyType
-            model:polyModel
-
-            delegate: MapPolygon {
-                color: "#38d93e"
-                path:polyPath
-            }
-        }
-
-        MapPolyline{
-            id: taskPoly
-            line.color: "black"
-            line.width: 1
-
-            function update(){
-                var mPath = []
-                for (var i = 0; i<pathModel.count;i++){
-                    mPath.push(QtPositioning.coordinate(pathModel.get(i).cor.latitude,pathModel.get(i).cor.longitude))
-                }
-                path = mPath
+                topLeft:QtPositioning.coordinate(cor1.latitude,cor1.longitude)
+                bottomRight:(!cor2||missionPanel.addingTaskCor)?win.tmpRectCor:QtPositioning.coordinate(cor2.latitude,cor2.longitude)
             }
         }
 
@@ -948,8 +927,7 @@ ApplicationWindow  {
                                     wpModel.append({"name":"","lat":coordinate.latitude,"lon":coordinate.longitude})
                                     onMapWpModel.update()
 
-                                }else {
-
+                                }else{
                                     if (movingWpIndex!=-1){
                                         for (var i=0;i<wpModel.count;i++){
                                             if(i!==movingWpIndex){
