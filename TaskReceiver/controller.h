@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QThread>
-
+#include <tasksender.h>
 #include <listener.h>
 
 class Controller: public QObject
@@ -13,7 +13,6 @@ public:
     QString currentTask;
 
     Controller(){
-
         TaskListener = new Listener;
         t = new QThread;
         TaskListener->moveToThread(t);
@@ -21,6 +20,13 @@ public:
         connect(TaskListener, SIGNAL(taskReceived(QString)), this, SLOT(newCurrentTask(QString)));
         connect(t, &QThread::finished, t, &QThread::deleteLater);
         t->start();
+
+        taskSender = new TaskSender;
+        t2 = new QThread;
+        taskSender->moveToThread(t2);
+        connect(TaskListener,SIGNAL(taskReceived(QString)),taskSender,SLOT(appendTask(QString)));
+        //connect(taskSender,SIGNAL(taskSent()),this,SIGNAL(taskSent()));
+        t2->start();
     }
 
 private slots:
@@ -30,11 +36,14 @@ private slots:
     }
 private:
     Listener* TaskListener;
+    TaskSender* taskSender;
     QThread* t;
+    QThread* t2;
 
 signals:
     void startListening();
     void newTask();
+    void taskSent();
 };
 
 

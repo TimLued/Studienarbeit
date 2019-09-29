@@ -9,6 +9,29 @@
 #include <QStringList>
 typedef QPair<int,int> RangeType;
 
+struct Task{
+    Q_GADGET
+    Q_PROPERTY(QString id MEMBER id)
+    Q_PROPERTY(QString mission MEMBER mission)
+    Q_PROPERTY(QString geoType MEMBER geoType)
+    Q_PROPERTY(QString taskType MEMBER taskType)
+    Q_PROPERTY(QGeoCoordinate pos MEMBER pos)
+public:
+    QString id;
+    QString mission;
+    QString geoType;
+    QString taskType;
+    QGeoCoordinate pos;
+    Task(const QString& id="", const QString& mission="",const QString& geoType="",const QString& taskType="",const QGeoCoordinate& pos = QGeoCoordinate(0,0)){
+        this->id = id;
+        this->mission = mission;
+        this->geoType = geoType;
+        this->taskType = taskType;
+        this->pos = pos;
+    }
+};
+Q_DECLARE_METATYPE(Task)
+
 class Drone
 {
 public:
@@ -281,6 +304,24 @@ public:
         markInList = !markInList;
     }
 
+    bool appendTask(Task task){
+        mTasks.append(task);
+        return true;
+    }
+
+    void clearMission(QString mission){
+        for(int i=mTasks.count()-1;i>0;i--){
+            if(mTasks[i].mission== mission) mTasks.removeAt(i);
+        }
+    }
+
+    QVariantList getTasks() const{
+        QVariantList tasks;
+        for (int i=0;i<mTasks.length();i++){
+            tasks.append(QVariant::fromValue(mTasks[i]));
+        }
+        return tasks;
+    }
 
 private:
     QString mId;
@@ -297,6 +338,7 @@ private:
     QVariantList mSelectedInfoNames;
     QVariantList mSelectedInfoValues;
     QVariantList mRoute;
+    QList<Task> mTasks;
     QList<QGeoCoordinate> mRoutePath;
     QList<QGeoCoordinate> mHotLeg;
     int mHotLegIndex = -1;

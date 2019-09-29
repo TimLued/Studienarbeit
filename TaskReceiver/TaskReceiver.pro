@@ -9,7 +9,8 @@ SOURCES += \
         listener.cpp \
         main.cpp \
         tasklist.cpp \
-        taskmodel.cpp
+        taskmodel.cpp \
+        tasksender.cpp
 
 RESOURCES += qml.qrc
 
@@ -22,4 +23,5 @@ HEADERS += \
     controller.h \
     listener.h \
     tasklist.h \
-    taskmodel.h
+    taskmodel.h \
+    tasksender.h

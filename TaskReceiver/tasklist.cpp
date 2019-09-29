@@ -28,7 +28,7 @@ void TaskList::appendTask(QString data)
 {
     emit preTaskAppended();
     TaskItem task;
-    task.done = false;
+    task.sent = false;
     task.text = data;
     mTasks.append(task);
     emit postTaskAppended();

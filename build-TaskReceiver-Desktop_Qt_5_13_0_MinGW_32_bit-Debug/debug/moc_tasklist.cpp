@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_TaskList_t {
-    QByteArrayData data[10];
-    char stringdata0[115];
+    QByteArrayData data[11];
+    char stringdata0[109];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -41,12 +41,13 @@ QT_MOC_LITERAL(5, 58, 5), // "index"
 QT_MOC_LITERAL(6, 64, 15), // "postTaskRemoved"
 QT_MOC_LITERAL(7, 80, 10), // "appendTask"
 QT_MOC_LITERAL(8, 91, 4), // "data"
-QT_MOC_LITERAL(9, 96, 18) // "removeFinishedTask"
+QT_MOC_LITERAL(9, 96, 10), // "removeTask"
+QT_MOC_LITERAL(10, 107, 1) // "i"
 
     },
     "TaskList\0preTaskAppended\0\0postTaskAppended\0"
     "preTaskRemoved\0index\0postTaskRemoved\0"
-    "appendTask\0data\0removeFinishedTask"
+    "appendTask\0data\0removeTask\0i"
 };
 #undef QT_MOC_LITERAL
 
@@ -71,7 +72,7 @@ static const uint qt_meta_data_TaskList[] = {
 
  // slots: name, argc, parameters, tag, flags
        7,    1,   50,    2, 0x0a /* Public */,
-       9,    0,   53,    2, 0x0a /* Public */,
+       9,    1,   53,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void,
@@ -81,7 +82,7 @@ static const uint qt_meta_data_TaskList[] = {
 
  // slots: parameters
     QMetaType::Void, QMetaType::QString,    8,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   10,
 
        0        // eod
 };
@@ -97,7 +98,7 @@ void TaskList::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         case 2: _t->preTaskRemoved((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 3: _t->postTaskRemoved(); break;
         case 4: _t->appendTask((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 5: _t->removeFinishedTask(); break;
+        case 5: _t->removeTask((*reinterpret_cast< int(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {

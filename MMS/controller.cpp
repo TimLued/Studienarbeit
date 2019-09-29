@@ -22,7 +22,6 @@ Controller::Controller(QObject *parent):
     connect(t1, &QThread::finished, t1, &QThread::deleteLater);
     t1->start();
 
-
     taskSender = new TaskSender;
     t2 = new QThread;
     taskSender->moveToThread(t2);

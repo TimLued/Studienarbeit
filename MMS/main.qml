@@ -6,6 +6,7 @@ import QtPositioning 5.13
 import QtLocation 5.13
 import QtQuick.Particles 2.13
 import "algos.js" as Algos
+import Controller 1.0
 
 ApplicationWindow  {
     id: win
@@ -180,7 +181,8 @@ ApplicationWindow  {
                         tmpCircleRadius = QtPositioning.coordinate(corModel.get(0).cor.latitude,corModel.get(0).cor.longitude).distanceTo(mousePos)
                         radiusPoly.update(mousePos)
                     }else if(missionPanel.selectedTaskType=="rectangle"&& corModel.count==1){
-                        tmpRectCor = mousePos
+                        if(rectModel.get(0).cor1.latitude>mousePos.latitude&&rectModel.get(0).cor1.longitude<mousePos.longitude)
+                            tmpRectCor = mousePos
                     }
                 }
 
@@ -837,7 +839,7 @@ ApplicationWindow  {
                 onCenterChanged: radiusPoly.setStart(center)
                 onRadiusChanged: if(missionPanel.addingTaskCor&&missionPanel.selectedTaskType=="circle"){
                                      distText.updateText(Algos.roundNumber(radius,0))
-                                     missionPanel.showRaddius(radius)
+                                     missionPanel.showRadius(radius)
                                  }
             }
 
@@ -974,7 +976,6 @@ ApplicationWindow  {
         fieldOfView: map.fieldOfView
         z: map.z + 1
 
-        WaypointPanel{id: wpPanel}
 
         ListModel {//in order to change order without violatioing active model
             id: wpModel
@@ -992,15 +993,14 @@ ApplicationWindow  {
             }
         }
 
-
         DronePanel{id:dronePanel}
         ActionPanel{id:actionPanel}
         NotificationPanel{id:notifyPanel}
+        WaypointPanel{id: wpPanel}
         MissionPanel{id: missionPanel;z:100}
-
     }
 
-
+    Controller{id: controller}
 
 }
 

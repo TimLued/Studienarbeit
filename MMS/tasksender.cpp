@@ -18,7 +18,7 @@ void TaskSender::appendTask(QString taskInfo)
 bool TaskSender::sendTask()
 {
     try {
-        if(m_task.count()==0){
+        if(m_task.length()==0){
             QLocalSocket *clientConnection = server->nextPendingConnection();
             clientConnection->disconnectFromServer();
             return false;

@@ -6,7 +6,7 @@
 
 struct TaskItem{
     QString text;
-    bool done;
+    bool sent;
 };
 
 class TaskList : public QObject

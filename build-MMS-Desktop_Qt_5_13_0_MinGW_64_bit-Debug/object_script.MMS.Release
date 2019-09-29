@@ -6,6 +6,7 @@ release/posupdater.o
 release/tasksender.o
 release/qrc_qml.o
 release/moc_controller.o
+release/moc_drone.o
 release/moc_dronelistmodel.o
 release/moc_grouplistmodel.o
 release/moc_posupdater.o

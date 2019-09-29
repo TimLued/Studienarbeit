@@ -30,9 +30,7 @@ int main(int argc, char *argv[])
     QObject::connect(&c, &Controller::newTask, [&taskList, &c]() {
         //current task in json format
         QJsonObject jsonResponse = QJsonDocument::fromJson(c.currentTask.toUtf8()).object();
-        if(jsonResponse.keys().contains("drone")){//Waypoint task
-            taskList.appendTask(c.currentTask);
-        }
+        taskList.appendTask(c.currentTask);
     });
 
     c.startListening();

@@ -894,7 +894,7 @@ Item{
                             anchors.fill:parent
                             enabled: droneItem.height !=small
                             onClicked: {
-                                missionPanel.show(true)
+                                missionPanel.show(true,idInfo)
                             }
                         }
                         height: 20

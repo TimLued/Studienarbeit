@@ -6,6 +6,7 @@
         <file>TimeSlider.qml</file>
         <file>NotificationPanel.qml</file>
         <file>MissionPanel.qml</file>
+        <file>MessageBox.qml</file>
         <file>main.qml</file>
         <file>DronePanel.qml</file>
         <file>Drone.qml</file>

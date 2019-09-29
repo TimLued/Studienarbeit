@@ -17,7 +17,7 @@ Listener::Listener(QObject *parent):
 }
 
 void Listener::requestTask(){
-    timer->start(2);
+    timer->start(1);
 }
 
 void Listener::recon(){
@@ -29,7 +29,7 @@ void Listener::recon(){
     //keep on connecting
 
     if (!socket->waitForConnected(3000) || socket->state() != QAbstractSocket::ConnectedState){
-        timer->start(500);
+        timer->start(100);
     }
     } catch (...) {
     }
@@ -48,5 +48,4 @@ void Listener::readTask(){
     in >> newData;
 
     emit taskReceived(newData);
-
 }

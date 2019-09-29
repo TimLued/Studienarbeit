@@ -2,7 +2,6 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtPositioning 5.13
 import "algos.js" as Algos
-import Controller 1.0
 
 Item {
     id: content
@@ -18,17 +17,50 @@ Item {
         rightMargin: 80
     }
 
-    function show(edit){
+    function show(edit,droneID=""){
         content.visible = true
         editing=edit
         clearAllModels()
-        if(editing){//load drone missions
 
+
+
+        if(editing){//load drone missions
+            var missionData = dronemodel.getTasks(droneID)
+            var tmpAddedMissions=[]
+            for(var i=0;i<missionData.length;i++){
+                var missionIndex = tmpAddedMissions.indexOf(missionData[i].mission)
+                if(missionIndex===-1) {
+                    missionModel.append({ID:missionData[i].mission,tasks:[]})
+                    tmpAddedMissions.push(missionData[i].mission);
+                    missionIndex = missionModel.length-1
+                }
+
+                var taskIndex=-1
+                for(var t=0;t<missionModel.get(missionIndex).tasks.count;t++){
+                    if(missionData[i].id===missionModel.get(missionIndex).tasks.get(t).ID) taskIndex=t
+                }
+                if(taskIndex===-1){
+                    missionModel.get(missionIndex).tasks.append(
+                                {"ID":missionData[i].id,
+                                    "geoType":missionData[i].geoType,
+                                    "taskType":missionData[i].taskType,
+                                    "defined":false,
+                                    "pValues":[]})
+                    taskIndex=missionModel.get(missionIndex).tasks.count-1
+                }
+
+                missionModel.get(missionIndex).tasks.get(taskIndex).pValues.append({"cor":missionData[i].pos})
+                missionModel.get(missionIndex).tasks.get(taskIndex).defined=definitionCheck(missionIndex,taskIndex)
+                taskModel.update(missionIndex)
+            }
+            missionListView.currentIndex=-1
+            taskListView.currentIndex=-1
 
         }else{
-            missionModel.append({ID:"Mission",tasks:[]})
+            missionModel.append({ID:"New Mission",tasks:[]})
             taskModel.update(0)
             missionListView.currentIndex=0
+
         }
     }
     function hide(){
@@ -56,14 +88,14 @@ Item {
         polyModel.clear()
         distText.updateText("")
     }
-    function showRaddius(rad){
+    function showRadius(rad){
         radiusTextField.rad = rad
     }
 
     function addDrone(drone){if(!modelContains(dronesModel,drone)) dronesModel.append({"ID":drone})}
 
     function addMouseCor(cor){
-        if(["circle","rectangle"].indexOf(selectedTaskType)==-1||corModel.count<2){           
+        if(["circle","rectangle"].indexOf(selectedTaskType)==-1||corModel.count<2){
             if(selectedTaskType=="rectangle" && corModel.count==1) //topLeft, bottomRight error
                 if(cor.latitude>corModel.get(0).cor.latitude || cor.longitude<corModel.get(0).cor.longitude) return false
             addCor(missionListView.currentIndex,taskListView.currentIndex,{"cor":QtPositioning.coordinate(cor.latitude,cor.longitude)})
@@ -737,61 +769,61 @@ Item {
                                 width: parent.width
                                 height: loader.height
 
-                                    Text{
-                                        id: keyText
-                                        anchors.left:parent.left
-                                        text: "Cor " + (index+1)
-                                        wrapMode: Text.WrapAnywhere
-                                        width: geoListView.columnWidths
-                                        renderType: Text.NativeRendering
+                                Text{
+                                    id: keyText
+                                    anchors.left:parent.left
+                                    text: "Cor " + (index+1)
+                                    wrapMode: Text.WrapAnywhere
+                                    width: geoListView.columnWidths
+                                    renderType: Text.NativeRendering
+                                }
+                                Loader {
+                                    id:loader
+                                    anchors{
+                                        left:keyText.right
+                                        leftMargin: 2
                                     }
-                                    Loader {
-                                        id:loader
-                                        anchors{
-                                            left:keyText.right
-                                            leftMargin: 2
-                                        }
-                                        sourceComponent: columnSeparator
-                                        height: keyText.height>valueText.height?keyText.height:valueText.height
+                                    sourceComponent: columnSeparator
+                                    height: keyText.height>valueText.height?keyText.height:valueText.height
+                                }
+                                Text{
+                                    id: valueText
+                                    anchors{
+                                        left:loader.right
+                                        right: corDelBtn.left
+                                        leftMargin: 4
                                     }
-                                    Text{
-                                        id: valueText
-                                        anchors{
-                                            left:loader.right
-                                            right: corDelBtn.left
-                                            leftMargin: 4
-                                        }
-                                        text:  Algos.roundNumber(cor.latitude,3) +"," + Algos.roundNumber(cor.longitude,3)
-                                        wrapMode: Text.WrapAnywhere
-                                        renderType: Text.NativeRendering
+                                    text:  Algos.roundNumber(cor.latitude,3) +"," + Algos.roundNumber(cor.longitude,3)
+                                    wrapMode: Text.WrapAnywhere
+                                    renderType: Text.NativeRendering
+                                }
+                                Text{
+                                    id:corDelBtn
+                                    anchors{
+                                        right:parent.right
+                                        rightMargin: 10
                                     }
-                                    Text{
-                                        id:corDelBtn
-                                        anchors{
-                                            right:parent.right
-                                            rightMargin: 10
-                                        }
-                                        text: "X"
-                                        color: "#FF5733"
-                                        height: parent.height
-                                        verticalAlignment: Text.AlignVCenter
-                                        MouseArea{
-                                            anchors.fill:parent
-                                            onClicked: {
-                                                removeCor(missionListView.currentIndex,taskListView.currentIndex,index)
+                                    text: "X"
+                                    color: "#FF5733"
+                                    height: parent.height
+                                    verticalAlignment: Text.AlignVCenter
+                                    MouseArea{
+                                        anchors.fill:parent
+                                        onClicked: {
+                                            removeCor(missionListView.currentIndex,taskListView.currentIndex,index)
 
-                                            }
                                         }
                                     }
+                                }
 
-                                    Component {
-                                        id: columnSeparator
-                                        Rectangle {
-                                            width: 1
-                                            color: "black"
-                                            opacity: 0.3
-                                        }
+                                Component {
+                                    id: columnSeparator
+                                    Rectangle {
+                                        width: 1
+                                        color: "black"
+                                        opacity: 0.3
                                     }
+                                }
                             }
 
 
@@ -1003,52 +1035,91 @@ Item {
                     text: "\u2713"
                     onClicked: {
                         //send missionS to taskReceiver
-
+                        if(dronesModel.count==0){
+                            msgBox.show("No drones selected!")
+                            return false
+                        }
 
                         var jString = '{"drone": ['
-                        for (var i=0;i<wpModel.count;i++){
-                            jString+='{"id":"'+wpModel.get(i).name+'","lat":"'+wpModel.get(i).lat + '","lon":"'+wpModel.get(i).lon+ '","drone":"'+droneId+(i===0?'","drone":"1':"")+'"}'
-                            if(i<wpModel.count-1) jString += ','
+                        var droneNrCounter = -1
+                        for (var m=0;m<missionModel.count;m++){
+
+                            var tasks = missionModel.get(m).tasks
+
+                            for (var d=0;d<dronesModel.count;d++){//each drone
+
+                                for (var t=0;t<tasks.count;t++){//each task
+
+                                    var pos = tasks.get(t).pValues
+                                    for (var p=0;p<pos.count;p++){
+                                        //get new Missio Name
+
+                                        if(!editing){//new Mission, get new Mission name
+                                            var droneMissions = dronemodel.getTasks(dronesModel.get(d).ID)
+                                            var nr = 1
+                                            var name = "Mission " + nr
+                                            restart:
+                                            for(var s =0;s<droneMissions.count;s++){
+                                                if(droneMissions[s].mission === name){
+                                                    nr+=1
+                                                    name = "Mission " + nr
+                                                    continue restart
+                                                }
+                                            }
+                                        }
+
+                                        //Sent NR. ???
+                                        jString+='{"mission":"'+(editing?missionModel.get(m).ID:name)
+                                                +'","drone":"'+dronesModel.get(d).ID
+                                                +'","id":"'+tasks.get(t).ID
+                                                +'","geoType":"'+tasks.get(t).geoType
+                                                +'","taskType":"'+tasks.get(t).taskType
+                                                +'","lat":"'+pos.get(p).cor.latitude
+                                                +'","lon":"'+pos.get(p).cor.longitude
+                                                +'","new":'+(droneNrCounter===d?0:1)+''
+                                        jString+=(m<missionModel.count-1||d<dronesModel.count-1||t<tasks.count-1||p<pos.count-1)?"},":"}"
+                                        droneNrCounter = d
+                                    }
+                                }
+                            }
                         }
                         jString+=']}'
                         controller.task = jString
-
-
                         hide()
                     }
                 }
 
-                Controller{
-                    id: controller
-                }
+
             }
 
         }
 
     }
 
+
+
     //Models for creating NEW missions with tasks
     ListModel{
         id: missionModel
-//        ListElement{
-//            ID: "Mission 1"
-//            tasks:[
-//                ListElement{
-//                    ID:         "Kreis 1"
-//                    geoType:    "kreis"
-//                    taskType:   "Ziel aufklären"
-//                    defined:    false
-//                    pValues:[
-//                        ListElement{
-//                            cor: QtPositioning.coordinate()
-//                        },
-//                        ListElement{
-//                            cor: QtPositioning.coordinate()
-//                        }
-//                    ]
-//                }
-//            ]
-//        }
+        //        ListElement{
+        //            ID: "Mission 1"
+        //            tasks:[
+        //                ListElement{
+        //                    ID:         "Kreis 1"
+        //                    geoType:    "kreis"
+        //                    taskType:   "Ziel aufklären"
+        //                    defined:    false
+        //                    pValues:[
+        //                        ListElement{
+        //                            cor: QtPositioning.coordinate()
+        //                        },
+        //                        ListElement{
+        //                            cor: QtPositioning.coordinate()
+        //                        }
+        //                    ]
+        //                }
+        //            ]
+        //        }
 
     }
     ListModel{
@@ -1199,7 +1270,6 @@ Item {
         }
     }
 
-
-
+    MessageBox{id:msgBox}
 
 }

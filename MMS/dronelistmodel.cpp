@@ -5,6 +5,7 @@
 #include <cmath>
 #include <QDateTime>
 #include <iostream>
+#include <QString>
 
 DroneListModel::DroneListModel(QObject *parent):QAbstractListModel(parent) {}
 
@@ -24,41 +25,49 @@ bool DroneListModel::updateDrone(const QString & jInfo){
     auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
             return obj.id() == id;});
 
-    // loading waypoints
+    // loading missions & waypoints
     if(jDroneInfo.keys().contains("drone")){
-        auto it_wp = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+        auto it_task = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
                 return obj.id() == jDroneInfo["drone"].toString();});
+    QModelIndex ix = index(it_task - mDrones.begin());
 
-    Waypoint wp{jDroneInfo["id"].toString(),jDroneInfo["lat"].toString(),jDroneInfo["lon"].toString()};
-    QModelIndex ix = index(it_wp - mDrones.begin());
+    if(jDroneInfo.keys().contains("mission")){
 
-    if(it_wp != mDrones.end()){
-        if(jDroneInfo.keys().contains("reset")) {
-            it_wp->resetRoute();//delete old data
-            it_wp->setChangeNote("Flugplanupdate für " + it_wp->id());
+        Task task{id,
+                 jDroneInfo["mission"].toString(),
+                 jDroneInfo["geoType"].toString(),
+                 jDroneInfo["taskType"].toString(),
+                 coord};
+        if(jDroneInfo["new"]==1){
+            it_task->clearMission(jDroneInfo["mission"].toString());
+            it_task->setChangeNote("Auftragsänderung für " + it_task->id());
             emit dataChanged(ix, ix, QVector<int>{changeNoteRole});
         }
-        it_wp->appendRoute(QVariant::fromValue(wp));
-        it_wp->appendRoutePath(coord);
-    }else{//should occur just once per drone
-        createDrone(jDroneInfo["drone"].toString());
-        mDrones.last().appendRoute(QVariant::fromValue(wp));
-        mDrones.last().appendRoutePath(coord);
-    }
+        it_task->appendTask(task);
 
-    emit dataChanged(ix, ix, QVector<int>{WaypointRole,RouteRole});
+    }else{
+        Waypoint wp{jDroneInfo["id"].toString(),jDroneInfo["lat"].toString(),jDroneInfo["lon"].toString()};
+        if(it_task != mDrones.end()){
+            if(jDroneInfo.keys().contains("reset")) {
+                it_task->resetRoute();//delete old data
+                it_task->setChangeNote("Flugplanupdate für " + it_task->id());
+                emit dataChanged(ix, ix, QVector<int>{changeNoteRole});
+            }
+            it_task->appendRoute(QVariant::fromValue(wp));
+            it_task->appendRoutePath(coord);
+        }else{//should occur just once per drone
+            createDrone(jDroneInfo["drone"].toString());
+            mDrones.last().appendRoute(QVariant::fromValue(wp));
+            mDrones.last().appendRoutePath(coord);
+        }
+
+        emit dataChanged(ix, ix, QVector<int>{WaypointRole,RouteRole});
+    }
     return true;
 }
 
+
 if(it != mDrones.end()){
-
-    /*append
-        DETERMINE bearing and speed from coordinates
-        std::cout<<it->getHistory().last().value<QGeoCoordinate>().azimuthTo(coord)<<std::endl;
-        50Hz updates
-        std::cout<<coord.distanceTo(it->getHistory().last().value<QGeoCoordinate>())/0.02<<std::endl;
-        */
-
     //save all data
     QVariantList infoNames = it -> getInfoNames(); //load old list (so if later value is not updated)
     QVariantList infoValues = it -> getInfoValues();
@@ -81,7 +90,6 @@ if(it != mDrones.end()){
 
                 double oVal  = infoValues[infoNames.indexOf(key)].toString().split(" ")[0].toDouble();
                 double diff = std::abs(val.toDouble()-oVal);
-
 
                 val+= diff<0.01? " -" : (val.toDouble()-oVal>0? " \u2227":" \u2228");
 
@@ -155,46 +163,9 @@ if(it != mDrones.end()){
             it->setLeg({},-1);
             it->setLastLeg(-1);
         }
-
-
-
-
-
-        //        for(int i=(it->getLastLeg()!=-1?it->getLastLeg():0);i<wpList.length()-1;i++){
-        //            //Start from last leg
-        //            wpAzi = wpList[i].azimuthTo(wpList[i+1]);
-        //            distToLastWp = it->pos().distanceTo(wpList[i]);
-        //            projectedAzi = it->pos().atDistanceAndAzimuth(-distToLastWp,angle).azimuthTo(wpList[i+1]);
-
-        //            bearCheck = abs(wpAzi-projectedAzi);
-        //            std::cout<<bearCheck<<std::endl;
-        //            if (bearCheck<180 && (i+2)<wpList.length()){
-        //                if(it->pos().distanceTo(wpList[i+1])<200){
-        //                    //next leg
-        //                    it->setLeg({wpList[i+1],wpList[i+2]},i+2);
-        //                    it->setLastLeg(i);
-        //                }else{
-        //                    it->setLeg({wpList[i],wpList[i+1]},i+1);
-        //                    it->setLastLeg(i);
-        //                }
-        //                break;
-        //            }else if((bearCheck<180 && (i+1)<wpList.length())){
-        //                it->setLeg({wpList[i],wpList[i+1]},i+1);
-        //                it->setLastLeg(i);
-        //                break;
-        //            }
-        //            if(i==wpList.length()-2){
-        //                //no leg
-        //                it->setLeg({},-1);
-        //                it->setLastLeg(-1);
-        //            }
-        //        }
-
-
-
     }else{
-//        it->setLeg({},-1);
-//        it->setLastLeg(-1);
+        it->setLeg({},-1);
+        it->setLastLeg(-1);
     }
 
 
@@ -404,6 +375,12 @@ void DroneListModel::switchMarked(const QString &id)
     emit dataChanged(ix, ix, QVector<int>{markListRole});
     it->setMarked();//for next call
     emit dataChanged(ix, ix, QVector<int>{markListRole});
+}
+
+QVariant DroneListModel::getTasks(const QString &id)
+{
+    auto it = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){return obj.id() == id;});
+    return it->getTasks();
 }
 
 void DroneListModel::setColor(const QString &id, QString color){

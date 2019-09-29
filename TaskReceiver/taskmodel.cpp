@@ -26,7 +26,7 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
     case TextRole:
         return QVariant(item.text);
     case StatusRole:
-        return QVariant(item.done);
+        return QVariant(item.sent);
     }
     return QVariant();
 }
@@ -42,7 +42,7 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
         item.text = value.toString();
         break;
     case StatusRole:
-        item.done = value.toBool();
+        item.sent = value.toBool();
         break;
     }
 

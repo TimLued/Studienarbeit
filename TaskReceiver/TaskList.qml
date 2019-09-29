@@ -19,18 +19,31 @@ Frame {
             height: taskText.height
             anchors.margins: 5
 
+
             Text{
                 id: taskText
                 text: "<b>Task " + (index+1) + "</b>: " + model.text
                 bottomPadding: 5
                 topPadding: 5
-                anchors.verticalCenter: parent.verticalCenter
                 anchors{
+                    verticalCenter: parent.verticalCenter
                     left: parent.left
+                    right: sendStatusText.left
+                    rightMargin: 10
+                }
+                wrapMode: Text.WrapAnywhere
+            }
+
+            Text{
+                id:sendStatusText
+                text: model.sent?"Sent":"Pending"
+                color: model.sent?"green":"red"
+                bottomPadding: 5
+                topPadding: 5
+                anchors{
+                    verticalCenter: parent.verticalCenter
                     right: parent.right
                 }
-
-                wrapMode: Text.WrapAnywhere
             }
 
             Rectangle {
