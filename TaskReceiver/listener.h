@@ -22,7 +22,6 @@ private:
     QLocalSocket *socket;
     QDataStream in;
     quint32 blockSize;
-
     QTimer *timer;
 
 private slots:

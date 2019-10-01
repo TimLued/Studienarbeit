@@ -11,39 +11,23 @@ class Controller: public QObject
     Q_OBJECT
 public:
     QString currentTask;
-
-    Controller(){
-        TaskListener = new Listener;
-        t = new QThread;
-        TaskListener->moveToThread(t);
-        connect(this, SIGNAL(startListening()), TaskListener, SLOT(requestTask()));
-        connect(TaskListener, SIGNAL(taskReceived(QString)), this, SLOT(newCurrentTask(QString)));
-        connect(t, &QThread::finished, t, &QThread::deleteLater);
-        t->start();
-
-        taskSender = new TaskSender;
-        t2 = new QThread;
-        taskSender->moveToThread(t2);
-        connect(TaskListener,SIGNAL(taskReceived(QString)),taskSender,SLOT(appendTask(QString)));
-        //connect(taskSender,SIGNAL(taskSent()),this,SIGNAL(taskSent()));
-        t2->start();
-    }
+    explicit Controller(QObject *parent = nullptr);
+    ~Controller();
 
 private slots:
-    void newCurrentTask(QString taskInfo){
-        currentTask = taskInfo;
-        emit newTask();
-    }
+    void newCurrentTask(QString taskInfo);
+
 private:
-    Listener* TaskListener;
+    Listener* taskListener;
     TaskSender* taskSender;
-    QThread* t;
-    QThread* t2;
+    QThread* listenThread;
+    QThread* taskThread;
 
 signals:
     void startListening();
     void newTask();
     void taskSent();
+    void taskReceived(QString);
 };
 
 

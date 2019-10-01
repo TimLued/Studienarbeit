@@ -10,10 +10,20 @@ Item {
     layer.enabled: true
 
     function hide(){
-        showing = false
         pAnimation.stop()
-        pBar.value = 0
+        if(messages.length>0&&pBar.value !=1){
+            //show next
+            notifyText.text = messages[messages.length-1]
+            messages.pop()
+            actionPanel.noticationCount = notify.messages.length
+            pBar.value = 0
+            pAnimation.start()
+        }else{
+            pBar.value = 0
+            showing = false
+        }
     }
+
     function show(info){
         if(showing){
             //already showing msg

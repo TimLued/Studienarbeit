@@ -2,11 +2,12 @@
 #define TASKSENDER_H
 
 #include <QObject>
-class QLocalServer;
 
+class QLocalServer;
 class TaskSender: public QObject
 {
     Q_OBJECT
+
 public:
     explicit TaskSender(QObject *parent = nullptr);
 
@@ -17,9 +18,7 @@ private:
     QLocalServer *server;
     bool sendTask();
     QList<QString> m_task;
-
-signals:
-    void taskSent();
+    void serverError();
 };
 
 #endif // TASKSENDER_H

@@ -1,0 +1,14 @@
+release/controller.o
+release/listener.o
+release/main.o
+release/tasklist.o
+release/taskmodel.o
+release/tasksender.o
+release/main_qml.o
+release/TaskList_qml.o
+release/qmlcache_loader.o
+release/moc_controller.o
+release/moc_listener.o
+release/moc_tasklist.o
+release/moc_taskmodel.o
+release/moc_tasksender.o

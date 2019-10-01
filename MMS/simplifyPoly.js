@@ -1,7 +1,6 @@
-WorkerScript.onMessage = function(points) {
+WorkerScript.onMessage = function(msg) {
     var toleranceInDegrees = metersToDegrees(36);
-    var simple = simplify(convertToArrayOfArray(points), toleranceInDegrees);
-    WorkerScript.sendMessage({'simple':simple});
+    WorkerScript.sendMessage({'simple':simplify(convertToArrayOfArray(msg.hist), toleranceInDegrees)});
 };
 
 var Line = function( p1, p2 ) {

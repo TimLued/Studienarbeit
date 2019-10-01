@@ -1,6 +1,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include <controller.h>
 
@@ -34,8 +36,13 @@ int main(int argc, char *argv[])
 
     Controller c;
     QObject::connect(&c, &Controller::posUpdated, [&droneModel, &c]() {
-        //json input
-        droneModel.updateDrone(c.currentDroneInfo);
+        //Comes TOO FAST???
+        QJsonObject jDroneInfo = QJsonDocument::fromJson(c.currentDroneInfo.toUtf8()).object();
+        if(jDroneInfo.keys().contains("drone")){
+            droneModel.updateTasks(c.currentDroneInfo);
+        }else{
+             droneModel.updateDrone(c.currentDroneInfo);
+        }
     });
     c.startListener();
 

@@ -23,23 +23,23 @@ public:
     void setTask(const QString &taskInfo);
 
 private slots:
-    void updateCurrent(QString droneInfo){
-        currentDroneInfo = droneInfo;
-        emit posUpdated();
-    }
+    void updateCurrent(QString droneInfo);
 
 private:
-   PosUpdater* up;
+   PosUpdater* posUpdater;
    QThread* t1;
 
    TaskSender* taskSender;
    QThread* t2;
+
+   PosUpdater* taskUpdater;
+   QThread* t3;
    QString m_Task;
+
 
 signals:
     void startListener();
     void posUpdated();
-
     void taskChanged(QString taskInfo);
 };
 

@@ -21,7 +21,12 @@ Item {
 
     visible: false
     function show(){content.visible = true}
-    function hide(){content.visible = false}
+    function hide(){
+        content.visible = false
+        wpModel.clear()
+        onMapWpModel.update()
+        addingWaypoints = false
+    }
 
     width: 200
     height: mHeight < (win.height*0.7)?  mHeight:win.height*0.7
@@ -56,9 +61,6 @@ Item {
             MouseArea{
                 anchors.fill:parent
                 onClicked: {
-                    wpModel.clear()
-                    onMapWpModel.update()
-                    addingWaypoints = false
                     hide()
                 }
             }
@@ -230,13 +232,12 @@ Item {
                 jString+='{"id":"'+wpModel.get(i).name
                         +'","lat":"'+wpModel.get(i).lat
                         +'","lon":"'+wpModel.get(i).lon
-                        +'","drone":"'+droneId
-                        +(i===0?'","reset":"1':"")+'"}'
+                        +'","drone":"'+droneId+'"'
+                        +(i===0?',"reset":'+1:'')+'}'
                 if(i<wpModel.count-1) jString += ','
             }
             jString+=']}'
             controller.task = jString
-
             hide()
         }
     }

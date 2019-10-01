@@ -25,6 +25,8 @@ Item {
 
 
         if(editing){//load drone missions
+
+            headerText.text = droneID
             var missionData = dronemodel.getTasks(droneID)
             var tmpAddedMissions=[]
             for(var i=0;i<missionData.length;i++){
@@ -32,7 +34,7 @@ Item {
                 if(missionIndex===-1) {
                     missionModel.append({ID:missionData[i].mission,tasks:[]})
                     tmpAddedMissions.push(missionData[i].mission);
-                    missionIndex = missionModel.length-1
+                    missionIndex = missionModel.count-1
                 }
 
                 var taskIndex=-1
@@ -55,8 +57,9 @@ Item {
             }
             missionListView.currentIndex=-1
             taskListView.currentIndex=-1
-
+            addDrone(droneID)
         }else{
+            headerText.text = "New Mission"
             missionModel.append({ID:"New Mission",tasks:[]})
             taskModel.update(0)
             missionListView.currentIndex=0
@@ -122,8 +125,8 @@ Item {
             width:parent.width
 
             Text {
+                id:headerText
                 anchors.centerIn: parent
-                text: "Mission"
                 font.pixelSize: 14
                 font.letterSpacing: 2
             }
@@ -228,13 +231,13 @@ Item {
                             focus:true
                             model: missionModel
                             onCurrentIndexChanged:{
+                                taskListView.currentIndex=-1
+                                taskButtons.uncheckBtns()
+                                addingTaskCor=false
                                 if (currentIndex != -1){
                                     taskModel.update(currentIndex)
-                                    if(taskListView.currentIndex!=-1)updateCorModel(taskListView.currentIndex)
-
                                 }else{
                                     taskModel.clear()
-                                    taskListView.currentIndex = -1
                                 }
                             }
 
@@ -321,7 +324,10 @@ Item {
                                 radius: width/2
                                 palette {button: checked? "black":"#3EC6AA"}
                                 text: "+"
-                                onClicked: missionModel.append({"ID":newName(missionModel,"Mission"),"tasks":[]})
+                                onClicked:{
+                                    missionModel.append({"ID":newName(missionModel,"Mission"),"tasks":[]})
+                                    missionListView.currentIndex=missionModel.count-1
+                                }
                             }
 
 
@@ -590,11 +596,13 @@ Item {
                     MouseArea{
                         anchors.fill:parent
                         onClicked: {
-                            if(!parent.checked) parent.parent.uncheckBtns()
-                            parent.checked = !parent.checked
-                            addingTaskCor = parent.checked
+                            if(missionListView.currentIndex!=-1){
+                                if(!parent.checked) parent.parent.uncheckBtns()
+                                parent.checked = !parent.checked
+                                addingTaskCor = parent.checked
 
-                            if(parent.checked) addTask(missionListView.currentIndex,"Rectangle")
+                                if(parent.checked) addTask(missionListView.currentIndex,"Rectangle")
+                            }
                         }
                     }
                 }
@@ -620,11 +628,13 @@ Item {
                     MouseArea{
                         anchors.fill:parent
                         onClicked: {
-                            if(!parent.checked) parent.parent.uncheckBtns()
-                            parent.checked = !parent.checked
-                            addingTaskCor = parent.checked
+                            if(missionListView.currentIndex!=-1){
+                                if(!parent.checked) parent.parent.uncheckBtns()
+                                parent.checked = !parent.checked
+                                addingTaskCor = parent.checked
 
-                            if(parent.checked) addTask(missionListView.currentIndex,"Polygon")
+                                if(parent.checked) addTask(missionListView.currentIndex,"Polygon")
+                            }
                         }
                     }
                 }
@@ -685,7 +695,6 @@ Item {
                             if(!enabled&&missionListView.currentIndex!=-1&&taskListView.currentIndex!=-1){
                                 missionModel.get(missionListView.currentIndex).tasks.get(taskListView.currentIndex).taskType = text
                                 taskModel.update(missionListView.currentIndex)
-                                //updateCorModel(taskListView.currentIndex)
                             }
                         }
                     }
@@ -1041,12 +1050,13 @@ Item {
                         }
 
                         var jString = '{"drone": ['
-                        var droneNrCounter = -1
-                        for (var m=0;m<missionModel.count;m++){
 
-                            var tasks = missionModel.get(m).tasks
+                        for (var d=0;d<dronesModel.count;d++){//each drone
+                            if(missionModel.count===0) jString+='{"mission":"","reset":1,"drone":"'+dronesModel.get(d).ID+(d<dronesModel.count-1?'"},':'"}')
 
-                            for (var d=0;d<dronesModel.count;d++){//each drone
+                            for (var m=0;m<missionModel.count;m++){
+
+                                var tasks = missionModel.get(m).tasks
 
                                 for (var t=0;t<tasks.count;t++){//each task
 
@@ -1059,7 +1069,7 @@ Item {
                                             var nr = 1
                                             var name = "Mission " + nr
                                             restart:
-                                            for(var s =0;s<droneMissions.count;s++){
+                                            for(var s =0;s<droneMissions.length;s++){
                                                 if(droneMissions[s].mission === name){
                                                     nr+=1
                                                     name = "Mission " + nr
@@ -1076,9 +1086,8 @@ Item {
                                                 +'","taskType":"'+tasks.get(t).taskType
                                                 +'","lat":"'+pos.get(p).cor.latitude
                                                 +'","lon":"'+pos.get(p).cor.longitude
-                                                +'","new":'+(droneNrCounter===d?0:1)+''
+                                                +(m===0&&t===0&&p===0?'","reset":1':'"')
                                         jString+=(m<missionModel.count-1||d<dronesModel.count-1||t<tasks.count-1||p<pos.count-1)?"},":"}"
-                                        droneNrCounter = d
                                     }
                                 }
                             }

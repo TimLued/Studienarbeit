@@ -113,18 +113,30 @@ compiler_rcc_clean:
 	-$(DEL_FILE) release\qrc_logfile.cpp
 release/qrc_logfile.cpp: ../PosStreamer/logfile.qrc \
 		C:/Qt/5.13.0/mingw73_64/bin/rcc.exe \
-		../PosStreamer/jdrone4.txt \
 		../PosStreamer/trajectory1.txt \
-		../PosStreamer/trajectory5.txt \
-		../PosStreamer/jdrone3.txt \
-		../PosStreamer/jdroneV1.txt \
-		../PosStreamer/trajectory4.txt \
-		../PosStreamer/jdrone2.txt \
-		../PosStreamer/trajectory3.txt \
-		../PosStreamer/jdrone1.txt \
-		../PosStreamer/jwp.txt \
 		../PosStreamer/trajectory2.txt \
-		../PosStreamer/trajectory6.txt
+		../PosStreamer/trajectory3.txt \
+		../PosStreamer/trajectory4.txt \
+		../PosStreamer/jdrone1.txt \
+		../PosStreamer/trajectory5.txt \
+		../PosStreamer/jdrone2.txt \
+		../PosStreamer/jdrone3.txt \
+		../PosStreamer/trajectory6.txt \
+		../PosStreamer/jdrone4.txt \
+		../PosStreamer/jdrone5.txt \
+		../PosStreamer/jdrone6.txt \
+		../PosStreamer/jdrone7.txt \
+		../PosStreamer/jdrone8.txt \
+		../PosStreamer/jdrone9.txt \
+		../PosStreamer/jdroneV1.txt \
+		../PosStreamer/jdroneV2.txt \
+		../PosStreamer/jwp.txt \
+		../PosStreamer/jdroneV3.txt \
+		../PosStreamer/jdroneV4.txt \
+		../PosStreamer/jdroneV5.txt \
+		../PosStreamer/jdroneV6.txt \
+		../PosStreamer/jdroneV7.txt \
+		../PosStreamer/jdroneV8.txt
 	C:\Qt\5.13.0\mingw73_64\bin\rcc.exe -name logfile ..\PosStreamer\logfile.qrc -o release\qrc_logfile.cpp
 
 compiler_moc_predefs_make_all: release/moc_predefs.h

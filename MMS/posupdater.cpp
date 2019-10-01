@@ -9,14 +9,11 @@ PosUpdater::PosUpdater(QObject *parent):
 {
     in.setDevice(socket);
     in.setVersion(QDataStream::Qt_5_10);
-    connect(socket, &QLocalSocket::readyRead, this, &PosUpdater::readPos);
-    connect(socket, &QLocalSocket::disconnected,this,&PosUpdater::requestPos);
-    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
 void PosUpdater::requestPos()
 {
-    timer->start(1);
+    timer->start(mInteverval);
 }
 
 void PosUpdater::update(){
@@ -24,7 +21,7 @@ void PosUpdater::update(){
         blockSize = 0;
         timer->stop();
         socket->abort();
-        socket->connectToServer("dronespos");
+        socket->connectToServer(tupeName);
 
         //keep on connecting
 
@@ -34,6 +31,15 @@ void PosUpdater::update(){
     } catch (const std::exception& ex) {
         std::cerr << "Error: " << ex.what() << std::endl;
     }
+}
+
+void PosUpdater::setTupeName(QString mTupe,int interval)
+{
+    tupeName = mTupe;
+    mInteverval = interval;
+    connect(socket, &QLocalSocket::readyRead, this, &PosUpdater::readPos);
+    connect(socket, &QLocalSocket::disconnected,this,&PosUpdater::requestPos);
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
 void PosUpdater::readPos()

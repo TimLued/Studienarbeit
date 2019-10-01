@@ -34,20 +34,21 @@ bool DroneListModel::updateDrone(const QString & jInfo){
     if(jDroneInfo.keys().contains("mission")){
 
         Task task{id,
-                 jDroneInfo["mission"].toString(),
-                 jDroneInfo["geoType"].toString(),
-                 jDroneInfo["taskType"].toString(),
-                 coord};
-        if(jDroneInfo["new"]==1){
-            it_task->clearMission(jDroneInfo["mission"].toString());
+                    jDroneInfo["mission"].toString(),
+                    jDroneInfo["geoType"].toString(),
+                    jDroneInfo["taskType"].toString(),
+                    coord};
+        if(jDroneInfo.keys().contains("reset")){
+            it_task->clearMissions();
             it_task->setChangeNote("Auftragsänderung für " + it_task->id());
             emit dataChanged(ix, ix, QVector<int>{changeNoteRole});
         }
-        it_task->appendTask(task);
+        if(!(jDroneInfo.keys().contains("reset")&&jDroneInfo["mission"].toString()=="")) it_task->appendTask(task);
 
     }else{
         Waypoint wp{jDroneInfo["id"].toString(),jDroneInfo["lat"].toString(),jDroneInfo["lon"].toString()};
         if(it_task != mDrones.end()){
+
             if(jDroneInfo.keys().contains("reset")) {
                 it_task->resetRoute();//delete old data
                 it_task->setChangeNote("Flugplanupdate für " + it_task->id());
@@ -104,68 +105,92 @@ if(it != mDrones.end()){
     //hot leg
     QList<QGeoCoordinate> wpList = it->getRoutePathInCoordinates();
 
-
     //double bearCheck,wpAzi,projectedAzi,distToLastWp;
 
     if (wpList.length()>2){
         //distance to wp getting smaller
-        QList<QPair<int,double>>distCandidates;
+        QList<QPair<int,double>> distCandidates;
+        distCandidates.clear();
+        int lastLeg = it->getLastLeg();
+        int histLength = it->getHistory().length();
 
-        if (it->getHistory().length()-2>-1){
-            QGeoCoordinate oldPos = it->getHistory()[it->getHistory().length()-2].value<QGeoCoordinate>();
+        if (histLength-2>-1){
+            QGeoCoordinate oldPos = it->getHistory()[histLength-2].value<QGeoCoordinate>();
+            QGeoCoordinate nPos = it->pos();
             double oldDist,newDist;
-            for (int j=(it->getLastLeg()!=-1?it->getLastLeg():0);j<wpList.length();j++){
+            for (int j=0;j<wpList.length();j++){
                 oldDist = oldPos.distanceTo(wpList[j]);
-                newDist = it->pos().distanceTo(wpList[j]);
-                if(newDist-oldDist<0.) distCandidates.append(qMakePair(j,newDist));
+                newDist = nPos.distanceTo(wpList[j]);
+                if(newDist-oldDist<0.){
+                    distCandidates.append(qMakePair(j,newDist));
+                    if(j==lastLeg+1) {
+                        break;
+                    }
+                }
             }
         }
 
-        //Course
-        if(distCandidates.length()>0){
-            QList<QPair<int,double>>courseCandidates = {};
+        //COURSE
+        //        if(distCandidates.length()>0){
+        //            QList<QPair<int,double>>courseCandidates = {};
 
-            for(int i=0;i<distCandidates.length();i++){
-                int index = distCandidates[i].first;
-                if(index!=0){
-                    double courseWpWp = wpList[index-1].azimuthTo(wpList[index]);
-                    double droneToLastWp = it->pos().distanceTo(wpList[index-1]);
-                    double droneCourse = it->pos().atDistanceAndAzimuth(-droneToLastWp,angle).azimuthTo(wpList[index]);
-                    if(abs(droneCourse-courseWpWp)<45) courseCandidates.append(qMakePair(index,distCandidates[i].second));
-                }
-            }
+        //            if(distCandidates.last().first == it->getLastLeg()+1){//is next hot leg
+        //                courseCandidates.append(distCandidates.last());
 
-            //get closest or next in chain
-            if(courseCandidates.length()>0){
-                int indexOfDist = 0;
-                double smallestDist=0.;
-                for(int k=0;k<courseCandidates.length();k++){
-                    if(smallestDist==0.||smallestDist-courseCandidates[k].second>0){
-                        smallestDist = courseCandidates[k].second;
-                        indexOfDist = courseCandidates[k].first;
-                        if(courseCandidates[k].first==it->getLastLeg()+1) break;
+        //            }else{
+        //                for(int i=0;i<distCandidates.length();i++){
+        //                    int index = distCandidates[i].first;
+        //                    if(index!=0){
+        //                        double courseWpWp = wpList[index-1].azimuthTo(wpList[index]);
+        //                        double droneToLastWp = it->pos().distanceTo(wpList[index-1]);
+        //                        double droneCourse = it->pos().atDistanceAndAzimuth(-droneToLastWp,angle).azimuthTo(wpList[index]);
+        //                        if(abs(droneCourse-courseWpWp)<45) courseCandidates.append(qMakePair(index,distCandidates[i].second));
+        //                    }
+        //                }
+        //            }
+
+        //get closest or next in chain
+
+        if(distCandidates.count()>0){
+            int indexOfDist = 0;
+            double smallestDist=0.;
+            if(distCandidates.last().first == lastLeg+1){//is next hot leg
+                smallestDist = distCandidates.last().second;
+                indexOfDist = distCandidates.last().first;
+            }else {
+                for(int k=0;k<distCandidates.count();k++){
+                    if(smallestDist==0.||smallestDist-distCandidates[k].second>0){
+                        smallestDist = distCandidates[k].second;
+                        indexOfDist = distCandidates[k].first;
                     }
                 }
-
-                //dist < 200
-                if(smallestDist<200 && indexOfDist+1<wpList.length()){//next leg
-                    it->setLeg({wpList[indexOfDist],wpList[indexOfDist+1]},indexOfDist+1);
-                    it->setLastLeg(indexOfDist);
-                }else{
-                    it->setLeg({wpList[indexOfDist-1],wpList[indexOfDist]},indexOfDist-1);
-                    it->setLastLeg(indexOfDist-1);
-                }
+            }
+            //dist < 200
+            if(smallestDist<200 && indexOfDist+1<wpList.length()){//next leg
+                it->setLeg({wpList[indexOfDist],wpList[indexOfDist+1]},indexOfDist);
+                it->setDisplayedLeg(indexOfDist+1);
+            }else if(smallestDist>=200&&indexOfDist>0){
+                it->setLeg({wpList[indexOfDist-1],wpList[indexOfDist]},indexOfDist-1);
+                it->setDisplayedLeg(indexOfDist);
+            }else if(wpList[0]==wpList.last()){
+                it->setLeg({wpList[0],wpList[1]},0);
+                it->setDisplayedLeg(1);
             }else{
                 it->setLeg({},-1);
-                it->setLastLeg(-1);
+                it->setDisplayedLeg(-1);
             }
         }else{
             it->setLeg({},-1);
-            it->setLastLeg(-1);
+            it->setDisplayedLeg(-1);
+            //it->setDisplayedLeg(-1);
         }
+        //}else{
+        //  it->setLeg({},-1);
+        //  it->setLastLeg(-1);
+        //}
     }else{
         it->setLeg({},-1);
-        it->setLastLeg(-1);
+        it->setDisplayedLeg(-1);
     }
 
 
@@ -203,6 +228,56 @@ if(it != mDrones.end()){
 return createDrone(id);
 }
 }
+
+bool DroneListModel::updateTasks(const QString &jInfo)
+{
+    // loading missions & waypoints
+    QJsonObject jDroneInfo = QJsonDocument::fromJson(jInfo.toUtf8()).object();
+    QString id = jDroneInfo["id"].toString();
+    QGeoCoordinate coord = QGeoCoordinate(jDroneInfo["lat"].toString().toDouble(),jDroneInfo["lon"].toString().toDouble());
+
+    if(jDroneInfo.keys().contains("drone")){
+        auto it_task = std::find_if(mDrones.begin(), mDrones.end(), [&](Drone const& obj){
+                return obj.id() == jDroneInfo["drone"].toString();});
+    QModelIndex ix = index(it_task - mDrones.begin());
+
+    if(jDroneInfo.keys().contains("mission")){
+
+        Task task{id,
+                    jDroneInfo["mission"].toString(),
+                    jDroneInfo["geoType"].toString(),
+                    jDroneInfo["taskType"].toString(),
+                    coord};
+        if(jDroneInfo.keys().contains("reset")){
+            it_task->clearMissions();
+            it_task->setChangeNote("Auftragsänderung für " + it_task->id());
+            emit dataChanged(ix, ix, QVector<int>{changeNoteRole});
+        }
+        if(!(jDroneInfo.keys().contains("reset")&&jDroneInfo["mission"].toString()=="")) it_task->appendTask(task);
+
+    }else{
+        Waypoint wp{jDroneInfo["id"].toString(),jDroneInfo["lat"].toString(),jDroneInfo["lon"].toString()};
+        if(it_task != mDrones.end()){
+            if(jDroneInfo.keys().contains("reset")) {
+                it_task->resetRoute();//delete old data
+                it_task->setChangeNote("Flugplanupdate für " + it_task->id());
+                emit dataChanged(ix, ix, QVector<int>{changeNoteRole});
+            }
+            it_task->appendRoute(QVariant::fromValue(wp));
+            it_task->appendRoutePath(coord);
+        }else{//should occur just once per drone
+            createDrone(jDroneInfo["drone"].toString());
+            mDrones.last().appendRoute(QVariant::fromValue(wp));
+            mDrones.last().appendRoutePath(coord);
+        }
+
+        emit dataChanged(ix, ix, QVector<int>{WaypointRole,RouteRole});
+    }
+
+}
+return true;
+}
+
 
 bool DroneListModel::createDrone(const QString & id){
     beginInsertRows(QModelIndex(), rowCount(), rowCount());

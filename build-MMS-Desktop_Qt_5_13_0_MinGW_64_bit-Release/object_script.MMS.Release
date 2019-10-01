@@ -15,9 +15,11 @@ release/TimeSlider_qml.o
 release/WaypointDraggableItemDropArea_qml.o
 release/DronePanel_qml.o
 release/WaypointDraggableItem_qml.o
+release/MessageBox_qml.o
 release/main_qml.o
 release/qmlcache_loader.o
 release/moc_controller.o
+release/moc_drone.o
 release/moc_dronelistmodel.o
 release/moc_grouplistmodel.o
 release/moc_posupdater.o

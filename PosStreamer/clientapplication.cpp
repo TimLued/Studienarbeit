@@ -85,12 +85,12 @@ ClientApplication::ClientApplication(QWidget *parent)
         source = new PosSource;
         sources.append(source);
         t = new QThread;
+        connect(t, &QThread::finished, t, &QThread::deleteLater);
         connect(this, SIGNAL(startStop(bool,bool)),source,SLOT(startStop(bool,bool)));
         connect(source, SIGNAL(posUpdated(QString)),this,SLOT(loadToBuffer(QString)));
         source->moveToThread(t);
         t->start();
         source->loadFile(files[i]);
-
 
         //ListView
         droneItem = new QListWidgetItem;
@@ -175,7 +175,7 @@ bool ClientApplication::nextPos()
         statusLbl->setStyleSheet("QLabel {color : green; }");
 
         QString line;
-        if (buffer.empty()){
+        if (buffer.count()==0){
             QLocalSocket *clientConnection = server->nextPendingConnection();
             clientConnection->disconnectFromServer();
             return false;

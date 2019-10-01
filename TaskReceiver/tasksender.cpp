@@ -3,16 +3,15 @@
 #include <iostream>
 
 TaskSender::TaskSender(QObject *parent):
-    QObject (parent)
+    QObject (parent),
+    server(new QLocalServer(this))
 {
-    server = new QLocalServer(this);
-    connect(server, &QLocalServer::newConnection, this, &TaskSender::sendTask);
-    server->listen("dronespos");
+    connect(server, &QLocalServer::newConnection, this, &TaskSender::sendTask); //LEADS TO ERROR!!!
+    server->listen("dronestask");
 }
 
 void TaskSender::appendTask(QString taskInfo)
 {
-    //split into json blocks
     QJsonDocument jsonResponse = QJsonDocument::fromJson(taskInfo.toUtf8());
     QJsonObject jsonObject = jsonResponse.object();
     QJsonArray jsonArray = jsonObject["drone"].toArray();
@@ -26,24 +25,33 @@ void TaskSender::appendTask(QString taskInfo)
 
 bool TaskSender::sendTask()
 {
-    if(m_task.length()==0){
+    try{
+        if(m_task.length()==0){
+            QLocalSocket *clientConnection = server->nextPendingConnection();
+            clientConnection->disconnectFromServer();
+            return false;
+        }
+
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out << quint32(m_task.size());
+        out << m_task.first();
+        m_task.removeFirst();
+
         QLocalSocket *clientConnection = server->nextPendingConnection();
+        connect(clientConnection, QOverload<QLocalSocket::LocalSocketError>::of(&QLocalSocket::error),this, &TaskSender::serverError);
+        connect(clientConnection, &QLocalSocket::disconnected, clientConnection, &QLocalSocket:: deleteLater);
+        clientConnection->write(block);
+        clientConnection->flush();
         clientConnection->disconnectFromServer();
-        return false;
+
+    } catch (...) {
+        //sendTask();
     }
-
-    QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
-    out << quint32(m_task.size());
-    out << m_task.first();
-    m_task.removeFirst();
-
-    QLocalSocket *clientConnection = server->nextPendingConnection();
-    connect(clientConnection, &QLocalSocket::disconnected, clientConnection, &QLocalSocket:: deleteLater);
-    clientConnection->write(block);
-    clientConnection->flush();
-    clientConnection->disconnectFromServer();
-
-    //emit taskSent(); //not implemented yet
     return true;
+}
+
+void TaskSender::serverError()
+{
+    std::cout << server->errorString().toUtf8().constData() << std::endl;
 }

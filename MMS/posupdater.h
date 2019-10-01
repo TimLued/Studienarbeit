@@ -20,6 +20,7 @@ public:
 
 public slots:
     void requestPos();
+    void setTupeName(QString,int);
 
 signals:
     void posUpdated(QString droneInfo);
@@ -31,6 +32,8 @@ private:
     quint32 blockSize;
 
     QTimer *timer;
+    QString tupeName;
+    int mInteverval;
 
 private slots:
     void readPos();

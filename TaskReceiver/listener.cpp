@@ -17,35 +17,39 @@ Listener::Listener(QObject *parent):
 }
 
 void Listener::requestTask(){
-    timer->start(1);
+    timer->start(2);
 }
 
 void Listener::recon(){
     blockSize = 0;
     try {
-    socket->abort();
-    socket->connectToServer("drone_task");
-    timer->stop();
-    //keep on connecting
+        socket->abort();
+        socket->connectToServer("drone_task");
+        timer->stop();
+        //keep on connecting
 
-    if (!socket->waitForConnected(3000) || socket->state() != QAbstractSocket::ConnectedState){
-        timer->start(100);
-    }
+        if (!socket->waitForConnected(3000) || socket->state() != QAbstractSocket::ConnectedState){
+            timer->start(200);
+        }
     } catch (...) {
+        recon();
     }
 }
 
 void Listener::readTask(){
-    if (blockSize == 0) {
-        if (socket->bytesAvailable() < (int)sizeof(quint32))
+    try {
+        if (blockSize == 0) {
+            if (socket->bytesAvailable() < (int)sizeof(quint32))
+                return;
+            in >> blockSize;
+        }
+        if (socket->bytesAvailable() < blockSize || in.atEnd())
             return;
-        in >> blockSize;
+
+        QString newData;
+        in >> newData;
+
+        emit taskReceived(newData);
+    } catch (...) {
     }
-    if (socket->bytesAvailable() < blockSize || in.atEnd())
-        return;
-
-    QString newData;
-    in >> newData;
-
-    emit taskReceived(newData);
 }

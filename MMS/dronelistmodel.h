@@ -89,6 +89,7 @@ public:
     void register_object(const QString &droneId,QQmlContext *context);
 
     Q_INVOKABLE bool updateDrone(const QString & jInfo);
+    Q_INVOKABLE bool updateTasks(const QString & jInfo);
     Q_INVOKABLE bool createDrone(const QString & id);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;

@@ -356,8 +356,7 @@ ApplicationWindow  {
                     function updateHistory(){
                         if(trackingHistory){
                             dynamicPath.path = []
-                            threadRunning = true
-                            mWorker.sendMessage(historyInfo)
+                           mWorker.sendMessage({'hist':historyInfo})
                         }
                     }
 
@@ -382,13 +381,15 @@ ApplicationWindow  {
                         dynamicPath.path = []
                         staticPath.path = []
                         if (trackingHistory){
-                            //if (historyInfo.length > 1) staticPath.updatePath(historyInfo)
+                            if(historyEnd===-2) {
+                                dynamicPath.addCoordinate(posInfo)
+                                dynamicPath.buffer.push(coordinate)
+                            }
+                            k = 0
                             if (historyInfo.length > 1) {
                                 threadRunning = true
-                                mWorker.sendMessage(historyInfo)
+                                mWorker.sendMessage({'hist':historyInfo})
                             }
-                            if(historyEnd===-2) dynamicPath.addCoordinate(posInfo)
-                            k = 0
                         }
                     }
                     property int k: 50
@@ -401,12 +402,12 @@ ApplicationWindow  {
 
                             if (k >= 50){//every 50th or corner
                                 if(n <= 100||threadRunning){
-                                    if (threadRunning) dynamicPath.buffer.push(posInfo)
+                                    if (threadRunning) dynamicPath.buffer.push(coordinate)
                                     dynamicPath.addCoordinate(posInfo)
                                     k = 0
                                 }else{
                                     threadRunning = true
-                                    mWorker.sendMessage(historyInfo)
+                                    mWorker.sendMessage({'hist':historyInfo})
                                 }
 
 
@@ -431,18 +432,19 @@ ApplicationWindow  {
                             positions = dronemodel.getAllDronePos()
                             if (positions.length>0){
                                 region = centerMapRegion(positions)
-                                map.fitViewportToGeoShape(region,50)
+                                map.fitViewportToGeoShape(region,200)
                             }
 
                         }else if(map.groupfollow!=""){
                             if (followInfo) dronemodel.toggleFollow(idInfo)
                             var groupMembers = groupmodel.getMembers(map.groupfollow)
                             for(var i=0;i<groupMembers.length;i++){
-                                positions.push(dronemodel.getDronePos(groupMembers[i]))
+                                var dronePos = dronemodel.getDronePos(groupMembers[i])
+                                if(dronePos.isValid) positions.push(dronePos)
                             }
                             if (positions.length>0){
                                 region = centerMapRegion(positions)
-                                map.fitViewportToGeoShape(region,50)
+                                map.fitViewportToGeoShape(region,200)
                             }
                         }
 
@@ -461,7 +463,13 @@ ApplicationWindow  {
                         wpPointer.visible = hotLegPoly.pathLength()>0
                     }
 
-
+                    WorkerScript{
+                        id:mWorker
+                        source: "simplifyPoly.js"
+                        onMessage: {
+                            staticPath.update(messageObject.simple)
+                        }
+                    }
                 }
 
 
@@ -483,7 +491,7 @@ ApplicationWindow  {
                             radius: zoomCircle
                             border.color: droneBody.droneColor
                             border.width: 1
-                            color: '#00000000'
+                            color: map.activeMapType ===  map.supportedMapTypes[1]?"white":"black"
                         }
 
                         Text {
@@ -499,7 +507,7 @@ ApplicationWindow  {
 
                 MapQuickItem{
                     id:wpPointer
-
+                    visible: visibleInfo
                     coordinate: droneBody.coordinate
                     anchorPoint.y: 10
                     anchorPoint.x: 10
@@ -701,20 +709,12 @@ ApplicationWindow  {
                     }
                 }
 
-                WorkerScript{
-                    id:mWorker
-                    source: "qrc:/simplifyPoly.js"
-                    onMessage: {
-                        var answer = messageObject.simple
-                        staticPath.update(answer)
-                    }
-                }
-
                 MapPolyline{//dynamic
                     id: dynamicPath
-                    property variant buffer //updates during staticPath is calculating poly
+                    property variant buffer:[] //updates during staticPath is calculating poly
                     function update(){
                         path = []
+                        buffer.push(staticPath.path[staticPath.pathLength()-1])
                         path = buffer
                         buffer = []
                     }
@@ -1000,7 +1000,10 @@ ApplicationWindow  {
         MissionPanel{id: missionPanel;z:100}
     }
 
-    Controller{id: controller}
+    Controller{
+        id: controller
+
+    }
 
 }
 

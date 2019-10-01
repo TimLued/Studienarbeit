@@ -138,6 +138,11 @@ public:
 
     void setLeg(QList<QGeoCoordinate> leg,int index){
         mHotLeg = leg;
+        lastLegIndex = index;
+        //mHotLegIndex = index;
+    }
+
+    void setDisplayedLeg(int index){
         mHotLegIndex = index;
     }
 
@@ -159,10 +164,6 @@ public:
 
     int getLastLeg() const{
         return lastLegIndex;
-    }
-
-    void setLastLeg(int i){
-        lastLegIndex = i;
     }
 
 
@@ -309,10 +310,8 @@ public:
         return true;
     }
 
-    void clearMission(QString mission){
-        for(int i=mTasks.count()-1;i>0;i--){
-            if(mTasks[i].mission== mission) mTasks.removeAt(i);
-        }
+    void clearMissions(){
+        mTasks.clear();
     }
 
     QVariantList getTasks() const{

@@ -66,19 +66,17 @@ Item{
             anchors{
                 top: parent.top
                 bottom: parent.bottom
-                left: parent.left
             }
-            width: panelBG.width
+            width: parent.width
             contentHeight: frame.height
 
             Rectangle{
                 id: frame
                 color:"transparent"
                 height: childrenRect.height+10
+                width:parent.width
                 anchors{
                     top:parent.top
-                    left:parent.left
-                    right:parent.right
                 }
 
 
@@ -86,10 +84,9 @@ Item{
                     id: dronesHeader
 
                     property int space: 10
-                    width: parent.width
+                    width: 150
                     height: extendBtn.height
                     anchors{
-                        left: parent.left
                         top: parent.top
                         topMargin: 4
                     }
@@ -133,11 +130,7 @@ Item{
                         text: "UAV"
                         font.pixelSize: 12
                         color:"white"
-                        anchors{
-                            left: parent.left
-                            right: parent.right
-                            verticalCenter: parent.verticalCenter
-                        }
+                        width:parent.width
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                     }
@@ -196,10 +189,9 @@ Item{
                     id: groupHeader
 
                     property int space: 10
-                    width: parent.width
+                    width: 150
                     height: extendGroupBtn.height
                     anchors{
-                        left: parent.left
                         top: uavContainer.bottom
                         topMargin: 4
                     }
@@ -245,11 +237,7 @@ Item{
                         text: "Groups"
                         font.pixelSize: 12
                         color:"white"
-                        anchors{
-                            left: parent.left
-                            right: parent.right
-                            verticalCenter: parent.verticalCenter
-                        }
+                        width:parent.width
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                     }
@@ -281,10 +269,9 @@ Item{
                     color:"transparent"
                     anchors{
                         top: groupHeader.bottom
-                        left:parent.left
-                        right:parent.right
                         topMargin: 4
                     }
+                    width:150
                     height: panelBG.groupExtended? groupLV.contentHeight+addBtnContainer.height:0
 
                     Behavior on height{
@@ -530,7 +517,8 @@ Item{
                                 if (!map.isCenterOnAll) {
                                     var positions = []
                                     for(var i=0;i<memberInfo.length;i++){
-                                        positions.push(dronemodel.getDronePos(memberInfo[i]))
+                                        var dronePos = dronemodel.getDronePos(memberInfo[i])
+                                        if(dronePos.isValid) positions.push(dronePos)
                                     }
                                     var region = centerMapRegion(positions)
                                     if(region) map.fitViewportToGeoShape(region,200)
@@ -737,6 +725,7 @@ Item{
                         anchors.fill:parent
                         enabled: groupItem.height !=small
                         onClicked: {
+                             map.groupfollow = ""
                             for(var i=0;i<memberInfo.length;i++){
                                 dronemodel.setGroup(memberInfo[i],"")
                             }
@@ -767,7 +756,7 @@ Item{
         id: droneLvDelegate
         Item{
             id: droneItem
-            width: parent.width
+            width: 150
             height: small
             opacity: 1
             property bool droneMarked:markInfo

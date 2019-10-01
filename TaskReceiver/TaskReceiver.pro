@@ -6,6 +6,7 @@ QT  += \
     core
 
 SOURCES += \
+        controller.cpp \
         listener.cpp \
         main.cpp \
         tasklist.cpp \

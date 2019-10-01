@@ -15,9 +15,11 @@ debug/TimeSlider_qml.o
 debug/WaypointDraggableItemDropArea_qml.o
 debug/DronePanel_qml.o
 debug/WaypointDraggableItem_qml.o
+debug/MessageBox_qml.o
 debug/main_qml.o
 debug/qmlcache_loader.o
 debug/moc_controller.o
+debug/moc_drone.o
 debug/moc_dronelistmodel.o
 debug/moc_grouplistmodel.o
 debug/moc_posupdater.o
