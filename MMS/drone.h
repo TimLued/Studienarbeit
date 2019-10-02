@@ -47,31 +47,29 @@ public:
     }
     void setPos(const QGeoCoordinate &pos,QDateTime stamp){
         if(mPos.isValid()){
-            appendHistory(mPos);
-            timestamps<<stamp;
+            history<<QVariant::fromValue(mPos);
+            timestamps<<QVariant::fromValue(stamp);
         }
         mPos = pos;
     }
 
-    void appendHistory(const QGeoCoordinate &value){
-        history<<value;
-    }
-
     QVariantList getHistory() const{
-        QVariantList history_list;
-        for (int i=historyRange.first;i<(historyRange.second==-2?history.length():historyRange.second+1);i++){
-          history_list << QVariant::fromValue(history[i]);
-        }
-        return history_list;
+//        QVariantList history_list;
+//        for (int i=historyRange.first;i<(historyRange.second==-2?history.length():historyRange.second+1);i++){
+//          history_list << QVariant::fromValue(history[i]);
+//        }
+//        return history_list;
+        int end = historyRange.second==-2?history.length()-1:historyRange.second;
+        return history.mid(historyRange.first,end-historyRange.first);
     }
 
     QVariantList getTimestamps() const{
-        QVariantList timestamp_list;
-        for (const QDateTime &stamp : timestamps) {
-          timestamp_list << QVariant::fromValue(stamp);
-        }
-        //timestamp_list << QVariant::fromValue(mTimeStamp);
-        return timestamp_list;
+//        QVariantList timestamp_list;
+//        for (const QDateTime &stamp : timestamps) {
+//          timestamp_list << QVariant::fromValue(stamp);
+//        }
+//        return timestamp_list;
+        return timestamps;
     }
 
     void appendRoute (QVariant waypoint){
@@ -88,20 +86,20 @@ public:
     }
 
     void appendRoutePath (const QGeoCoordinate &waypoint){
-        mRoutePath << waypoint;
+        mRoutePath << QVariant::fromValue(waypoint);
     }
 
     QVariantList getRoutePath() const{
-        QVariantList route_list;
-        for (const QGeoCoordinate &coord : mRoutePath) {
-          route_list << QVariant::fromValue(coord);
-        }
-        return route_list;
-    }
-
-    QList<QGeoCoordinate> getRoutePathInCoordinates() const{
+//        QVariantList route_list;
+//        for (const QGeoCoordinate &coord : mRoutePath) {
+//          route_list << QVariant::fromValue(coord);
+//        }
         return mRoutePath;
     }
+
+//    QVariantList getRoutePathInCoordinates() const{
+//        return mRoutePath;
+//    }
 
 
     QString getColor() const{
@@ -325,8 +323,8 @@ public:
 private:
     QString mId;
     QGeoCoordinate mPos;
-    QList<QGeoCoordinate> history;
-    QList<QDateTime> timestamps;
+    QVariantList history;
+    QVariantList timestamps;
     QString mColor;
     double mAngle;
     double mSpeed;
@@ -338,7 +336,7 @@ private:
     QVariantList mSelectedInfoValues;
     QVariantList mRoute;
     QList<Task> mTasks;
-    QList<QGeoCoordinate> mRoutePath;
+    QVariantList mRoutePath;
     QList<QGeoCoordinate> mHotLeg;
     int mHotLegIndex = -1;
     int lastLegIndex = -1;

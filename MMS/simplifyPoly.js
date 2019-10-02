@@ -1,7 +1,10 @@
 WorkerScript.onMessage = function(msg) {
     var toleranceInDegrees = metersToDegrees(36);
-    WorkerScript.sendMessage({'simple':simplify(convertToArrayOfArray(msg.hist), toleranceInDegrees)});
-};
+    var corArray = convertToArrayOfArray(msg.req)
+    var simpleArray = simplify(corArray, toleranceInDegrees)
+    var simple = convertToLatLon(simpleArray)
+    WorkerScript.sendMessage({'reply':simple});
+}
 
 var Line = function( p1, p2 ) {
     this.p1 = p1;
@@ -78,6 +81,14 @@ function convertToArrayOfArray(sourceArray) {
     var destArray = [];
     for(var i = 0; i < sourceArray.length; i++) {
         destArray.push([sourceArray[i].latitude, sourceArray[i].longitude]);
+    }
+    return destArray;
+}
+
+function convertToLatLon(sourceArray) {
+    var destArray = [];
+    for(var i = 0; i < sourceArray.length; i++) {
+        destArray.push({'latitude':sourceArray[i][0],'longitude':sourceArray[i][1]})
     }
     return destArray;
 }

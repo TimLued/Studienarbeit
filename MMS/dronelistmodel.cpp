@@ -61,7 +61,7 @@ if(it != mDrones.end()){
     QModelIndex ix = index(it - mDrones.begin());
 
     //hot leg
-    QList<QGeoCoordinate> wpList = it->getRoutePathInCoordinates();
+    QVariantList wpList = it->getRoutePath();
 
 
     if (wpList.length()>2){
@@ -77,8 +77,8 @@ if(it != mDrones.end()){
         QGeoCoordinate nPos = coord;
         double oldDist,newDist;
         for (int j=0;j<wpList.length();j++){
-            oldDist = oldPos.distanceTo(wpList[j]);
-            newDist = nPos.distanceTo(wpList[j]);
+            oldDist = oldPos.distanceTo(wpList[j].value<QGeoCoordinate>());
+            newDist = nPos.distanceTo(wpList[j].value<QGeoCoordinate>());
             if(newDist-oldDist<0.){
                 distCandidates.append(qMakePair(j,newDist));
                 if(j==lastLeg+1) {
@@ -103,17 +103,17 @@ if(it != mDrones.end()){
                 }
             }
             if(smallestDist<200 && indexOfDist+1<wpList.length()){//next leg
-                it->setLeg({wpList[indexOfDist],wpList[indexOfDist+1]},indexOfDist);
+                it->setLeg({wpList[indexOfDist].value<QGeoCoordinate>(),wpList[indexOfDist+1].value<QGeoCoordinate>()},indexOfDist);
                 it->setDisplayedLeg(indexOfDist+1);
             }else if(smallestDist>=200&&indexOfDist>0){
-                it->setLeg({wpList[indexOfDist-1],wpList[indexOfDist]},indexOfDist-1);
+                it->setLeg({wpList[indexOfDist-1].value<QGeoCoordinate>(),wpList[indexOfDist].value<QGeoCoordinate>()},indexOfDist-1);
                 it->setDisplayedLeg(indexOfDist);
             }else if(wpList[0]==wpList.last()){
-                if(nPos.distanceTo(wpList[0])<200){
-                    it->setLeg({wpList[0],wpList[1]},0);
+                if(nPos.distanceTo(wpList[0].value<QGeoCoordinate>())<200){
+                    it->setLeg({wpList[0].value<QGeoCoordinate>(),wpList[1].value<QGeoCoordinate>()},0);
                     it->setDisplayedLeg(1);
                 }else{
-                    it->setLeg({wpList[wpList.count()-2],wpList.last()},wpList.count()-2);
+                    it->setLeg({wpList[wpList.count()-2].value<QGeoCoordinate>(),wpList.last().value<QGeoCoordinate>()},wpList.count()-2);
                     it->setDisplayedLeg(wpList.count()-2);
                 }
 
@@ -335,10 +335,6 @@ bool DroneListModel::setUnselectedInfoList(const QString&id,QString info){
         it->removeSelectedInfoNames(info);
         it->removeSelectedInfoValues(index);
     }
-
-
-
-
 
 
     emit dataChanged(ix, ix, QVector<int>{InfoSelectedNamesRole,InfoSelectedValuesRole});

@@ -356,7 +356,7 @@ ApplicationWindow  {
                     function updateHistory(){
                         if(trackingHistory){
                             dynamicPath.path = []
-                            mWorker.sendMessage({'hist':historyInfo})
+                            mWorker.sendMessage({'req':historyInfo})
                         }
                     }
 
@@ -386,10 +386,8 @@ ApplicationWindow  {
                                 dynamicPath.buffer.push(coordinate)
                             }
                             k = 0
-                            if (historyInfo.length > 1) {
-                                threadRunning = true
-                                mWorker.sendMessage({'hist':historyInfo})
-                            }
+                            threadRunning = true
+                            mWorker.sendMessage({'req':historyInfo})
                         }
                     }
                     property int k: 50
@@ -407,7 +405,7 @@ ApplicationWindow  {
                                     k = 0
                                 }else{
                                     threadRunning = true
-                                    mWorker.sendMessage({'hist':historyInfo})
+                                    mWorker.sendMessage({'req':historyInfo})
                                 }
 
 
@@ -465,9 +463,7 @@ ApplicationWindow  {
                     WorkerScript{
                         id:mWorker
                         source: "simplifyPoly.js"
-                        onMessage: {
-                            staticPath.update(messageObject.simple)
-                        }
+                        onMessage: staticPath.update(messageObject.reply)
                     }
                 }
 
@@ -692,20 +688,10 @@ ApplicationWindow  {
                     line.width: 1
 
                     function update(path){
-                        var shortPath = []
-
-                        for (var i = 0; i<path.length;i++){
-                            if(path[i]){
-                                shortPath.push(QtPositioning.coordinate(path[i][0],path[i][1]))
-                            }
-                        }
-
-                        if(shortPath.length>0){
-                            staticPath.path = shortPath
-                            dynamicPath.update()
-                            droneBody.k = 50
-                            droneBody.threadRunning = false
-                        }
+                        staticPath.path = path
+                        dynamicPath.update()
+                        droneBody.k = 50
+                        droneBody.threadRunning = false
                     }
                 }
 
