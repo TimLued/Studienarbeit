@@ -233,7 +233,7 @@ Item {
                         +'","lat":"'+wpModel.get(i).lat
                         +'","lon":"'+wpModel.get(i).lon
                         +'","drone":"'+droneId+'"'
-                        +(i===0?',"reset":'+1:'')+'}'
+                        +(i===0?',"reset":1':'')+'}'
                 if(i<wpModel.count-1) jString += ','
             }
             jString+=']}'

@@ -356,7 +356,7 @@ ApplicationWindow  {
                     function updateHistory(){
                         if(trackingHistory){
                             dynamicPath.path = []
-                           mWorker.sendMessage({'hist':historyInfo})
+                            mWorker.sendMessage({'hist':historyInfo})
                         }
                     }
 
@@ -457,7 +457,6 @@ ApplicationWindow  {
 
                         }else map.centerFollowing = false
 
-
                         //update hotleg pointer
                         wpPointer.direction = hotLegPoly.pathLength()>0? coordinate.azimuthTo(hotLegPoly.path[1]):0
                         wpPointer.visible = hotLegPoly.pathLength()>0
@@ -491,11 +490,12 @@ ApplicationWindow  {
                             radius: zoomCircle
                             border.color: droneBody.droneColor
                             border.width: 1
-                            color: map.activeMapType ===  map.supportedMapTypes[1]?"white":"black"
+                            color:  "transparent"
                         }
 
                         Text {
                             text: zoomRadius
+                            color: map.activeMapType ===  map.supportedMapTypes[1]?"white":"black"
                             font.bold: true
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.bottom: parent.top

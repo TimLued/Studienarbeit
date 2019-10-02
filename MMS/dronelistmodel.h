@@ -112,6 +112,10 @@ public:
     Q_INVOKABLE void setHistoryRange(const QString &id,int start,int end);
     Q_INVOKABLE void switchMarked(const QString &id);
     Q_INVOKABLE QVariant getTasks(const QString &id);
+    Q_INVOKABLE void setLeg(const QString &id,int i,QGeoCoordinate from=QGeoCoordinate(0,0),QGeoCoordinate to = QGeoCoordinate(0,0));
+    Q_INVOKABLE void setDisplayedLeg(const QString &id,int i);
+    Q_INVOKABLE int getLastLeg(const QString &id);
+
 
 private:
     QList<Drone> mDrones;
